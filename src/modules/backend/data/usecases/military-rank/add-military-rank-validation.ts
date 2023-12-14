@@ -36,7 +36,7 @@ export class AddMilitaryRankValidation
     const militaryRankAlreadyRegistered =
       await this.militaryRankRepository.getByName(name);
 
-    if (!militaryRankAlreadyRegistered) {
+    if (militaryRankAlreadyRegistered) {
       throw new DuplicatedKeyError("nome");
     }
   };

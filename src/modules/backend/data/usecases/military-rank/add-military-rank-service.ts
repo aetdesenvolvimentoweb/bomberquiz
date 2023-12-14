@@ -4,10 +4,13 @@ import { AddMilitaryRankValidation } from ".";
 import { MilitaryRankRepository } from "@/modules/backend/data/protocols/repositories";
 
 export class AddMilitaryRankService implements AddMilitaryRankUsecase {
-  constructor(
-    private readonly militaryRankRepository: MilitaryRankRepository,
-    private readonly addMilitaryRankValidation: AddMilitaryRankValidation
-  ) {}
+  private readonly addMilitaryRankValidation: AddMilitaryRankValidation;
+
+  constructor(private readonly militaryRankRepository: MilitaryRankRepository) {
+    this.addMilitaryRankValidation = new AddMilitaryRankValidation(
+      militaryRankRepository
+    );
+  }
 
   add = async (data: AddMilitaryRankModel): Promise<void> => {
     await this.addMilitaryRankValidation.checkMissingParams(data);
