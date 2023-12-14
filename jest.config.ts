@@ -12,6 +12,9 @@ export const customJestConfig: Config = {
   collectCoverageFrom: [
     "<rootDir>/src/**/*.{ts,tsx}",
     "!<rootDir>/src/app/layout.tsx",
+    "!<rootDir>/src/modules/backend/domain/**/*.ts",
+    "!<rootDir>/src/modules/backend/data/protocols/**/*.ts",
+    "!<rootDir>/src/modules/backend/presentation/protocols/**/*.ts",
   ],
   coverageDirectory: "coverage",
   coverageProvider: "v8",
