@@ -4,7 +4,10 @@ import {
   MissingParamValidation,
 } from "@/modules/backend/domain/validations";
 import { MilitaryRankRepository } from "@/modules/backend/data/protocols/repositories";
-import { MissingParamError } from "@/modules/backend/presentation/errors";
+import {
+  DuplicatedKeyError,
+  MissingParamError,
+} from "@/modules/backend/presentation/errors";
 
 export class AddMilitaryRankValidation
   implements MissingParamValidation, DuplicatedKeyValidation
@@ -34,9 +37,7 @@ export class AddMilitaryRankValidation
       await this.militaryRankRepository.getByName(name);
 
     if (!militaryRankAlreadyRegistered) {
-      throw new Error(
-        "Já existe um registro para o campo nome com esse valor."
-      );
+      throw new DuplicatedKeyError("nome");
     }
   };
 }
