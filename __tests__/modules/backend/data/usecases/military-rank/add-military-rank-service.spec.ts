@@ -14,12 +14,19 @@ const makeSut = (): SutResponse => {
 };
 
 describe("AddMilitaryRankService", () => {
-  test("should be add a military rank in db", async () => {
+  test("should throws if no order is provided", async () => {
     const { sut } = makeSut();
 
     await expect(
       sut.add({ order: 0, name: "any_military_rank" })
     ).rejects.toThrow(new MissingParamError("ordem"));
+  });
+  test("should throws if no name is provided", async () => {
+    const { sut } = makeSut();
+
+    await expect(sut.add({ order: 1, name: "" })).rejects.toThrow(
+      new MissingParamError("nome")
+    );
   });
   test("should be add a military rank in db", async () => {
     const { sut } = makeSut();
