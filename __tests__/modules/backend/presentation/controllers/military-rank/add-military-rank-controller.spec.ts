@@ -7,6 +7,7 @@ import {
 } from "@/modules/backend/presentation/errors";
 
 interface SutResponse {
+  addMilitaryRankService: AddMilitaryRankService;
   sut: AddMilitaryRankController;
 }
 
@@ -16,7 +17,7 @@ const makeSut = (): SutResponse => {
     militaryRankRepository
   );
   const sut = new AddMilitaryRankController(addMilitaryRankService);
-  return { sut };
+  return { addMilitaryRankService, sut };
 };
 
 describe("AddMilitaryRankController", () => {
@@ -57,6 +58,20 @@ describe("AddMilitaryRankController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.error).toEqual(new DuplicatedKeyError("nome").message);
+  });
+  test("should be return 500 if server throws", async () => {
+    const { addMilitaryRankService, sut } = makeSut();
+    jest
+      .spyOn(addMilitaryRankService, "add")
+      .mockRejectedValue(new Error("Erro no servidor."));
+
+    const httpResponse = await sut.handle({
+      order: 1,
+      name: "any_military_rank",
+    });
+
+    expect(httpResponse.statusCode).toBe(500);
+    expect(httpResponse.error).toEqual(new Error("Erro no servidor.").message);
   });
   test("should be return 201 if correct data is provided", async () => {
     const { sut } = makeSut();
