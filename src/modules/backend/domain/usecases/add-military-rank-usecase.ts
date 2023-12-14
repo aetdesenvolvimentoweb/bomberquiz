@@ -1,5 +1,5 @@
-import { AddMilitaryRankModel, MilitaryRankModel } from "../models";
+import { AddMilitaryRankModel } from "@/modules/backend/domain/models";
 
 export interface AddMilitaryRankUsecase {
-  add: (data: AddMilitaryRankModel) => Promise<MilitaryRankModel>;
+  add: (data: AddMilitaryRankModel) => Promise<void>;
 }
