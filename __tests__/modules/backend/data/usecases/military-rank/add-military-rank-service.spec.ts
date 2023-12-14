@@ -1,6 +1,9 @@
 import { AddMilitaryRankService } from "@/modules/backend/data/usecases/military-rank";
 import { MilitaryRanksInMemoryRepository } from "@/modules/backend/infra/db/in-memory";
-import { MissingParamError } from "@/modules/backend/presentation/errors";
+import {
+  DuplicatedKeyError,
+  MissingParamError,
+} from "@/modules/backend/presentation/errors";
 
 interface SutResponse {
   sut: AddMilitaryRankService;
@@ -27,6 +30,15 @@ describe("AddMilitaryRankService", () => {
     await expect(sut.add({ order: 1, name: "" })).rejects.toThrow(
       new MissingParamError("nome")
     );
+  });
+  test("should throws if already registered name is provided", async () => {
+    const { sut } = makeSut();
+
+    await sut.add({ order: 1, name: "any_military_rank" });
+
+    await expect(
+      sut.add({ order: 2, name: "any_military_rank" })
+    ).rejects.toThrow(new DuplicatedKeyError("nome"));
   });
   test("should be add a military rank in db", async () => {
     const { sut } = makeSut();
