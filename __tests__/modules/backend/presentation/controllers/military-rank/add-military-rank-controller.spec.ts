@@ -28,6 +28,17 @@ describe("AddMilitaryRankController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.error).toEqual(new MissingParamError("ordem").message);
   });
+  test("should be return 400 if no name is provided", async () => {
+    const { sut } = makeSut();
+
+    const httpResponse = await sut.handle({
+      order: 1,
+      name: "",
+    });
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.error).toEqual(new MissingParamError("nome").message);
+  });
   test("should be return 201 if correct data is provided", async () => {
     const { sut } = makeSut();
 
