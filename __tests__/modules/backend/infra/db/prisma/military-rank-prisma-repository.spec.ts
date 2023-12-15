@@ -35,4 +35,12 @@ describe("MilitaryRankPrismaRepository", () => {
     expect(militaryRank?.order).toBe(1);
     expect(militaryRank?.name).toBe("any_military_rank");
   });
+
+  test("should return null if military rank not found", async () => {
+    const { sut } = makeSut();
+
+    const militaryRank = await sut.getByName("no_registered_military_rank");
+
+    expect(militaryRank).toBeNull();
+  });
 });
