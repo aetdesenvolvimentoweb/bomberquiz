@@ -1,0 +1,16 @@
+import { MilitaryRankRepository } from "@/modules/backend/data/protocols/repositories";
+import {
+  AddMilitaryRankModel,
+  MilitaryRankModel,
+} from "@/modules/backend/domain/models";
+import { prismaClient } from "@/modules/backend/infra/libs";
+
+export class MilitaryRanksPrismaRepository implements MilitaryRankRepository {
+  add = async (data: AddMilitaryRankModel): Promise<MilitaryRankModel> => {
+    return await prismaClient.militaryRank.create({ data });
+  };
+
+  getByName = async (name: string): Promise<MilitaryRankModel | null> => {
+    return await prismaClient.militaryRank.findUnique({ where: { name } });
+  };
+}
