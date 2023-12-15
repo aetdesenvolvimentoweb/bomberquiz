@@ -1,4 +1,4 @@
-import { adaptRouteNextjs } from "@/modules/backend/application/adapters/adapt-route-nextjs";
+import { adaptRouteNextjs } from "@/modules/backend/application/adapters";
 import { makeAddMilitaryRankController } from "@/modules/backend/application/factories/controllers";
 import { URL } from "url";
 

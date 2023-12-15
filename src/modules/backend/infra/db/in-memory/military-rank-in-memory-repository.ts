@@ -5,7 +5,7 @@ import {
 } from "@/modules/backend/domain/models";
 import { randomUUID } from "crypto";
 
-export class MilitaryRanksInMemoryRepository implements MilitaryRankRepository {
+export class MilitaryRankInMemoryRepository implements MilitaryRankRepository {
   private readonly militaryRanks: MilitaryRankModel[];
 
   constructor() {

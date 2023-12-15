@@ -5,7 +5,7 @@ import {
 } from "@/modules/backend/domain/models";
 import { prismaClient } from "@/modules/backend/infra/libs";
 
-export class MilitaryRanksPrismaRepository implements MilitaryRankRepository {
+export class MilitaryRankPrismaRepository implements MilitaryRankRepository {
   add = async (data: AddMilitaryRankModel): Promise<MilitaryRankModel> => {
     return await prismaClient.militaryRank.create({ data });
   };

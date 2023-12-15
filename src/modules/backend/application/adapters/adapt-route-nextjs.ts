@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { Controller } from "../../presentation/protocols";
+import { Controller } from "@/modules/backend/presentation/protocols";
 
 export const adaptRouteNextjs = async (
   controller: Controller,

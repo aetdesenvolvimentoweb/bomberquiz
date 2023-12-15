@@ -1,1 +1,1 @@
-export * from "./military-ranks-repository";
+export * from "./military-rank-prisma-repository";

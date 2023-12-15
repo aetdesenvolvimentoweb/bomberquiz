@@ -1,5 +1,5 @@
 import { AddMilitaryRankService } from "@/modules/backend/data/usecases/military-rank";
-import { MilitaryRanksInMemoryRepository } from "@/modules/backend/infra/db/in-memory";
+import { MilitaryRankInMemoryRepository } from "@/modules/backend/infra/db/in-memory";
 import {
   DuplicatedKeyError,
   MissingParamError,
@@ -10,7 +10,7 @@ interface SutResponse {
 }
 
 const makeSut = (): SutResponse => {
-  const militaryRankRepository = new MilitaryRanksInMemoryRepository();
+  const militaryRankRepository = new MilitaryRankInMemoryRepository();
   const sut = new AddMilitaryRankService(militaryRankRepository);
 
   return { sut };
