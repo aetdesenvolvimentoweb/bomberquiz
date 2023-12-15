@@ -5,5 +5,6 @@ import {
 
 export interface MilitaryRankRepository {
   add: (data: AddMilitaryRankModel) => Promise<MilitaryRankModel>;
+  getAll: () => Promise<MilitaryRankModel[]>;
   getByName: (name: string) => Promise<MilitaryRankModel | null>;
 }
