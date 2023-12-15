@@ -18,6 +18,10 @@ export class MilitaryRankInMemoryRepository implements MilitaryRankRepository {
     return militaryRank;
   };
 
+  getAll = async (): Promise<MilitaryRankModel[]> => {
+    return this.militaryRanks;
+  };
+
   getByName = async (name: string): Promise<MilitaryRankModel | null> => {
     const militaryRank = this.militaryRanks.find((rank) => rank.name === name);
     return militaryRank || null;
