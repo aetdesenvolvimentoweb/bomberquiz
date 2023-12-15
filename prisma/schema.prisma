@@ -6,3 +6,11 @@ datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
+
+model MilitaryRank {
+  id    String @id @default(auto()) @map("_id") @db.ObjectId
+  order Int
+  name  String @unique
+
+  @@map("militaryRanks")
+}
