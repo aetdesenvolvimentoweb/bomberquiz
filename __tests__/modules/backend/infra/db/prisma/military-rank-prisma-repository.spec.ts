@@ -43,4 +43,17 @@ describe("MilitaryRankPrismaRepository", () => {
 
     expect(militaryRank).toBeNull();
   });
+
+  test("should be return an array of military rank from db if that found", async () => {
+    const { sut } = makeSut();
+
+    await sut.add({ order: 1, name: "any_military_rank" });
+    const militaryRanks = await sut.getAll();
+
+    expect(Array.isArray(militaryRanks)).toBe(true);
+    expect(militaryRanks.length).toBeGreaterThan(0);
+    expect(militaryRanks[0]).toHaveProperty("id");
+    expect(militaryRanks[0]).toHaveProperty("order");
+    expect(militaryRanks[0]).toHaveProperty("name");
+  });
 });
