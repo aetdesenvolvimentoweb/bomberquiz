@@ -5,6 +5,7 @@ import { GetAllMilitaryRankController } from "@/modules/backend/presentation/con
 
 interface SutResponse {
   militaryRankRepository: MilitaryRankRepository;
+  getAllMilitaryRankService: GetAllMilitaryRankService;
   sut: GetAllMilitaryRankController;
 }
 
@@ -14,7 +15,7 @@ const makeSut = (): SutResponse => {
     militaryRankRepository
   );
   const sut = new GetAllMilitaryRankController(getAllMilitaryRankService);
-  return { militaryRankRepository, sut };
+  return { militaryRankRepository, getAllMilitaryRankService, sut };
 };
 
 describe("GetAllMilitaryRankController", () => {
@@ -34,5 +35,16 @@ describe("GetAllMilitaryRankController", () => {
     expect(httpResponse.data[0]).toHaveProperty("id");
     expect(httpResponse.data[0]).toHaveProperty("order");
     expect(httpResponse.data[0]).toHaveProperty("name");
+  });
+  test("should be return 500 if server throws", async () => {
+    const { getAllMilitaryRankService, sut } = makeSut();
+    jest
+      .spyOn(getAllMilitaryRankService, "getAll")
+      .mockRejectedValue(new Error("Erro no servidor."));
+
+    const httpResponse = await sut.handle();
+
+    expect(httpResponse.statusCode).toBe(500);
+    expect(httpResponse.error).toEqual(new Error("Erro no servidor.").message);
   });
 });
