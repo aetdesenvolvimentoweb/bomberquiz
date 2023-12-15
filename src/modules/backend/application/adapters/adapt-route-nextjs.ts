@@ -5,7 +5,7 @@ export const adaptRouteNextjs = async (
   controller: Controller,
   request: Request
 ) => {
-  const data = await request.json();
+  const data = request && request.body ? await request.json() : {};
   const httpResponse = await controller.handle(data);
 
   if (httpResponse.error) {
