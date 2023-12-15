@@ -15,7 +15,7 @@ export class AddMilitaryRankController implements Controller {
     try {
       await this.addMilitaryRankService.add(data);
 
-      return success(201);
+      return success(null, 201);
     } catch (error: any) {
       return httpError(error);
     }
