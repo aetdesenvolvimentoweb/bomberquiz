@@ -25,7 +25,7 @@ describe("MilitaryRankPrismaRepository", () => {
     expect(militaryRank.name).toBe("any_military_rank");
   });
 
-  test("should return a db military rank if found", async () => {
+  test("should be return a military rank from db if found", async () => {
     const { sut } = makeSut();
 
     await sut.add({ order: 1, name: "any_military_rank" });
@@ -36,7 +36,7 @@ describe("MilitaryRankPrismaRepository", () => {
     expect(militaryRank?.name).toBe("any_military_rank");
   });
 
-  test("should return null if military rank not found", async () => {
+  test("should be return null if military rank not found", async () => {
     const { sut } = makeSut();
 
     const militaryRank = await sut.getByName("no_registered_military_rank");
