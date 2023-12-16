@@ -33,4 +33,11 @@ describe("GetByIdMilitaryRankService", () => {
       new InvalidParamError("id")
     );
   });
+  test("should be return null if no registered id is provided", async () => {
+    const { sut } = makeSut();
+
+    const no_registered_id = new ObjectId().toString();
+
+    await expect(sut.getById(no_registered_id)).resolves.toBeNull();
+  });
 });
