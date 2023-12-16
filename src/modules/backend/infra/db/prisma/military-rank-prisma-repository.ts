@@ -14,6 +14,10 @@ export class MilitaryRankPrismaRepository implements MilitaryRankRepository {
     return await prismaClient.militaryRank.findMany({});
   };
 
+  getById = async (id: string): Promise<MilitaryRankModel | null> => {
+    return await prismaClient.militaryRank.findFirst({ where: { id } });
+  };
+
   getByName = async (name: string): Promise<MilitaryRankModel | null> => {
     return await prismaClient.militaryRank.findUnique({ where: { name } });
   };
