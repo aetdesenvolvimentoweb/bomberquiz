@@ -4,9 +4,9 @@ export class GetByIdMilitaryRankValidation implements IdValidation {
   constructor(private readonly idValidator: IdValidation) {}
 
   isValid = (id: string): boolean => {
-    if (this.idValidator.isValid(id)) {
-      return true;
+    if (!this.idValidator.isValid(id)) {
+      return false;
     }
-    return false;
+    return true;
   };
 }
