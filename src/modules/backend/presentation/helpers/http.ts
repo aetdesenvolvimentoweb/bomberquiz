@@ -1,7 +1,7 @@
 import {
   DuplicatedKeyError,
   MissingParamError,
-} from "@/modules/backend/presentation/errors";
+} from "@/modules/backend/data/errors";
 import { HttpResponse } from "@/modules/backend/presentation/protocols";
 
 export const httpError = (

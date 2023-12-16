@@ -7,7 +7,7 @@ import { MilitaryRankRepository } from "@/modules/backend/data/protocols/reposit
 import {
   DuplicatedKeyError,
   MissingParamError,
-} from "@/modules/backend/presentation/errors";
+} from "@/modules/backend/data/errors";
 
 export class AddMilitaryRankValidation
   implements MissingParamValidation, DuplicatedKeyValidation

@@ -3,7 +3,7 @@ import { MilitaryRankInMemoryRepository } from "@/modules/backend/infra/db/in-me
 import {
   DuplicatedKeyError,
   MissingParamError,
-} from "@/modules/backend/presentation/errors";
+} from "@/modules/backend/data/errors";
 
 interface SutResponse {
   sut: AddMilitaryRankService;

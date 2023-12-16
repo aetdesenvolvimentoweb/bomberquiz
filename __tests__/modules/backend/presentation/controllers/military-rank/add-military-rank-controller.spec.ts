@@ -4,7 +4,7 @@ import { AddMilitaryRankController } from "@/modules/backend/presentation/contro
 import {
   DuplicatedKeyError,
   MissingParamError,
-} from "@/modules/backend/presentation/errors";
+} from "@/modules/backend/data/errors";
 
 interface SutResponse {
   addMilitaryRankService: AddMilitaryRankService;

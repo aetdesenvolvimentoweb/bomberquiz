@@ -1,3 +1,3 @@
 export interface IdValidation {
-  checkIdIsValid: (id: string) => boolean;
+  isValid: (id: string) => boolean;
 }
