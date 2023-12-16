@@ -56,4 +56,17 @@ describe("MilitaryRankPrismaRepository", () => {
     expect(militaryRanks[0]).toHaveProperty("order");
     expect(militaryRanks[0]).toHaveProperty("name");
   });
+
+  test("should be return a military rank from db if that found", async () => {
+    const { sut } = makeSut();
+
+    const militaryRankCreated = await sut.add({
+      order: 1,
+      name: "any_military_rank",
+    });
+
+    const militaryRank = await sut.getById(militaryRankCreated.id);
+
+    expect(militaryRank).toEqual(militaryRankCreated);
+  });
 });
