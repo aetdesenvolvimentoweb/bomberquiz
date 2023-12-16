@@ -1,19 +1,16 @@
 import { GetByIdMilitaryRankUsecase } from "@/modules/backend/domain/usecases";
 import { MilitaryRankRepository } from "../../protocols/repositories";
 import { MilitaryRankModel } from "@/modules/backend/domain/models";
-import { GetByIdMilitaryRankValidation } from ".";
+import { IdValidation } from "@/modules/backend/domain/validations";
 
 export class GetByIdMilitaryRankService implements GetByIdMilitaryRankUsecase {
-  private readonly getByIdMilitaryRankValidation: GetByIdMilitaryRankValidation;
-
-  constructor(private readonly militaryRankRepository: MilitaryRankRepository) {
-    this.getByIdMilitaryRankValidation = new GetByIdMilitaryRankValidation(
-      militaryRankRepository
-    );
-  }
+  constructor(
+    private readonly militaryRankRepository: MilitaryRankRepository,
+    private readonly idValidator: IdValidation
+  ) {}
 
   getById = async (id: string): Promise<MilitaryRankModel | null> => {
-    await this.getByIdMilitaryRankValidation.checkIsValidKey(id);
+    this.idValidator.isValid(id);
     return await this.militaryRankRepository.getById(id);
   };
 }
