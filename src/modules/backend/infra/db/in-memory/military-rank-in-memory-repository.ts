@@ -3,7 +3,7 @@ import {
   AddMilitaryRankModel,
   MilitaryRankModel,
 } from "@/modules/backend/domain/models";
-import { randomUUID } from "crypto";
+import { ObjectId } from "mongodb";
 
 export class MilitaryRankInMemoryRepository implements MilitaryRankRepository {
   private readonly militaryRanks: MilitaryRankModel[];
@@ -13,7 +13,7 @@ export class MilitaryRankInMemoryRepository implements MilitaryRankRepository {
   }
 
   add = async (data: AddMilitaryRankModel): Promise<MilitaryRankModel> => {
-    const militaryRank = { ...data, id: randomUUID() };
+    const militaryRank = { ...data, id: new ObjectId().toString() };
     this.militaryRanks.push(militaryRank);
     return militaryRank;
   };
