@@ -1,4 +1,5 @@
 import { AdaptMongoIdValidator } from "@/modules/backend/application/adapters/adapt-mongo-id-validator";
+import { InvalidParamError } from "@/modules/backend/data/errors";
 import { MilitaryRankRepository } from "@/modules/backend/data/protocols/repositories";
 import { GetByIdMilitaryRankService } from "@/modules/backend/data/usecases/military-rank";
 import { MilitaryRankInMemoryRepository } from "@/modules/backend/infra/db/in-memory";
@@ -21,6 +22,14 @@ const makeSut = (): SutResponse => {
 };
 
 describe("GetByIdMilitaryRankController", () => {
+  test("should be return 400 if invalid id is provided", async () => {
+    const { sut } = makeSut();
+
+    const httpResponse = await sut.handle("invalid id");
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.error).toEqual(new InvalidParamError("id").message);
+  });
   test("should be return 200 if correct data is provided", async () => {
     const { militaryRankRepository, sut } = makeSut();
 
