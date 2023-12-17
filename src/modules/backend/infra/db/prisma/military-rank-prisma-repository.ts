@@ -10,6 +10,10 @@ export class MilitaryRankPrismaRepository implements MilitaryRankRepository {
     return await prismaClient.militaryRank.create({ data });
   };
 
+  delete = async (id: string): Promise<MilitaryRankModel> => {
+    return await prismaClient.militaryRank.delete({ where: { id } });
+  };
+
   getAll = async (): Promise<MilitaryRankModel[]> => {
     return await prismaClient.militaryRank.findMany({});
   };

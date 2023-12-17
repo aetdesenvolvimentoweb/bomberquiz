@@ -10,7 +10,10 @@ import { NotRegisteredError } from "../../errors/not-registered-error";
 export class DeleteMilitaryRankValidation
   implements MissingParamValidation, IdValidation, RegisteredValidation
 {
-  constructor(private militaryRankRepository: MilitaryRankRepository) {}
+  constructor(
+    private readonly militaryRankRepository: MilitaryRankRepository,
+    private readonly idValidator: IdValidation
+  ) {}
 
   checkMissingParams = async (data: string): Promise<void> => {
     if (!data) {
@@ -18,17 +21,17 @@ export class DeleteMilitaryRankValidation
     }
   };
 
-  isRegistered = async (id: string): Promise<boolean> => {
-    const isRegistered = await this.militaryRankRepository.getById(id);
-    if (!isRegistered) {
-      throw new NotRegisteredError("posto/graduação");
+  isValid = (id: string): boolean => {
+    if (!this.idValidator.isValid(id)) {
+      throw new InvalidParamError("id");
     }
     return true;
   };
 
-  isValid = (id: string): boolean => {
-    if (!this.isValid(id)) {
-      throw new InvalidParamError("id");
+  isRegistered = async (id: string): Promise<boolean> => {
+    const isRegistered = await this.militaryRankRepository.getById(id);
+    if (!isRegistered) {
+      throw new NotRegisteredError("posto/graduação");
     }
     return true;
   };

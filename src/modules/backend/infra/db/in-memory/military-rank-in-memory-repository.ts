@@ -18,6 +18,15 @@ export class MilitaryRankInMemoryRepository implements MilitaryRankRepository {
     return militaryRank;
   };
 
+  delete = async (id: string): Promise<MilitaryRankModel> => {
+    const index = this.militaryRanks.findIndex(
+      (militaryRank) => militaryRank.id === id
+    );
+    const deletedMilitaryRank = this.militaryRanks[index];
+    this.militaryRanks.splice(index, 1);
+    return deletedMilitaryRank;
+  };
+
   getAll = async (): Promise<MilitaryRankModel[]> => {
     return this.militaryRanks;
   };

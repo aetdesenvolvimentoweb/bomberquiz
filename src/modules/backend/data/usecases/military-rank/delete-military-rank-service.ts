@@ -9,16 +9,18 @@ export class DeleteMilitaryRankService implements DeleteMilitaryRankUsecase {
 
   constructor(
     private readonly militaryRankRepository: MilitaryRankRepository,
-    private readonly idValidator: IdValidation
+    private idValidator: IdValidation
   ) {
     this.deleteMilitaryRankValidation = new DeleteMilitaryRankValidation(
-      militaryRankRepository
+      militaryRankRepository,
+      this.idValidator
     );
   }
 
   delete = async (id: string): Promise<MilitaryRankModel> => {
     await this.deleteMilitaryRankValidation.checkMissingParams(id);
-    this.idValidator.isValid(id);
+    this.deleteMilitaryRankValidation.isValid(id);
+    await this.deleteMilitaryRankValidation.isRegistered(id);
 
     return await this.militaryRankRepository.delete(id);
   };
