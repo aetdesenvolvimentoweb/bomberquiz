@@ -1,5 +1,5 @@
 import { GetByIdMilitaryRankService } from "@/modules/backend/data/usecases/military-rank";
-import { Controller, HttpResponse } from "../../protocols";
+import { Controller, HttpRequest, HttpResponse } from "../../protocols";
 import { httpError, success } from "../../helpers";
 
 export class GetByIdMilitaryRankController implements Controller {
@@ -7,12 +7,17 @@ export class GetByIdMilitaryRankController implements Controller {
     private readonly getByIdMilitaryRankService: GetByIdMilitaryRankService
   ) {}
 
-  handle = async (id: string): Promise<HttpResponse> => {
+  handle = async (request: HttpRequest): Promise<HttpResponse> => {
+    const id = request.params!.id;
+    console.log("id", id);
     try {
-      await this.getByIdMilitaryRankService.getById(id);
+      const militaryRank = await this.getByIdMilitaryRankService.getById(id);
+      console.log("militarrank", militaryRank);
 
-      return success(null, 200);
+      return success(militaryRank, 200);
     } catch (error: any) {
+      console.log("dentro do controller erro");
+
       return httpError(error);
     }
   };

@@ -25,7 +25,8 @@ describe("GetByIdMilitaryRankController", () => {
   test("should be return 400 if invalid id is provided", async () => {
     const { sut } = makeSut();
 
-    const httpResponse = await sut.handle("invalid id");
+    const httpRequest = { params: { id: "invalid_id" } };
+    const httpResponse = await sut.handle(httpRequest);
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.error).toEqual(new InvalidParamError("id").message);
@@ -38,7 +39,8 @@ describe("GetByIdMilitaryRankController", () => {
       name: "any_military_rank",
     });
 
-    const httpResponse = await sut.handle(militaryRank.id);
+    const httpRequest = { params: { id: militaryRank.id } };
+    const httpResponse = await sut.handle(httpRequest);
 
     expect(httpResponse.statusCode).toBe(200);
   });

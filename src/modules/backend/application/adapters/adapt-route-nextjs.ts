@@ -1,14 +1,18 @@
 import { NextResponse } from "next/server";
-import { Controller } from "@/modules/backend/presentation/protocols";
+import {
+  Controller,
+  HttpRequest,
+} from "@/modules/backend/presentation/protocols";
 
 export const adaptRouteNextjs = async (
   controller: Controller,
-  request: Request
+  request: HttpRequest
 ) => {
-  const data = request && request.body ? await request.json() : {};
-  const httpResponse = await controller.handle(data);
+  const httpResponse = await controller.handle(request);
 
   if (httpResponse.error) {
+    console.log("chegou erro", httpResponse.error);
+
     return NextResponse.json(
       { error: httpResponse.error },
       { status: httpResponse.statusCode }

@@ -23,38 +23,43 @@ const makeSut = (): SutResponse => {
 describe("AddMilitaryRankController", () => {
   test("should be return 400 if no order is provided", async () => {
     const { sut } = makeSut();
+    const httpRequest = {
+      body: {
+        order: 0,
+        name: "any_military_rank",
+      },
+    };
 
-    const httpResponse = await sut.handle({
-      order: 0,
-      name: "any_military_rank",
-    });
+    const httpResponse = await sut.handle(httpRequest);
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.error).toEqual(new MissingParamError("ordem").message);
   });
   test("should be return 400 if no name is provided", async () => {
     const { sut } = makeSut();
-
-    const httpResponse = await sut.handle({
-      order: 1,
-      name: "",
-    });
+    const httpRequest = {
+      body: {
+        order: 1,
+        name: "",
+      },
+    };
+    const httpResponse = await sut.handle(httpRequest);
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.error).toEqual(new MissingParamError("nome").message);
   });
   test("should be return 400 if duplicated name is provided", async () => {
     const { sut } = makeSut();
+    const httpRequest = {
+      body: {
+        order: 1,
+        name: "any_military_rank",
+      },
+    };
 
-    await sut.handle({
-      order: 1,
-      name: "any_military_rank",
-    });
+    await sut.handle(httpRequest);
 
-    const httpResponse = await sut.handle({
-      order: 2,
-      name: "any_military_rank",
-    });
+    const httpResponse = await sut.handle(httpRequest);
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.error).toEqual(new DuplicatedKeyError("nome").message);
@@ -65,10 +70,13 @@ describe("AddMilitaryRankController", () => {
       .spyOn(addMilitaryRankService, "add")
       .mockRejectedValue(new Error("Erro no servidor."));
 
-    const httpResponse = await sut.handle({
-      order: 1,
-      name: "any_military_rank",
-    });
+    const httpRequest = {
+      body: {
+        order: 1,
+        name: "any_military_rank",
+      },
+    };
+    const httpResponse = await sut.handle(httpRequest);
 
     expect(httpResponse.statusCode).toBe(500);
     expect(httpResponse.error).toEqual(new Error("Erro no servidor.").message);
@@ -76,10 +84,13 @@ describe("AddMilitaryRankController", () => {
   test("should be return 201 if correct data is provided", async () => {
     const { sut } = makeSut();
 
-    const httpResponse = await sut.handle({
-      order: 1,
-      name: "any_military_rank",
-    });
+    const httpRequest = {
+      body: {
+        order: 1,
+        name: "any_military_rank",
+      },
+    };
+    const httpResponse = await sut.handle(httpRequest);
 
     expect(httpResponse.statusCode).toBe(201);
   });

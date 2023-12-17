@@ -5,9 +5,14 @@ import {
 } from "@/modules/backend/application/factories/controllers";
 
 export const POST = async (request: Request) => {
-  return await adaptRouteNextjs(makeAddMilitaryRankController(), request);
+  const httpRequest = { body: await request.json() };
+  return await adaptRouteNextjs(makeAddMilitaryRankController(), httpRequest);
 };
 
 export const GET = async (request: Request) => {
-  return await adaptRouteNextjs(makeGetAllMilitaryRankController(), request);
+  const httpRequest = {};
+  return await adaptRouteNextjs(
+    makeGetAllMilitaryRankController(),
+    httpRequest
+  );
 };

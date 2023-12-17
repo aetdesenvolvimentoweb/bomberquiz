@@ -1,5 +1,6 @@
 import {
   Controller,
+  HttpRequest,
   HttpResponse,
 } from "@/modules/backend/presentation/protocols";
 import { httpError, success } from "@/modules/backend/presentation/helpers";
@@ -11,8 +12,11 @@ export class AddMilitaryRankController implements Controller {
     private readonly addMilitaryRankService: AddMilitaryRankService
   ) {}
 
-  handle = async (data: AddMilitaryRankModel): Promise<HttpResponse> => {
+  handle = async (request: HttpRequest): Promise<HttpResponse> => {
     try {
+      console.log("aqui");
+      const data: AddMilitaryRankModel = request.body;
+      console.log("data handle", data);
       await this.addMilitaryRankService.add(data);
 
       return success(null, 201);
