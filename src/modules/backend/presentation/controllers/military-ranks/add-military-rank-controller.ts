@@ -14,9 +14,7 @@ export class AddMilitaryRankController implements Controller {
 
   handle = async (request: HttpRequest): Promise<HttpResponse> => {
     try {
-      console.log("aqui");
       const data: AddMilitaryRankModel = request.body;
-      console.log("data handle", data);
       await this.addMilitaryRankService.add(data);
 
       return success(null, 201);

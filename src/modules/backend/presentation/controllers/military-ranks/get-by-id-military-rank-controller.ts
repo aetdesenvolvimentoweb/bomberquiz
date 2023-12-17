@@ -9,15 +9,11 @@ export class GetByIdMilitaryRankController implements Controller {
 
   handle = async (request: HttpRequest): Promise<HttpResponse> => {
     const id = request.params!.id;
-    console.log("id", id);
     try {
       const militaryRank = await this.getByIdMilitaryRankService.getById(id);
-      console.log("militarrank", militaryRank);
 
       return success(militaryRank, 200);
     } catch (error: any) {
-      console.log("dentro do controller erro");
-
       return httpError(error);
     }
   };

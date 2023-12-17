@@ -11,8 +11,6 @@ export const adaptRouteNextjs = async (
   const httpResponse = await controller.handle(request);
 
   if (httpResponse.error) {
-    console.log("chegou erro", httpResponse.error);
-
     return NextResponse.json(
       { error: httpResponse.error },
       { status: httpResponse.statusCode }
