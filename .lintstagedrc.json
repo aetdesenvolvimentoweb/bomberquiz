@@ -1,4 +1,10 @@
 {
-  "./*.(ts|js)": ["pnpm eslint --fix"],
-  "./src/**/*.(ts|tsx|js|jsx)": ["pnpm eslint --fix"]
+  "./*.(ts|js)": [
+    "pnpm exec prettier --write --ignore-unknown --stdin-filepath \"{}\"\"",
+    "pnpm eslint --fix"
+  ],
+  "./src/**/*.(ts|tsx|js|jsx)": [
+    "pnpm exec prettier --write --ignore-unknown --stdin-filepath \"{}\"\"",
+    "pnpm eslint --fix"
+  ]
 }
