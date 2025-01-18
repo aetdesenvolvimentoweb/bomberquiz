@@ -11,11 +11,22 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript", "prettier"),
-  ...compat.plugins("prettier"),
+  ...compat.plugins("prettier". "unused-imports"),
   {
     ignores: ["node_modules", ".next", "coverage"],
     rules: {
-      "prettier/prettier": "error"
+      "prettier/prettier": "error",
+      "unused-imports/no-unused-imports": "error",
+      "sort-imports": [
+        "error",
+        {
+          ignoreCase: false,
+          ignoreDeclarationSort: false,
+          ignoreMemberSort: false,
+          memberSyntaxSortOrder: ["none", "all", "multiple", "single"],
+          allowSeparatedGroups: false,
+        },
+      ],
     }
   }
 ];
