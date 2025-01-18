@@ -25,3 +25,14 @@ export type User = UserProps & {
 };
 
 export type UserMapped = Omit<User, "password">;
+
+export type UpdateUserPasswordProps = {
+  id: string;
+  oldPassword: string;
+  newPassword: string;
+};
+
+export type UpdateUserRoleProps = {
+  id: string;
+  role: UserRole;
+};
