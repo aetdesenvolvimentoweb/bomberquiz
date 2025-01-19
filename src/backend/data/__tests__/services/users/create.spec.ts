@@ -9,15 +9,11 @@ import {
   PhoneValidatorUseCase,
 } from "@/backend/domain/use-cases/validators";
 import { UserProps, UserRole } from "@/backend/domain/entities";
-import {
-  duplicatedKeyError,
-  invalidParamError,
-  missingParamError,
-} from "@/backend/data/helpers";
 import { CreateUserService } from "@/backend/data/services/users";
 import { UserRepository } from "@/backend/data/repositories";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 import { UserValidator } from "@/backend/data/validators/user";
+import { ValidationErrors } from "@/backend/data/helpers";
 
 interface SutTypes {
   sut: CreateUserService;
@@ -25,18 +21,21 @@ interface SutTypes {
   emailValidator: EmailValidatorUseCase;
   phoneValidator: PhoneValidatorUseCase;
   userRepository: UserRepository;
+  validationErrors: ValidationErrors;
 }
 
 const makeSut = (): SutTypes => {
   const dateValidator = new DateValidatorStub();
   const emailValidator = new EmailValidatorStub();
   const phoneValidator = new PhoneValidatorStub();
-  const userRepository: UserRepository = new UserRepositoryInMemory();
+  const userRepository = new UserRepositoryInMemory();
+  const validationErrors = new ValidationErrors();
   const userValidator: UserValidator = new UserValidator({
     userRepository,
-    dateValidator: dateValidator,
-    emailValidator: emailValidator,
-    phoneValidator: phoneValidator,
+    dateValidator,
+    emailValidator,
+    phoneValidator,
+    validationErrors,
   });
   const sut = new CreateUserService({
     userRepository,
@@ -49,6 +48,7 @@ const makeSut = (): SutTypes => {
     emailValidator,
     phoneValidator,
     userRepository,
+    validationErrors,
   };
 };
 
@@ -58,6 +58,7 @@ describe("CreateUserService", () => {
   let emailValidator: EmailValidatorUseCase;
   let phoneValidator: PhoneValidatorUseCase;
   let userRepository: UserRepository;
+  let validationErrors: ValidationErrors;
 
   beforeEach(() => {
     const sutTypes = makeSut();
@@ -66,6 +67,7 @@ describe("CreateUserService", () => {
     emailValidator = sutTypes.emailValidator;
     phoneValidator = sutTypes.phoneValidator;
     userRepository = sutTypes.userRepository;
+    validationErrors = sutTypes.validationErrors;
   });
 
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
@@ -90,7 +92,7 @@ describe("CreateUserService", () => {
     const userProps = createUserProps({ name: undefined });
 
     await expect(sut.create(userProps)).rejects.toThrow(
-      missingParamError("nome")
+      validationErrors.missingParamError("nome")
     );
   });
 
@@ -98,7 +100,7 @@ describe("CreateUserService", () => {
     const userProps = createUserProps({ email: undefined });
 
     await expect(sut.create(userProps)).rejects.toThrow(
-      missingParamError("email")
+      validationErrors.missingParamError("email")
     );
   });
 
@@ -108,7 +110,7 @@ describe("CreateUserService", () => {
     jest.spyOn(emailValidator, "isValid").mockReturnValue(false);
 
     await expect(sut.create(userProps)).rejects.toThrow(
-      invalidParamError("email")
+      validationErrors.invalidParamError("email")
     );
   });
 
@@ -118,7 +120,7 @@ describe("CreateUserService", () => {
     await userRepository.create(userProps);
 
     await expect(sut.create(userProps)).rejects.toThrow(
-      duplicatedKeyError({ entity: "usuário", key: "email" })
+      validationErrors.duplicatedKeyError({ entity: "usuário", key: "email" })
     );
   });
 
@@ -126,7 +128,7 @@ describe("CreateUserService", () => {
     const userProps = createUserProps({ phone: undefined });
 
     await expect(sut.create(userProps)).rejects.toThrow(
-      missingParamError("telefone")
+      validationErrors.missingParamError("telefone")
     );
   });
 
@@ -136,7 +138,7 @@ describe("CreateUserService", () => {
     jest.spyOn(phoneValidator, "isValid").mockReturnValue(false);
 
     await expect(sut.create(userProps)).rejects.toThrow(
-      invalidParamError("telefone")
+      validationErrors.invalidParamError("telefone")
     );
   });
 
@@ -144,7 +146,7 @@ describe("CreateUserService", () => {
     const userProps = createUserProps({ birthdate: undefined });
 
     await expect(sut.create(userProps)).rejects.toThrow(
-      missingParamError("data de nascimento")
+      validationErrors.missingParamError("data de nascimento")
     );
   });
 
@@ -154,7 +156,7 @@ describe("CreateUserService", () => {
     jest.spyOn(dateValidator, "isValid").mockReturnValue(false);
 
     await expect(sut.create(userProps)).rejects.toThrow(
-      invalidParamError("data de nascimento")
+      validationErrors.invalidParamError("data de nascimento")
     );
   });
 
@@ -162,7 +164,7 @@ describe("CreateUserService", () => {
     const userProps = createUserProps({ role: undefined });
 
     await expect(sut.create(userProps)).rejects.toThrow(
-      missingParamError("função")
+      validationErrors.missingParamError("função")
     );
   });
 
@@ -170,7 +172,7 @@ describe("CreateUserService", () => {
     const userProps = createUserProps({ role: "invalid_role" as UserRole });
 
     await expect(sut.create(userProps)).rejects.toThrow(
-      invalidParamError("função")
+      validationErrors.invalidParamError("função")
     );
   });
 
@@ -178,7 +180,7 @@ describe("CreateUserService", () => {
     const userProps = createUserProps({ password: undefined });
 
     await expect(sut.create(userProps)).rejects.toThrow(
-      missingParamError("senha")
+      validationErrors.missingParamError("senha")
     );
   });
 
@@ -186,7 +188,7 @@ describe("CreateUserService", () => {
     const userProps = createUserProps({ password: "invalid" });
 
     await expect(sut.create(userProps)).rejects.toThrow(
-      invalidParamError("senha")
+      validationErrors.invalidParamError("senha")
     );
   });
 });

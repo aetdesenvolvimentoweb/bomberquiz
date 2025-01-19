@@ -4,22 +4,31 @@ import {
   PhoneValidatorUseCase,
 } from "@/backend/domain/use-cases/validators";
 import { UserProps, UserRole } from "@/backend/domain/entities";
-import {
-  duplicatedKeyError,
-  invalidParamError,
-  missingParamError,
-} from "../helpers";
 import { UserRepository } from "../repositories";
+import { ValidationErrors } from "../helpers";
 
 interface UserValidatorProps {
   dateValidator: DateValidatorUseCase;
   emailValidator: EmailValidatorUseCase;
   phoneValidator: PhoneValidatorUseCase;
   userRepository: UserRepository;
+  validationErrors: ValidationErrors;
 }
 
 export class UserValidator {
-  constructor(private props: UserValidatorProps) {}
+  private dateValidator;
+  private emailValidator;
+  private phoneValidator;
+  private userRepository;
+  private validationErrors;
+
+  constructor(private props: UserValidatorProps) {
+    this.dateValidator = props.dateValidator;
+    this.emailValidator = props.emailValidator;
+    this.phoneValidator = props.phoneValidator;
+    this.userRepository = props.userRepository;
+    this.validationErrors = props.validationErrors;
+  }
 
   private checkMissingUserProps = (userProps: UserProps): void => {
     const fieldNames: { [key in keyof UserProps]: string } = {
@@ -33,7 +42,7 @@ export class UserValidator {
 
     Object.entries(fieldNames).forEach(([field, name]) => {
       if (!userProps[field as keyof UserProps]) {
-        throw missingParamError(name);
+        throw this.validationErrors.missingParamError(name);
       }
     });
   };
@@ -41,38 +50,41 @@ export class UserValidator {
   private checkAlreadyRegisteredEmail = async (
     email: string
   ): Promise<void> => {
-    if (await this.props.userRepository.listByEmail(email)) {
-      throw duplicatedKeyError({ entity: "usuário", key: "email" });
+    if (await this.userRepository.listByEmail(email)) {
+      throw this.validationErrors.duplicatedKeyError({
+        entity: "usuário",
+        key: "email",
+      });
     }
   };
 
   private validateEmail = (email: string): void => {
-    if (!this.props.emailValidator.isValid(email)) {
-      throw invalidParamError("email");
+    if (!this.emailValidator.isValid(email)) {
+      throw this.validationErrors.invalidParamError("email");
     }
   };
 
   private validatePhone = (phone: string): void => {
-    if (!this.props.phoneValidator.isValid(phone)) {
-      throw invalidParamError("telefone");
+    if (!this.phoneValidator.isValid(phone)) {
+      throw this.validationErrors.invalidParamError("telefone");
     }
   };
 
   private validateBirthdate = (birthdate: Date): void => {
-    if (!this.props.dateValidator.isValid(birthdate)) {
-      throw invalidParamError("data de nascimento");
+    if (!this.dateValidator.isValid(birthdate)) {
+      throw this.validationErrors.invalidParamError("data de nascimento");
     }
   };
 
   private validateUserRole = (role: UserRole): void => {
     if (!["administrador", "colaborador", "cliente"].includes(role)) {
-      throw invalidParamError("função");
+      throw this.validationErrors.invalidParamError("função");
     }
   };
 
   private validatePassword = (password: string, passwordName: string): void => {
     if (password.length < 8) {
-      throw invalidParamError(passwordName);
+      throw this.validationErrors.invalidParamError(passwordName);
     }
   };
 
