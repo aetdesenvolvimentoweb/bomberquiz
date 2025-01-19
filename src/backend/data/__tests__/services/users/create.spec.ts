@@ -1,13 +1,15 @@
 import {
   DateValidatorStub,
   EmailValidatorStub,
+  EncrypterStub,
   PhoneValidatorStub,
 } from "@/backend/data/__mocks__";
 import {
   DateValidatorUseCase,
   EmailValidatorUseCase,
+  EncrypterUseCase,
   PhoneValidatorUseCase,
-} from "@/backend/domain/use-cases/validators";
+} from "@/backend/domain/use-cases";
 import { UserProps, UserRole } from "@/backend/domain/entities";
 import { CreateUserService } from "@/backend/data/services/users";
 import { UserRepository } from "@/backend/data/repositories";
@@ -26,6 +28,7 @@ interface SutTypes {
 
 const makeSut = (): SutTypes => {
   const dateValidator = new DateValidatorStub();
+  const encrypter: EncrypterUseCase = new EncrypterStub();
   const emailValidator = new EmailValidatorStub();
   const phoneValidator = new PhoneValidatorStub();
   const userRepository = new UserRepositoryInMemory();
@@ -38,6 +41,7 @@ const makeSut = (): SutTypes => {
     validationErrors,
   });
   const sut = new CreateUserService({
+    encrypter,
     userRepository,
     userValidator,
   });
