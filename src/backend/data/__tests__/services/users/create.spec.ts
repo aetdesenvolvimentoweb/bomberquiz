@@ -88,8 +88,13 @@ describe("CreateUserService", () => {
 
   test("should create a user", async () => {
     const userProps = createUserProps();
+    const repositorySpy = jest.spyOn(userRepository, "create");
 
     await expect(sut.create(userProps)).resolves.not.toThrow();
+    expect(repositorySpy).toHaveBeenCalledWith({
+      ...userProps,
+      password: "hashed_password",
+    });
   });
 
   test("should throw if no name is provided", async () => {
