@@ -2,7 +2,7 @@ import {
   DateValidatorUseCase,
   EmailValidatorUseCase,
   PhoneValidatorUseCase,
-} from "@/backend/domain/use-cases/validators";
+} from "@/backend/domain/use-cases";
 import { UserProps, UserRole } from "@/backend/domain/entities";
 import { UserRepository } from "../repositories";
 import { ValidationErrors } from "../helpers";
