@@ -65,13 +65,13 @@ describe("CreateUserService", () => {
   let validationErrors: ValidationErrors;
 
   beforeEach(() => {
-    const sutTypes = makeSut();
-    sut = sutTypes.sut;
-    dateValidator = sutTypes.dateValidator;
-    emailValidator = sutTypes.emailValidator;
-    phoneValidator = sutTypes.phoneValidator;
-    userRepository = sutTypes.userRepository;
-    validationErrors = sutTypes.validationErrors;
+    const sutInstance = makeSut();
+    sut = sutInstance.sut;
+    dateValidator = sutInstance.dateValidator;
+    emailValidator = sutInstance.emailValidator;
+    phoneValidator = sutInstance.phoneValidator;
+    userRepository = sutInstance.userRepository;
+    validationErrors = sutInstance.validationErrors;
   });
 
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
