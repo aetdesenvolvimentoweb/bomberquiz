@@ -1,7 +1,10 @@
+import {
+  IdValidatorUseCase,
+  UserIdValidatorUseCase,
+} from "@/backend/domain/use-cases";
 import { DeleteUserService } from "@/backend/data/services";
 import { IdValidatorStub } from "@/backend/data/__mocks__";
 import { UserIdValidator } from "@/backend/data/validators";
-import { UserIdValidatorUseCase } from "@/backend/domain/use-cases";
 import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repositories";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
@@ -9,6 +12,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 
 interface SutTypes {
   sut: DeleteUserService;
+  idValidator: IdValidatorUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
 }
@@ -17,18 +21,19 @@ const makeSut = (): SutTypes => {
   const idValidator = new IdValidatorStub();
   const userRepository = new UserRepositoryInMemory();
   const validationErrors = new ValidationErrors();
-  const userValidator: UserIdValidatorUseCase = new UserIdValidator({
+  const userIdValidator: UserIdValidatorUseCase = new UserIdValidator({
     idValidator,
     userRepository,
     validationErrors,
   });
   const sut = new DeleteUserService({
     userRepository,
-    userValidator,
+    userIdValidator,
   });
 
   return {
     sut,
+    idValidator,
     userRepository,
     validationErrors,
   };
@@ -36,6 +41,7 @@ const makeSut = (): SutTypes => {
 
 describe("DeleteUserService", () => {
   let sut: DeleteUserService;
+  let idValidator: IdValidatorUseCase;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
   const createUserProps: UserProps = {
@@ -50,6 +56,7 @@ describe("DeleteUserService", () => {
   beforeEach(async () => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
+    idValidator = sutInstance.idValidator;
     userRepository = sutInstance.userRepository;
     validationErrors = sutInstance.validationErrors;
   });
@@ -64,6 +71,14 @@ describe("DeleteUserService", () => {
   test("should throw if no id is provided", async () => {
     await expect(sut.delete("")).rejects.toThrow(
       validationErrors.missingParamError("id")
+    );
+  });
+
+  test("should throw if invalid id is provided", async () => {
+    jest.spyOn(idValidator, "isValid").mockReturnValue(false);
+
+    await expect(sut.delete("invalid-id")).rejects.toThrow(
+      validationErrors.invalidParamError("id")
     );
   });
 });
