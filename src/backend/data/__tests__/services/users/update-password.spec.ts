@@ -1,12 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   IdValidatorUseCase,
   UserIdValidatorUseCase,
 } from "@/backend/domain/use-cases";
+import { UpdateUserPasswordProps, UserProps } from "@/backend/domain/entities";
 import { IdValidatorStub } from "@/backend/data/__mocks__";
 import { UpdateUserPasswordService } from "@/backend/data/services";
 import { UserIdValidator } from "@/backend/data/validators";
-import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repositories";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 import { ValidationErrors } from "@/backend/data/helpers";
@@ -73,5 +72,26 @@ describe("UpdateUserPasswordService", () => {
         newPassword: "new_password",
       })
     ).resolves.not.toThrow();
+  });
+
+  test("should throw if no id is provided", async () => {
+    await expect(
+      sut.updatePassword({
+        oldPassword: "any_password",
+        newPassword: "new_password",
+      } as UpdateUserPasswordProps)
+    ).rejects.toThrow(validationErrors.missingParamError("id"));
+  });
+
+  test("should throw if invalid id is provided", async () => {
+    jest.spyOn(idValidator, "isValid").mockReturnValue(false);
+
+    await expect(
+      sut.updatePassword({
+        id: "invalid-id",
+        oldPassword: "any_password",
+        newPassword: "new_password",
+      })
+    ).rejects.toThrow(validationErrors.invalidParamError("id"));
   });
 });
