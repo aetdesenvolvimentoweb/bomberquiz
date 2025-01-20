@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   IdValidatorUseCase,
   UserIdValidatorUseCase,
@@ -72,6 +71,14 @@ describe("ListUserByIdService", () => {
   test("should throw if no id is provided", async () => {
     await expect(sut.listById("")).rejects.toThrow(
       validationErrors.missingParamError("id")
+    );
+  });
+
+  test("should throw if invalid id is provided", async () => {
+    jest.spyOn(idValidator, "isValid").mockReturnValue(false);
+
+    await expect(sut.listById("invalid-id")).rejects.toThrow(
+      validationErrors.invalidParamError("id")
     );
   });
 });
