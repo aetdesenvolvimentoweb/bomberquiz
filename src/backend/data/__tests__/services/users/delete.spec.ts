@@ -81,4 +81,10 @@ describe("DeleteUserService", () => {
       validationErrors.invalidParamError("id")
     );
   });
+
+  test("should throw if unregistered id is provided", async () => {
+    await expect(sut.delete("valid-id")).rejects.toThrow(
+      validationErrors.unregisteredError("id")
+    );
+  });
 });
