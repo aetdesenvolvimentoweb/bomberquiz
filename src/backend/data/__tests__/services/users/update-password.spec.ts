@@ -114,4 +114,29 @@ describe("UpdateUserPasswordService", () => {
       })
     ).rejects.toThrow(validationErrors.unregisteredError("id"));
   });
+
+  test("should throw if no old password is provided", async () => {
+    await userRepository.create(createUserProps);
+    const user = await userRepository.listByEmail(createUserProps.email);
+
+    await expect(
+      sut.updatePassword({
+        id: user!.id,
+        newPassword: "new_password",
+      } as UpdateUserPasswordProps)
+    ).rejects.toThrow(validationErrors.missingParamError("senha atual"));
+  });
+
+  test("should throw if invalid old password is provided", async () => {
+    await userRepository.create(createUserProps);
+    const user = await userRepository.listByEmail(createUserProps.email);
+
+    await expect(
+      sut.updatePassword({
+        id: user!.id,
+        oldPassword: "invalid",
+        newPassword: "new_password",
+      } as UpdateUserPasswordProps)
+    ).rejects.toThrow(validationErrors.invalidParamError("senha atual"));
+  });
 });
