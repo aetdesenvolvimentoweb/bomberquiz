@@ -170,7 +170,8 @@ describe("UpdateUserPasswordService", () => {
   });
 
   test("should throw if no new password is provided", async () => {
-    await userRepository.create(createUserProps());
+    const hashedPassword = await encrypter.encrypt("any_password");
+    await userRepository.create(createUserProps({ password: hashedPassword }));
     const user = await userRepository.listByEmail(createUserProps().email);
 
     await expect(
@@ -179,5 +180,19 @@ describe("UpdateUserPasswordService", () => {
         oldPassword: "any_password",
       } as UpdateUserPasswordProps)
     ).rejects.toThrow(validationErrors.missingParamError("nova senha"));
+  });
+
+  test("should throw if invalid new password is provided", async () => {
+    const hashedPassword = await encrypter.encrypt("any_password");
+    await userRepository.create(createUserProps({ password: hashedPassword }));
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    await expect(
+      sut.updatePassword({
+        id: user!.id,
+        oldPassword: "any_password",
+        newPassword: "invalid",
+      } as UpdateUserPasswordProps)
+    ).rejects.toThrow(validationErrors.invalidParamError("nova senha"));
   });
 });
