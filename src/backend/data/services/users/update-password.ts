@@ -19,8 +19,9 @@ export class UpdateUserPasswordService implements UpdateUserPasswordUseCase {
     oldPassword,
     newPassword,
   }: UpdateUserPasswordProps): Promise<void> => {
-    const { userRepository } = this.props;
+    const { userRepository, userIdValidator } = this.props;
 
+    await userIdValidator.validateUserId(id);
     await userRepository.delete(id);
   };
 }
