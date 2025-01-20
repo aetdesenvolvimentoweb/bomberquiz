@@ -1,4 +1,5 @@
 export * from "./create";
 export * from "./delete";
-export * from "./list-by-id";
 export * from "./list-all";
+export * from "./list-by-id";
+export * from "./update-password";
