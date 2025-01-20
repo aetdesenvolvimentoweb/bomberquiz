@@ -1,11 +1,15 @@
 import {
   IdValidatorUseCase,
+  UpdatePasswordPropsValidatorUseCase,
   UserIdValidatorUseCase,
 } from "@/backend/domain/use-cases";
+import {
+  UpdatePasswordPropsValidator,
+  UserIdValidator,
+} from "@/backend/data/validators";
 import { UpdateUserPasswordProps, UserProps } from "@/backend/domain/entities";
 import { IdValidatorStub } from "@/backend/data/__mocks__";
 import { UpdateUserPasswordService } from "@/backend/data/services";
-import { UserIdValidator } from "@/backend/data/validators";
 import { UserRepository } from "@/backend/data/repositories";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 import { ValidationErrors } from "@/backend/data/helpers";
@@ -26,7 +30,13 @@ const makeSut = (): SutTypes => {
     userRepository,
     validationErrors,
   });
+  const updatePasswordPropsValidator: UpdatePasswordPropsValidatorUseCase =
+    new UpdatePasswordPropsValidator({
+      userRepository,
+      validationErrors,
+    });
   const sut = new UpdateUserPasswordService({
+    updatePasswordPropsValidator,
     userRepository,
     userIdValidator,
   });
