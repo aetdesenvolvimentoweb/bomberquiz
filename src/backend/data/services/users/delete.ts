@@ -6,16 +6,16 @@ import { UserRepository } from "../../repositories";
 
 interface DeleteUserServiceProps {
   userRepository: UserRepository;
-  userValidator: UserIdValidatorUseCase;
+  userIdValidator: UserIdValidatorUseCase;
 }
 
 export class DeleteUserService implements DeleteUserUseCase {
   constructor(private props: DeleteUserServiceProps) {}
 
   public readonly delete = async (id: string): Promise<void> => {
-    const { userRepository, userValidator } = this.props;
+    const { userRepository, userIdValidator } = this.props;
 
-    await userValidator.validateUserId(id);
+    await userIdValidator.validateUserId(id);
     await userRepository.delete(id);
   };
 }
