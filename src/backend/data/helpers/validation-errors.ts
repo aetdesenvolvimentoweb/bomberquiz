@@ -18,4 +18,8 @@ export class ValidationErrors {
       400
     );
   };
+
+  public readonly unregisteredError = (param: string): AppError => {
+    return new AppError(`Nenhum registro encontrado para esse ${param}.`, 404);
+  };
 }

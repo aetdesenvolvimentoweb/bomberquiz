@@ -28,6 +28,10 @@ export class UserIdValidator implements UserIdValidatorUseCase {
     if (!this.idValidator.isValid(id)) {
       throw this.validationErrors.invalidParamError("id");
     }
+
+    if (!(await this.userRepository.listById(id))) {
+      throw this.validationErrors.unregisteredError("id");
+    }
   };
 
   public readonly validateUserId = async (id: string): Promise<void> => {
