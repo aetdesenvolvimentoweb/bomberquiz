@@ -94,4 +94,14 @@ describe("UpdateUserPasswordService", () => {
       })
     ).rejects.toThrow(validationErrors.invalidParamError("id"));
   });
+
+  test("should throw if unregistered id is provided", async () => {
+    await expect(
+      sut.updatePassword({
+        id: "unregistered-id",
+        oldPassword: "any_password",
+        newPassword: "new_password",
+      })
+    ).rejects.toThrow(validationErrors.unregisteredError("id"));
+  });
 });
