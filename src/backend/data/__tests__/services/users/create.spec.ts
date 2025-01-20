@@ -11,10 +11,11 @@ import {
   PhoneValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { UserProps, UserRole } from "@/backend/domain/entities";
-import { CreateUserService } from "@/backend/data/services/users";
+import { CreateUserService } from "@/backend/data/services";
+import { UserCreationPropsValidator } from "@/backend/data/validators";
+import { UserCretionPropsValidatorUseCase } from "@/backend/domain/use-cases";
 import { UserRepository } from "@/backend/data/repositories";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
-import { UserValidator } from "@/backend/data/validators/user";
 import { ValidationErrors } from "@/backend/data/helpers";
 
 interface SutTypes {
@@ -33,13 +34,14 @@ const makeSut = (): SutTypes => {
   const phoneValidator = new PhoneValidatorStub();
   const userRepository = new UserRepositoryInMemory();
   const validationErrors = new ValidationErrors();
-  const userValidator: UserValidator = new UserValidator({
-    userRepository,
-    dateValidator,
-    emailValidator,
-    phoneValidator,
-    validationErrors,
-  });
+  const userValidator: UserCretionPropsValidatorUseCase =
+    new UserCreationPropsValidator({
+      userRepository,
+      dateValidator,
+      emailValidator,
+      phoneValidator,
+      validationErrors,
+    });
   const sut = new CreateUserService({
     encrypter,
     userRepository,

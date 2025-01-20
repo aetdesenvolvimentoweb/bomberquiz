@@ -4,8 +4,9 @@ import {
   PhoneValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { UserProps, UserRole } from "@/backend/domain/entities";
-import { UserRepository } from "../repositories";
-import { ValidationErrors } from "../helpers";
+import { UserCretionPropsValidatorUseCase } from "@/backend/domain/use-cases";
+import { UserRepository } from "../../repositories";
+import { ValidationErrors } from "../../helpers";
 
 interface UserValidatorProps {
   dateValidator: DateValidatorUseCase;
@@ -15,7 +16,9 @@ interface UserValidatorProps {
   validationErrors: ValidationErrors;
 }
 
-export class UserValidator {
+export class UserCreationPropsValidator
+  implements UserCretionPropsValidatorUseCase
+{
   private dateValidator;
   private emailValidator;
   private phoneValidator;
@@ -88,7 +91,7 @@ export class UserValidator {
     }
   };
 
-  public readonly validateUserCreation = async (
+  public readonly validateUserCreationProps = async (
     userProps: UserProps
   ): Promise<void> => {
     this.checkMissingUserProps(userProps);

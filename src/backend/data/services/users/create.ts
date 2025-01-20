@@ -1,15 +1,15 @@
 import {
   CreateUserUseCase,
   EncrypterUseCase,
+  UserCretionPropsValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "../../repositories";
-import { UserValidator } from "../../validators/user";
 
 interface CreateUserServiceProps {
   encrypter: EncrypterUseCase;
   userRepository: UserRepository;
-  userValidator: UserValidator;
+  userValidator: UserCretionPropsValidatorUseCase;
 }
 
 export class CreateUserService implements CreateUserUseCase {
@@ -18,7 +18,7 @@ export class CreateUserService implements CreateUserUseCase {
   public readonly create = async (userProps: UserProps): Promise<void> => {
     const { encrypter, userRepository, userValidator } = this.props;
 
-    await userValidator.validateUserCreation(userProps);
+    await userValidator.validateUserCreationProps(userProps);
     const hashedPassword = await encrypter.encrypt(userProps.password);
     await userRepository.create({ ...userProps, password: hashedPassword });
   };
