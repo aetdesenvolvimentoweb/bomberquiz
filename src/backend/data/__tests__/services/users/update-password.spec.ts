@@ -168,4 +168,16 @@ describe("UpdateUserPasswordService", () => {
       } as UpdateUserPasswordProps)
     ).rejects.toThrow(validationErrors.wrongPasswordError("senha atual"));
   });
+
+  test("should throw if no new password is provided", async () => {
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    await expect(
+      sut.updatePassword({
+        id: user!.id,
+        oldPassword: "any_password",
+      } as UpdateUserPasswordProps)
+    ).rejects.toThrow(validationErrors.missingParamError("nova senha"));
+  });
 });
