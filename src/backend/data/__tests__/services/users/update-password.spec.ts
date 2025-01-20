@@ -1,4 +1,6 @@
+import { EncrypterStub, IdValidatorStub } from "@/backend/data/__mocks__";
 import {
+  EncrypterUseCase,
   IdValidatorUseCase,
   UpdatePasswordPropsValidatorUseCase,
   UserIdValidatorUseCase,
@@ -8,7 +10,6 @@ import {
   UserIdValidator,
 } from "@/backend/data/validators";
 import { UpdateUserPasswordProps, UserProps } from "@/backend/domain/entities";
-import { IdValidatorStub } from "@/backend/data/__mocks__";
 import { UpdateUserPasswordService } from "@/backend/data/services";
 import { UserRepository } from "@/backend/data/repositories";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
@@ -16,6 +17,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 
 interface SutTypes {
   sut: UpdateUserPasswordService;
+  encrypter: EncrypterUseCase;
   idValidator: IdValidatorUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
@@ -30,8 +32,10 @@ const makeSut = (): SutTypes => {
     userRepository,
     validationErrors,
   });
+  const encrypter: EncrypterUseCase = new EncrypterStub();
   const updatePasswordPropsValidator: UpdatePasswordPropsValidatorUseCase =
     new UpdatePasswordPropsValidator({
+      encrypter,
       userRepository,
       validationErrors,
     });
@@ -43,6 +47,7 @@ const makeSut = (): SutTypes => {
 
   return {
     sut,
+    encrypter,
     idValidator,
     userRepository,
     validationErrors,
@@ -51,29 +56,35 @@ const makeSut = (): SutTypes => {
 
 describe("UpdateUserPasswordService", () => {
   let sut: UpdateUserPasswordService;
+  let encrypter: EncrypterUseCase;
   let idValidator: IdValidatorUseCase;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
-  const createUserProps: UserProps = {
-    name: "any_name",
-    email: "valid_email",
-    phone: "any_phone",
-    birthdate: new Date(),
-    role: "cliente",
-    password: "any_password",
-  };
 
   beforeEach(async () => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
+    encrypter = sutInstance.encrypter;
     idValidator = sutInstance.idValidator;
     userRepository = sutInstance.userRepository;
     validationErrors = sutInstance.validationErrors;
   });
 
+  const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
+    return {
+      name: "any_name",
+      email: "valid_email",
+      phone: "any_phone",
+      birthdate: new Date(),
+      role: "cliente",
+      password: "any_password",
+      ...overrides,
+    };
+  };
+
   test("should update a user password", async () => {
-    await userRepository.create(createUserProps);
-    const user = await userRepository.listByEmail(createUserProps.email);
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
 
     await expect(
       sut.updatePassword({
@@ -116,8 +127,8 @@ describe("UpdateUserPasswordService", () => {
   });
 
   test("should throw if no old password is provided", async () => {
-    await userRepository.create(createUserProps);
-    const user = await userRepository.listByEmail(createUserProps.email);
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
 
     await expect(
       sut.updatePassword({
@@ -128,8 +139,8 @@ describe("UpdateUserPasswordService", () => {
   });
 
   test("should throw if invalid old password is provided", async () => {
-    await userRepository.create(createUserProps);
-    const user = await userRepository.listByEmail(createUserProps.email);
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
 
     await expect(
       sut.updatePassword({
@@ -138,5 +149,23 @@ describe("UpdateUserPasswordService", () => {
         newPassword: "new_password",
       } as UpdateUserPasswordProps)
     ).rejects.toThrow(validationErrors.invalidParamError("senha atual"));
+  });
+
+  test("should throw if wrong old password is provided", async () => {
+    const hashedPassword = await encrypter.encrypt("any_password");
+    await userRepository.create(createUserProps({ password: hashedPassword }));
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    jest
+      .spyOn(encrypter, "verify")
+      .mockReturnValue(new Promise((resolve) => resolve(false)));
+
+    await expect(
+      sut.updatePassword({
+        id: user!.id,
+        oldPassword: "wrong_password",
+        newPassword: "new_password",
+      } as UpdateUserPasswordProps)
+    ).rejects.toThrow(validationErrors.wrongPasswordError("senha atual"));
   });
 });
