@@ -22,4 +22,8 @@ export class ValidationErrors {
   public readonly unregisteredError = (param: string): AppError => {
     return new AppError(`Nenhum registro encontrado para esse ${param}.`, 404);
   };
+
+  public readonly wrongPasswordError = (param: string): AppError => {
+    return new AppError(`${param} incorreta.`, 401);
+  };
 }

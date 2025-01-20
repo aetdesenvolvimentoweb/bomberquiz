@@ -15,19 +15,14 @@ interface UpdateUserPasswordServiceProps {
 export class UpdateUserPasswordService implements UpdateUserPasswordUseCase {
   constructor(private props: UpdateUserPasswordServiceProps) {}
 
-  public readonly updatePassword = async ({
-    id,
-    oldPassword,
-    newPassword,
-  }: UpdateUserPasswordProps): Promise<void> => {
+  public readonly updatePassword = async (
+    props: UpdateUserPasswordProps
+  ): Promise<void> => {
     const { updatePasswordPropsValidator, userRepository, userIdValidator } =
       this.props;
 
-    await userIdValidator.validateUserId(id);
-    await updatePasswordPropsValidator.validateUpdatePasswordProps({
-      oldPassword,
-      newPassword,
-    });
-    await userRepository.delete(id);
+    await userIdValidator.validateUserId(props.id);
+    await updatePasswordPropsValidator.validateUpdatePasswordProps(props);
+    await userRepository.delete(props.id);
   };
 }

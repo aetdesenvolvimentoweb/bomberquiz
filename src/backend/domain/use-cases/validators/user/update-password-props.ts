@@ -2,6 +2,6 @@ import { UpdateUserPasswordProps } from "../../../entities";
 
 export type UpdatePasswordPropsValidatorUseCase = {
   validateUpdatePasswordProps: (
-    updateUserPasswordProps: Omit<UpdateUserPasswordProps, "id">
+    updateUserPasswordProps: UpdateUserPasswordProps
   ) => Promise<void>;
 };
