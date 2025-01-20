@@ -37,6 +37,7 @@ const makeSut = (): SutTypes => {
 describe("DeleteUserService", () => {
   let sut: DeleteUserService;
   let userRepository: UserRepository;
+  let validationErrors: ValidationErrors;
   const createUserProps: UserProps = {
     name: "any_name",
     email: "valid_email",
@@ -50,6 +51,7 @@ describe("DeleteUserService", () => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
     userRepository = sutInstance.userRepository;
+    validationErrors = sutInstance.validationErrors;
   });
 
   test("should delete a user", async () => {
@@ -57,5 +59,11 @@ describe("DeleteUserService", () => {
     const user = await userRepository.listByEmail(createUserProps.email);
 
     await expect(sut.delete(user!.id)).resolves.not.toThrow();
+  });
+
+  test("should throw if no id is provided", async () => {
+    await expect(sut.delete("")).rejects.toThrow(
+      validationErrors.missingParamError("id")
+    );
   });
 });
