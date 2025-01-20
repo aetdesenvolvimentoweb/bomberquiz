@@ -20,8 +20,11 @@ export class UserIdValidator implements UserIdValidatorUseCase {
     this.validationErrors = props.validationErrors;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private checkId = async (id: string): Promise<void> => {};
+  private checkId = async (id: string): Promise<void> => {
+    if (!id) {
+      throw this.validationErrors.missingParamError("id");
+    }
+  };
 
   public readonly validateUserId = async (id: string): Promise<void> => {
     await this.checkId(id);
