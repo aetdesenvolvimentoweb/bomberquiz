@@ -68,4 +68,10 @@ describe("ListUserByIdService", () => {
 
     await expect(sut.listById(user!.id)).resolves.not.toThrow();
   });
+
+  test("should throw if no id is provided", async () => {
+    await expect(sut.listById("")).rejects.toThrow(
+      validationErrors.missingParamError("id")
+    );
+  });
 });
