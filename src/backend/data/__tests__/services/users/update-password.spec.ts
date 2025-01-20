@@ -83,7 +83,8 @@ describe("UpdateUserPasswordService", () => {
   };
 
   test("should update a user password", async () => {
-    await userRepository.create(createUserProps());
+    const hashedPassword = await encrypter.encrypt("any_password");
+    await userRepository.create(createUserProps({ password: hashedPassword }));
     const user = await userRepository.listByEmail(createUserProps().email);
 
     await expect(
