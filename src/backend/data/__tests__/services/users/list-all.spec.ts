@@ -43,4 +43,18 @@ describe("ListAllUsersService", () => {
 
     await expect(sut.listAll()).resolves.not.toThrow();
   });
+
+  test("should list a user by id with correct data", async () => {
+    await userRepository.create(createUserProps);
+
+    const usersListed = await sut.listAll();
+
+    expect(usersListed.length).not.toBeLessThan(1);
+    expect(usersListed[0]).toHaveProperty("id");
+    expect(usersListed[0]?.name).toEqual(createUserProps.name);
+    expect(usersListed[0]?.email).toEqual(createUserProps.email);
+    expect(usersListed[0]?.phone).toEqual(createUserProps.phone);
+    expect(usersListed[0]?.birthdate).toEqual(createUserProps.birthdate);
+    expect(usersListed[0]?.role).toEqual(createUserProps.role);
+  });
 });
