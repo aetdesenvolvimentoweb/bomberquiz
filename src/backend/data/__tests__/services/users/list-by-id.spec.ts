@@ -68,6 +68,21 @@ describe("ListUserByIdService", () => {
     await expect(sut.listById(user!.id)).resolves.not.toThrow();
   });
 
+  test("should list a user by id with correct data", async () => {
+    await userRepository.create(createUserProps);
+    const user = await userRepository.listByEmail(createUserProps.email);
+
+    const userListed = await sut.listById(user!.id);
+
+    expect(userListed).not.toBeNull();
+    expect(userListed?.id).toEqual(user!.id);
+    expect(userListed?.name).toEqual(createUserProps.name);
+    expect(userListed?.email).toEqual(createUserProps.email);
+    expect(userListed?.phone).toEqual(createUserProps.phone);
+    expect(userListed?.birthdate).toEqual(createUserProps.birthdate);
+    expect(userListed?.role).toEqual(createUserProps.role);
+  });
+
   test("should throw if no id is provided", async () => {
     await expect(sut.listById("")).rejects.toThrow(
       validationErrors.missingParamError("id")
