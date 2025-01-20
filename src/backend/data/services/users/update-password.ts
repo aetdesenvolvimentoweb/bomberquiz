@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
+  UpdatePasswordPropsValidatorUseCase,
   UpdateUserPasswordUseCase,
   UserIdValidatorUseCase,
 } from "@/backend/domain/use-cases";
@@ -9,6 +9,7 @@ import { UserRepository } from "../../repositories";
 interface UpdateUserPasswordServiceProps {
   userRepository: UserRepository;
   userIdValidator: UserIdValidatorUseCase;
+  updatePasswordPropsValidator: UpdatePasswordPropsValidatorUseCase;
 }
 
 export class UpdateUserPasswordService implements UpdateUserPasswordUseCase {
@@ -19,9 +20,14 @@ export class UpdateUserPasswordService implements UpdateUserPasswordUseCase {
     oldPassword,
     newPassword,
   }: UpdateUserPasswordProps): Promise<void> => {
-    const { userRepository, userIdValidator } = this.props;
+    const { updatePasswordPropsValidator, userRepository, userIdValidator } =
+      this.props;
 
     await userIdValidator.validateUserId(id);
+    await updatePasswordPropsValidator.validateUpdatePasswordProps({
+      oldPassword,
+      newPassword,
+    });
     await userRepository.delete(id);
   };
 }
