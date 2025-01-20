@@ -81,4 +81,10 @@ describe("ListUserByIdService", () => {
       validationErrors.invalidParamError("id")
     );
   });
+
+  test("should throw if unregistered id is provided", async () => {
+    await expect(sut.listById("valid-id")).rejects.toThrow(
+      validationErrors.unregisteredError("id")
+    );
+  });
 });
