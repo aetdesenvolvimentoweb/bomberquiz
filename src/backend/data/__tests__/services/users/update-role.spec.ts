@@ -104,4 +104,13 @@ describe("UpdateUserRoleService", () => {
       } as UpdateUserRoleProps)
     ).rejects.toThrow(validationErrors.invalidParamError("id"));
   });
+
+  test("should throws if unregistered id is provided", async () => {
+    await expect(
+      sut.updateRole({
+        id: "unregistered-id",
+        role: "administrador",
+      } as UpdateUserRoleProps)
+    ).rejects.toThrow(validationErrors.unregisteredError("id"));
+  });
 });
