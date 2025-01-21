@@ -197,4 +197,23 @@ describe("UpdateUserProfileService", () => {
       } as UserProfile)
     ).rejects.toThrow(validationErrors.invalidParamError("email"));
   });
+
+  test("should throws if already registered email is provided", async () => {
+    await userRepository.create(createUserProps());
+    await userRepository.create(createUserProps({ email: "another_email" }));
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    await expect(
+      sut.updateProfile({
+        id: user!.id,
+        name: "new_name",
+        // email already registered
+        email: "another_email",
+        phone: "new_phone",
+        birthdate: new Date(),
+      } as UserProfile)
+    ).rejects.toThrow(
+      validationErrors.duplicatedKeyError({ entity: "usuário", key: "email" })
+    );
+  });
 });
