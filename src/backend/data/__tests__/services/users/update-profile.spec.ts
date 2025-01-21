@@ -142,4 +142,16 @@ describe("UpdateUserProfileService", () => {
       } as UserProfile)
     ).rejects.toThrow(validationErrors.invalidParamError("id"));
   });
+
+  test("should throws if unregistered id is provided", async () => {
+    await expect(
+      sut.updateProfile({
+        id: "unregistered-id",
+        name: "new_name",
+        email: "new_email",
+        phone: "new_phone",
+        birthdate: new Date(),
+      } as UserProfile)
+    ).rejects.toThrow(validationErrors.unregisteredError("id"));
+  });
 });
