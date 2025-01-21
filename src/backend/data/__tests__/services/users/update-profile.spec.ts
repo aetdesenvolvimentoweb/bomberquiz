@@ -75,7 +75,6 @@ describe("UpdateUserProfileService", () => {
   let dateValidator: DateValidatorUseCase;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let emailValidator: EmailValidatorUseCase;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let idValidator: IdValidatorUseCase;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let phoneValidator: PhoneValidatorUseCase;
@@ -129,5 +128,18 @@ describe("UpdateUserProfileService", () => {
         birthdate: new Date(),
       } as UserProfile)
     ).rejects.toThrow(validationErrors.missingParamError("id"));
+  });
+
+  test("should throws if invalid id is provided", async () => {
+    jest.spyOn(idValidator, "isValid").mockReturnValue(false);
+    await expect(
+      sut.updateProfile({
+        id: "invalid-id",
+        name: "new_name",
+        email: "new_email",
+        phone: "new_phone",
+        birthdate: new Date(),
+      } as UserProfile)
+    ).rejects.toThrow(validationErrors.invalidParamError("id"));
   });
 });
