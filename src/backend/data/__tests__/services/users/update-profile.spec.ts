@@ -168,4 +168,18 @@ describe("UpdateUserProfileService", () => {
       } as UserProfile)
     ).rejects.toThrow(validationErrors.missingParamError("nome"));
   });
+
+  test("should throws if no email is provided", async () => {
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    await expect(
+      sut.updateProfile({
+        id: user!.id,
+        name: "new_name",
+        phone: "new_phone",
+        birthdate: new Date(),
+      } as UserProfile)
+    ).rejects.toThrow(validationErrors.missingParamError("email"));
+  });
 });
