@@ -216,4 +216,18 @@ describe("UpdateUserProfileService", () => {
       validationErrors.duplicatedKeyError({ entity: "usuário", key: "email" })
     );
   });
+
+  test("should throws if no phone is provided", async () => {
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    await expect(
+      sut.updateProfile({
+        id: user!.id,
+        name: "new_name",
+        email: "new_email",
+        birthdate: new Date(),
+      } as UserProfile)
+    ).rejects.toThrow(validationErrors.missingParamError("telefone"));
+  });
 });
