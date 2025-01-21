@@ -73,7 +73,6 @@ describe("UpdateUserProfileService", () => {
   let sut: UpdateUserProfileService;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let dateValidator: DateValidatorUseCase;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let emailValidator: EmailValidatorUseCase;
   let idValidator: IdValidatorUseCase;
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -181,5 +180,21 @@ describe("UpdateUserProfileService", () => {
         birthdate: new Date(),
       } as UserProfile)
     ).rejects.toThrow(validationErrors.missingParamError("email"));
+  });
+
+  test("should throws if invalid email is provided", async () => {
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+    jest.spyOn(emailValidator, "isValid").mockReturnValue(false);
+
+    await expect(
+      sut.updateProfile({
+        id: user!.id,
+        name: "new_name",
+        email: "new_email",
+        phone: "new_phone",
+        birthdate: new Date(),
+      } as UserProfile)
+    ).rejects.toThrow(validationErrors.invalidParamError("email"));
   });
 });
