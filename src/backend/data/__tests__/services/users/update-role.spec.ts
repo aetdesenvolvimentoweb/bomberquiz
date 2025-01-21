@@ -1,11 +1,12 @@
 import {
-  UpdateRoleValidator,
-  UserIdValidator,
-} from "@/backend/data/validators";
-import {
+  IdValidatorUseCase,
   UpdateRoleValidatorUseCase,
   UserIdValidatorUseCase,
 } from "@/backend/domain/use-cases";
+import {
+  UpdateRoleValidator,
+  UserIdValidator,
+} from "@/backend/data/validators";
 import { UpdateUserRoleProps, UserProps } from "@/backend/domain/entities";
 import { IdValidatorStub } from "@/backend/data/__mocks__";
 import { UpdateUserRoleService } from "@/backend/data/services";
@@ -15,6 +16,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 
 interface SutTypes {
   sut: UpdateUserRoleService;
+  idValidator: IdValidatorUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
 }
@@ -40,6 +42,7 @@ const makeSut = (): SutTypes => {
 
   return {
     sut,
+    idValidator,
     userRepository,
     validationErrors,
   };
@@ -47,13 +50,14 @@ const makeSut = (): SutTypes => {
 
 describe("UpdateUserRoleService", () => {
   let sut: UpdateUserRoleService;
+  let idValidator: IdValidatorUseCase;
   let userRepository: UserRepository;
-
   let validationErrors: ValidationErrors;
 
   beforeEach(async () => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
+    idValidator = sutInstance.idValidator;
     userRepository = sutInstance.userRepository;
     validationErrors = sutInstance.validationErrors;
   });
@@ -88,5 +92,16 @@ describe("UpdateUserRoleService", () => {
         role: "administrador",
       } as UpdateUserRoleProps)
     ).rejects.toThrow(validationErrors.missingParamError("id"));
+  });
+
+  test("should throws if invalid id is provided", async () => {
+    jest.spyOn(idValidator, "isValid").mockReturnValue(false);
+
+    await expect(
+      sut.updateRole({
+        id: "invalid-id",
+        role: "administrador",
+      } as UpdateUserRoleProps)
+    ).rejects.toThrow(validationErrors.invalidParamError("id"));
   });
 });
