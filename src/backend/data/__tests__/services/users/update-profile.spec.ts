@@ -75,7 +75,6 @@ describe("UpdateUserProfileService", () => {
   let dateValidator: DateValidatorUseCase;
   let emailValidator: EmailValidatorUseCase;
   let idValidator: IdValidatorUseCase;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let phoneValidator: PhoneValidatorUseCase;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
@@ -229,5 +228,22 @@ describe("UpdateUserProfileService", () => {
         birthdate: new Date(),
       } as UserProfile)
     ).rejects.toThrow(validationErrors.missingParamError("telefone"));
+  });
+
+  test("should throws if invalid phone is provided", async () => {
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    jest.spyOn(phoneValidator, "isValid").mockReturnValue(false);
+
+    await expect(
+      sut.updateProfile({
+        id: user!.id,
+        name: "new_name",
+        email: "new_email",
+        phone: "invalid-phone",
+        birthdate: new Date(),
+      } as UserProfile)
+    ).rejects.toThrow(validationErrors.invalidParamError("telefone"));
   });
 });
