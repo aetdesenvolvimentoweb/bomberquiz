@@ -80,7 +80,6 @@ describe("UpdateUserProfileService", () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let phoneValidator: PhoneValidatorUseCase;
   let userRepository: UserRepository;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let validationErrors: ValidationErrors;
 
   beforeEach(async () => {
@@ -119,5 +118,16 @@ describe("UpdateUserProfileService", () => {
         birthdate: new Date(),
       } as UserProfile)
     ).resolves.not.toThrow();
+  });
+
+  test("should throws if no id is provided", async () => {
+    await expect(
+      sut.updateProfile({
+        name: "new_name",
+        email: "new_email",
+        phone: "new_phone",
+        birthdate: new Date(),
+      } as UserProfile)
+    ).rejects.toThrow(validationErrors.missingParamError("id"));
   });
 });
