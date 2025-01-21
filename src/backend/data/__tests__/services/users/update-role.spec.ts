@@ -7,7 +7,11 @@ import {
   UpdateRoleValidator,
   UserIdValidator,
 } from "@/backend/data/validators";
-import { UpdateUserRoleProps, UserProps } from "@/backend/domain/entities";
+import {
+  UpdateUserRoleProps,
+  UserProps,
+  UserRole,
+} from "@/backend/domain/entities";
 import { IdValidatorStub } from "@/backend/data/__mocks__";
 import { UpdateUserRoleService } from "@/backend/data/services";
 import { UserRepository } from "@/backend/data/repositories";
@@ -123,5 +127,17 @@ describe("UpdateUserRoleService", () => {
         id: user!.id,
       } as UpdateUserRoleProps)
     ).rejects.toThrow(validationErrors.missingParamError("função"));
+  });
+
+  test("should throws if invalid role is provided", async () => {
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    await expect(
+      sut.updateRole({
+        id: user!.id,
+        role: "invalid-role" as UserRole,
+      } as UpdateUserRoleProps)
+    ).rejects.toThrow(validationErrors.invalidParamError("função"));
   });
 });
