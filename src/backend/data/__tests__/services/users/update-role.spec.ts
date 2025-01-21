@@ -113,4 +113,15 @@ describe("UpdateUserRoleService", () => {
       } as UpdateUserRoleProps)
     ).rejects.toThrow(validationErrors.unregisteredError("id"));
   });
+
+  test("should throws if no role is provided", async () => {
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    await expect(
+      sut.updateRole({
+        id: user!.id,
+      } as UpdateUserRoleProps)
+    ).rejects.toThrow(validationErrors.missingParamError("função"));
+  });
 });
