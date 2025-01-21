@@ -246,4 +246,18 @@ describe("UpdateUserProfileService", () => {
       } as UserProfile)
     ).rejects.toThrow(validationErrors.invalidParamError("telefone"));
   });
+
+  test("should throws if no birthdate is provided", async () => {
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    await expect(
+      sut.updateProfile({
+        id: user!.id,
+        name: "new_name",
+        email: "new_email",
+        phone: "new_phone",
+      } as UserProfile)
+    ).rejects.toThrow(validationErrors.missingParamError("data de nascimento"));
+  });
 });
