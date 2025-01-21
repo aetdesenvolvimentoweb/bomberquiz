@@ -6,9 +6,9 @@ import {
   UpdateRoleValidatorUseCase,
   UserIdValidatorUseCase,
 } from "@/backend/domain/use-cases";
+import { UpdateUserRoleProps, UserProps } from "@/backend/domain/entities";
 import { IdValidatorStub } from "@/backend/data/__mocks__";
 import { UpdateUserRoleService } from "@/backend/data/services";
-import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repositories";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 import { ValidationErrors } from "@/backend/data/helpers";
@@ -48,7 +48,7 @@ const makeSut = (): SutTypes => {
 describe("UpdateUserRoleService", () => {
   let sut: UpdateUserRoleService;
   let userRepository: UserRepository;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   let validationErrors: ValidationErrors;
 
   beforeEach(async () => {
@@ -80,5 +80,13 @@ describe("UpdateUserRoleService", () => {
         role: "administrador",
       })
     ).resolves.not.toThrow();
+  });
+
+  test("should throws if no id is provided", async () => {
+    await expect(
+      sut.updateRole({
+        role: "administrador",
+      } as UpdateUserRoleProps)
+    ).rejects.toThrow(validationErrors.missingParamError("id"));
   });
 });
