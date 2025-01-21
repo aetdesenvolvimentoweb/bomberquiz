@@ -68,10 +68,10 @@ export class UpdatePasswordPropsValidator
   ): Promise<void> => {
     this.checkMissingUpdatePasswordProps(updateUserPasswordProps);
     this.validatePassword(updateUserPasswordProps.oldPassword, "senha atual");
-    this.validatePassword(updateUserPasswordProps.newPassword, "nova senha");
     await this.checkMatchingPassword(
       updateUserPasswordProps.id,
       updateUserPasswordProps.oldPassword
     );
+    this.validatePassword(updateUserPasswordProps.newPassword, "nova senha");
   };
 }
