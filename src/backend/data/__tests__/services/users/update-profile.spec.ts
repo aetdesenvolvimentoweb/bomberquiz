@@ -71,7 +71,6 @@ const makeSut = (): SutTypes => {
 
 describe("UpdateUserProfileService", () => {
   let sut: UpdateUserProfileService;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   let dateValidator: DateValidatorUseCase;
   let emailValidator: EmailValidatorUseCase;
   let idValidator: IdValidatorUseCase;
@@ -259,5 +258,22 @@ describe("UpdateUserProfileService", () => {
         phone: "new_phone",
       } as UserProfile)
     ).rejects.toThrow(validationErrors.missingParamError("data de nascimento"));
+  });
+
+  test("should throws if invalid birthdate is provided", async () => {
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    jest.spyOn(dateValidator, "isValid").mockReturnValue(false);
+
+    await expect(
+      sut.updateProfile({
+        id: user!.id,
+        name: "new_name",
+        email: "new_email",
+        phone: "new_phone",
+        birthdate: new Date("invalid-date"),
+      } as UserProfile)
+    ).rejects.toThrow(validationErrors.invalidParamError("data de nascimento"));
   });
 });
