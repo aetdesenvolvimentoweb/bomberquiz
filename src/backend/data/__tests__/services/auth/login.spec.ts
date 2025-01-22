@@ -23,14 +23,15 @@ interface SutTypes {
 }
 
 const makeSut = (): SutTypes => {
-  const encrypter = new EncrypterStub();
   const emailValidator = new EmailValidatorStub();
+  const encrypter = new EncrypterStub();
   const userRepository = new UserRepositoryInMemory();
   const authRepository = new AuthRepositoryInMemory(userRepository);
   const validationErrors = new ValidationErrors();
   const loginValidator: LoginValidatorUseCase = new LoginValidator({
     authRepository,
     emailValidator,
+    encrypter,
     validationErrors,
   });
   const sut = new LoginService({
@@ -156,6 +157,22 @@ describe("LoginService", () => {
       sut.login({
         email: "invalid-email",
         password: createUserProps().password,
+      } as LoginProps)
+    ).rejects.toThrow(validationErrors.unauthorizedError());
+  });
+
+  test("should throws if wrong password is provided", async () => {
+    const hashedPassword = await encrypter.encrypt(createUserProps().password);
+    await userRepository.create(createUserProps({ password: hashedPassword }));
+
+    jest
+      .spyOn(encrypter, "verify")
+      .mockReturnValue(new Promise((resolve) => resolve(false)));
+
+    await expect(
+      sut.login({
+        email: createUserProps().email,
+        password: "wrong-password",
       } as LoginProps)
     ).rejects.toThrow(validationErrors.unauthorizedError());
   });
