@@ -131,7 +131,20 @@ describe("LoginService", () => {
     await userRepository.create(createUserProps({ password: hashedPassword }));
 
     await expect(
-      sut.login({ email: createUserProps().password } as LoginProps)
+      sut.login({ email: createUserProps().email } as LoginProps)
     ).rejects.toThrow(validationErrors.missingParamError("senha"));
+  });
+
+  test("should throws if invalid password is provided", async () => {
+    const hashedPassword = await encrypter.encrypt(createUserProps().password);
+    await userRepository.create(createUserProps({ password: hashedPassword }));
+
+    await expect(
+      sut.login({
+        email: createUserProps().email,
+        // less than 8 characters = invalid password
+        password: "invalid",
+      } as LoginProps)
+    ).rejects.toThrow(validationErrors.invalidParamError("senha"));
   });
 });
