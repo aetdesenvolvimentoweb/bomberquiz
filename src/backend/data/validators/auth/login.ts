@@ -1,5 +1,6 @@
 import {
   EmailValidatorUseCase,
+  EncrypterUseCase,
   LoginValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { AuthRepository } from "../../repositories";
@@ -9,17 +10,20 @@ import { ValidationErrors } from "../../helpers";
 interface LoginValidatorProps {
   authRepository: AuthRepository;
   emailValidator: EmailValidatorUseCase;
+  encrypter: EncrypterUseCase;
   validationErrors: ValidationErrors;
 }
 
 export class LoginValidator implements LoginValidatorUseCase {
   private authRepository: AuthRepository;
   private emailValidator: EmailValidatorUseCase;
+  private encrypter: EncrypterUseCase;
   private validationErrors: ValidationErrors;
 
   constructor(private props: LoginValidatorProps) {
     this.authRepository = props.authRepository;
     this.emailValidator = props.emailValidator;
+    this.encrypter = props.encrypter;
     this.validationErrors = props.validationErrors;
   }
 
@@ -54,6 +58,12 @@ export class LoginValidator implements LoginValidatorUseCase {
     const userLogged = await this.authRepository.login(loginProps);
 
     if (!userLogged) {
+      throw this.validationErrors.unauthorizedError();
+    }
+
+    if (
+      !(await this.encrypter.verify(loginProps.password, userLogged.password!))
+    ) {
       throw this.validationErrors.unauthorizedError();
     }
   };
