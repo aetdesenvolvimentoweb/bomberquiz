@@ -7,7 +7,7 @@ import {
   EncrypterUseCase,
   LoginValidatorUseCase,
 } from "@/backend/domain/use-cases";
-import { LoginProps, UserProps } from "@/backend/domain/entities";
+import { LoginProps, UserLogged, UserProps } from "@/backend/domain/entities";
 import { EncrypterStub } from "@/backend/data/__mocks__";
 import { LoginService } from "@/backend/data/services";
 import { LoginValidator } from "@/backend/data/validators";
@@ -78,5 +78,22 @@ describe("LoginService", () => {
         password: "correct_password",
       } as LoginProps)
     ).resolves.not.toThrow();
+  });
+
+  test("should return user logged", async () => {
+    const hashedPassword = await encrypter.encrypt("correct_password");
+    await userRepository.create(createUserProps({ password: hashedPassword }));
+
+    const userLogged: UserLogged | null = await sut.login({
+      email: "valid_email",
+      password: "correct_password",
+    } as LoginProps);
+
+    expect(userLogged).not.toBeNull();
+    expect(userLogged).toHaveProperty("id");
+    expect(userLogged?.email).toEqual("valid_email");
+    expect(userLogged?.name).toEqual(createUserProps().name);
+    expect(userLogged?.role).toEqual(createUserProps().role);
+    expect(userLogged).not.toHaveProperty("password");
   });
 });
