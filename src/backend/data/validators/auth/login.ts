@@ -42,8 +42,15 @@ export class LoginValidator implements LoginValidatorUseCase {
     }
   };
 
+  private validatePassword = (password: string): void => {
+    if (password.length < 8) {
+      throw this.validationErrors.invalidParamError("senha");
+    }
+  };
+
   public validateLogin = async (loginProps: LoginProps): Promise<void> => {
     this.checkMissingLoginProps(loginProps);
     this.validateEmail(loginProps.email);
+    this.validatePassword(loginProps.password);
   };
 }
