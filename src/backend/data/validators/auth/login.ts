@@ -1,19 +1,25 @@
+import {
+  EmailValidatorUseCase,
+  LoginValidatorUseCase,
+} from "@/backend/domain/use-cases";
 import { AuthRepository } from "../../repositories";
 import { LoginProps } from "@/backend/domain/entities";
-import { LoginValidatorUseCase } from "@/backend/domain/use-cases";
 import { ValidationErrors } from "../../helpers";
 
 interface LoginValidatorProps {
   authRepository: AuthRepository;
+  emailValidator: EmailValidatorUseCase;
   validationErrors: ValidationErrors;
 }
 
 export class LoginValidator implements LoginValidatorUseCase {
   private authRepository: AuthRepository;
+  private emailValidator: EmailValidatorUseCase;
   private validationErrors: ValidationErrors;
 
   constructor(private props: LoginValidatorProps) {
     this.authRepository = props.authRepository;
+    this.emailValidator = props.emailValidator;
     this.validationErrors = props.validationErrors;
   }
 
@@ -30,7 +36,14 @@ export class LoginValidator implements LoginValidatorUseCase {
     });
   };
 
+  private validateEmail = (email: string): void => {
+    if (!this.emailValidator.isValid(email)) {
+      throw this.validationErrors.invalidParamError("email");
+    }
+  };
+
   public validateLogin = async (loginProps: LoginProps): Promise<void> => {
     this.checkMissingLoginProps(loginProps);
+    this.validateEmail(loginProps.email);
   };
 }
