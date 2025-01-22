@@ -68,40 +68,49 @@ describe("LoginService", () => {
   });
 
   test("should login", async () => {
-    const hashedPassword = await encrypter.encrypt("correct_password");
+    const hashedPassword = await encrypter.encrypt(createUserProps().password);
     await userRepository.create(createUserProps({ password: hashedPassword }));
 
     await expect(
       sut.login({
-        email: "valid_email",
-        password: "correct_password",
+        email: createUserProps().email,
+        password: createUserProps().password,
       } as LoginProps)
     ).resolves.not.toThrow();
   });
 
   test("should return user logged", async () => {
-    const hashedPassword = await encrypter.encrypt("correct_password");
+    const hashedPassword = await encrypter.encrypt(createUserProps().password);
     await userRepository.create(createUserProps({ password: hashedPassword }));
 
     const userLogged: UserLogged | null = await sut.login({
-      email: "valid_email",
-      password: "correct_password",
+      email: createUserProps().email,
+      password: createUserProps().password,
     } as LoginProps);
 
     expect(userLogged).not.toBeNull();
     expect(userLogged).toHaveProperty("id");
-    expect(userLogged?.email).toEqual("valid_email");
+    expect(userLogged?.email).toEqual(createUserProps().email);
     expect(userLogged?.name).toEqual(createUserProps().name);
     expect(userLogged?.role).toEqual(createUserProps().role);
     expect(userLogged).not.toHaveProperty("password");
   });
 
   test("should throws if no email is provided", async () => {
-    const hashedPassword = await encrypter.encrypt("correct_password");
+    const hashedPassword = await encrypter.encrypt(createUserProps().password);
     await userRepository.create(createUserProps({ password: hashedPassword }));
 
     await expect(
-      sut.login({ password: "correct_password" } as LoginProps)
+      sut.login({ password: createUserProps().password } as LoginProps)
     ).rejects.toThrow(validationErrors.missingParamError("email"));
+  });
+
+  test("should throws if no password is provided", async () => {
+    const hashedPassword = await encrypter.encrypt(createUserProps().password);
+    await userRepository.create(createUserProps({ password: hashedPassword }));
+
+    await expect(
+      sut.login({ email: createUserProps().password } as LoginProps)
+    ).rejects.toThrow(validationErrors.missingParamError("senha"));
   });
 });
