@@ -1,14 +1,6 @@
 import { AppError } from "../errors";
 
 export class ValidationErrors {
-  public readonly missingParamError = (param: string): AppError => {
-    return new AppError(`Preencha o campo ${param}.`, 400);
-  };
-
-  public readonly invalidParamError = (param: string): AppError => {
-    return new AppError(`Valor inválido para o campo: ${param}.`, 400);
-  };
-
   public readonly duplicatedKeyError = (props: {
     entity: string;
     key: string;
@@ -17,6 +9,18 @@ export class ValidationErrors {
       `Já existe ${props.entity} registrada(o) com essa(e) ${props.key}.`,
       400
     );
+  };
+
+  public readonly invalidParamError = (param: string): AppError => {
+    return new AppError(`Valor inválido para o campo: ${param}.`, 400);
+  };
+
+  public readonly missingParamError = (param: string): AppError => {
+    return new AppError(`Preencha o campo ${param}.`, 400);
+  };
+
+  public readonly unauthorizedError = (): AppError => {
+    return new AppError("Email ou senha incorreto(s).", 401);
   };
 
   public readonly unregisteredError = (param: string): AppError => {

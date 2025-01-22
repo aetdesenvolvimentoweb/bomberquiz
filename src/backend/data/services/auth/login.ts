@@ -21,10 +21,10 @@ export class LoginService implements LoginUseCase {
     await loginValidator.validateLogin(loginProps);
     const userLogged = await authRepository.login(loginProps);
     return {
-      id: userLogged.id,
-      name: userLogged.name,
-      email: userLogged.email,
-      role: userLogged.role,
+      id: userLogged!.id,
+      name: userLogged!.name,
+      email: userLogged!.email,
+      role: userLogged!.role,
     };
   };
 }
