@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   AuthRepositoryInMemory,
   UserRepositoryInMemory,
@@ -95,5 +94,14 @@ describe("LoginService", () => {
     expect(userLogged?.name).toEqual(createUserProps().name);
     expect(userLogged?.role).toEqual(createUserProps().role);
     expect(userLogged).not.toHaveProperty("password");
+  });
+
+  test("should throws if no email is provided", async () => {
+    const hashedPassword = await encrypter.encrypt("correct_password");
+    await userRepository.create(createUserProps({ password: hashedPassword }));
+
+    await expect(
+      sut.login({ password: "correct_password" } as LoginProps)
+    ).rejects.toThrow(validationErrors.missingParamError("email"));
   });
 });
