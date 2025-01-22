@@ -147,4 +147,16 @@ describe("LoginService", () => {
       } as LoginProps)
     ).rejects.toThrow(validationErrors.invalidParamError("senha"));
   });
+
+  test("should throws if unregistered email is provided", async () => {
+    const hashedPassword = await encrypter.encrypt(createUserProps().password);
+    await userRepository.create(createUserProps({ password: hashedPassword }));
+
+    await expect(
+      sut.login({
+        email: "invalid-email",
+        password: createUserProps().password,
+      } as LoginProps)
+    ).rejects.toThrow(validationErrors.unauthorizedError());
+  });
 });
