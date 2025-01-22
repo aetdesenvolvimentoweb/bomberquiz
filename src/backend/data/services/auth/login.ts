@@ -15,10 +15,16 @@ export class LoginService implements LoginUseCase {
 
   public readonly login = async (
     loginProps: LoginProps
-  ): Promise<UserLogged | null> => {
+  ): Promise<UserLogged> => {
     const { loginValidator, authRepository } = this.props;
 
     await loginValidator.validateLogin(loginProps);
-    return await authRepository.login(loginProps);
+    const userLogged = await authRepository.login(loginProps);
+    return {
+      id: userLogged.id,
+      name: userLogged.name,
+      email: userLogged.email,
+      role: userLogged.role,
+    };
   };
 }
