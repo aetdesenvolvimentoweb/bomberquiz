@@ -2,12 +2,13 @@ import {
   AuthRepositoryInMemory,
   UserRepositoryInMemory,
 } from "@/backend/infra/in-memory-repositories";
+import { EmailValidatorStub, EncrypterStub } from "@/backend/data/__mocks__";
 import {
+  EmailValidatorUseCase,
   EncrypterUseCase,
   LoginValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { LoginProps, UserLogged, UserProps } from "@/backend/domain/entities";
-import { EncrypterStub } from "@/backend/data/__mocks__";
 import { LoginService } from "@/backend/data/services";
 import { LoginValidator } from "@/backend/data/validators";
 import { UserRepository } from "@/backend/data/repositories";
@@ -15,6 +16,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 
 interface SutTypes {
   sut: LoginService;
+  emailValidator: EmailValidatorUseCase;
   encrypter: EncrypterUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
@@ -22,11 +24,13 @@ interface SutTypes {
 
 const makeSut = (): SutTypes => {
   const encrypter = new EncrypterStub();
+  const emailValidator = new EmailValidatorStub();
   const userRepository = new UserRepositoryInMemory();
   const authRepository = new AuthRepositoryInMemory(userRepository);
   const validationErrors = new ValidationErrors();
   const loginValidator: LoginValidatorUseCase = new LoginValidator({
     authRepository,
+    emailValidator,
     validationErrors,
   });
   const sut = new LoginService({
@@ -36,6 +40,7 @@ const makeSut = (): SutTypes => {
 
   return {
     sut,
+    emailValidator,
     encrypter,
     userRepository,
     validationErrors,
@@ -44,6 +49,7 @@ const makeSut = (): SutTypes => {
 
 describe("LoginService", () => {
   let sut: LoginService;
+  let emailValidator: EmailValidatorUseCase;
   let encrypter: EncrypterUseCase;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
@@ -62,6 +68,7 @@ describe("LoginService", () => {
   beforeEach(async () => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
+    emailValidator = sutInstance.emailValidator;
     encrypter = sutInstance.encrypter;
     userRepository = sutInstance.userRepository;
     validationErrors = sutInstance.validationErrors;
@@ -103,6 +110,20 @@ describe("LoginService", () => {
     await expect(
       sut.login({ password: createUserProps().password } as LoginProps)
     ).rejects.toThrow(validationErrors.missingParamError("email"));
+  });
+
+  test("should throws if invalid email is provided", async () => {
+    const hashedPassword = await encrypter.encrypt(createUserProps().password);
+    await userRepository.create(createUserProps({ password: hashedPassword }));
+
+    jest.spyOn(emailValidator, "isValid").mockReturnValue(false);
+
+    await expect(
+      sut.login({
+        email: "invalid-email",
+        password: createUserProps().password,
+      } as LoginProps)
+    ).rejects.toThrow(validationErrors.invalidParamError("email"));
   });
 
   test("should throws if no password is provided", async () => {
