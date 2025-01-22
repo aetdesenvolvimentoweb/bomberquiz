@@ -18,6 +18,20 @@ export class HttpResponses {
     };
   };
 
+  public readonly noContent = (): HttpResponse => {
+    return {
+      body: {},
+      statusCode: 204,
+    };
+  };
+
+  public readonly ok = (data: unknown): HttpResponse => {
+    return {
+      body: { data },
+      statusCode: 200,
+    };
+  };
+
   public readonly serverError = (): HttpResponse => {
     return {
       body: {
