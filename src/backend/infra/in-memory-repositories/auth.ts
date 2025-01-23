@@ -4,7 +4,7 @@ import { LoginProps, UserLogged } from "@/backend/domain/entities";
 export class AuthRepositoryInMemory implements AuthRepository {
   constructor(private readonly userRepository: UserRepository) {}
 
-  public readonly login = async (
+  public readonly authorize = async (
     loginProps: LoginProps
   ): Promise<UserLogged | null> => {
     const user = await this.userRepository.listByEmail(loginProps.email);

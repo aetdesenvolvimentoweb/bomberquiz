@@ -1,3 +1,3 @@
-import { LoginUseCase } from "@/backend/domain/use-cases";
+import { AuthorizeUseCase } from "@/backend/domain/use-cases";
 
-export type AuthRepository = LoginUseCase;
+export type AuthRepository = AuthorizeUseCase;

@@ -55,7 +55,7 @@ export class LoginValidator implements LoginValidatorUseCase {
   private checkLoginPropsMatch = async (
     loginProps: LoginProps
   ): Promise<void> => {
-    const userLogged = await this.authRepository.login(loginProps);
+    const userLogged = await this.authRepository.authorize(loginProps);
 
     if (!userLogged) {
       throw this.validationErrors.unauthorizedError();

@@ -1,12 +1,12 @@
 import { HttpRequest, HttpResponse } from "../../protocols";
 import { LoginProps, UserLogged } from "@/backend/domain/entities";
 import { AppError } from "@/backend/data/errors";
+import { AuthorizeService } from "@/backend/data/services";
 import { Controller } from "../../protocols/controller";
 import { HttpResponses } from "../../helpers/http-responses";
-import { LoginService } from "@/backend/data/services";
 
 interface LoginControllerProps {
-  loginService: LoginService;
+  authorizeService: AuthorizeService;
   httpResponses: HttpResponses;
 }
 
@@ -16,12 +16,13 @@ export class LoginController implements Controller {
   public readonly handle = async (
     request: HttpRequest<LoginProps>
   ): Promise<HttpResponse> => {
-    const { loginService, httpResponses } = this.props;
+    const { authorizeService, httpResponses } = this.props;
 
     try {
       const loginProps: LoginProps = request.body;
 
-      const userLogged: UserLogged = await loginService.login(loginProps);
+      const userLogged: UserLogged =
+        await authorizeService.authorize(loginProps);
 
       return httpResponses.ok(userLogged);
     } catch (error) {

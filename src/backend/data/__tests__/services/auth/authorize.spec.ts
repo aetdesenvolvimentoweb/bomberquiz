@@ -9,13 +9,13 @@ import {
   LoginValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { LoginProps, UserLogged, UserProps } from "@/backend/domain/entities";
-import { LoginService } from "@/backend/data/services";
+import { AuthorizeService } from "@/backend/data/services";
 import { LoginValidator } from "@/backend/data/validators";
 import { UserRepository } from "@/backend/data/repositories";
 import { ValidationErrors } from "@/backend/data/helpers";
 
 interface SutTypes {
-  sut: LoginService;
+  sut: AuthorizeService;
   emailValidator: EmailValidatorUseCase;
   encrypter: EncrypterUseCase;
   userRepository: UserRepository;
@@ -34,7 +34,7 @@ const makeSut = (): SutTypes => {
     encrypter,
     validationErrors,
   });
-  const sut = new LoginService({
+  const sut = new AuthorizeService({
     authRepository,
     loginValidator,
   });
@@ -48,8 +48,8 @@ const makeSut = (): SutTypes => {
   };
 };
 
-describe("LoginService", () => {
-  let sut: LoginService;
+describe("AuthorizeService", () => {
+  let sut: AuthorizeService;
   let emailValidator: EmailValidatorUseCase;
   let encrypter: EncrypterUseCase;
   let userRepository: UserRepository;
@@ -80,7 +80,7 @@ describe("LoginService", () => {
     await userRepository.create(createUserProps({ password: hashedPassword }));
 
     await expect(
-      sut.login({
+      sut.authorize({
         email: createUserProps().email,
         password: createUserProps().password,
       } as LoginProps)
@@ -91,7 +91,7 @@ describe("LoginService", () => {
     const hashedPassword = await encrypter.encrypt(createUserProps().password);
     await userRepository.create(createUserProps({ password: hashedPassword }));
 
-    const userLogged: UserLogged | null = await sut.login({
+    const userLogged: UserLogged | null = await sut.authorize({
       email: createUserProps().email,
       password: createUserProps().password,
     } as LoginProps);
@@ -109,7 +109,7 @@ describe("LoginService", () => {
     await userRepository.create(createUserProps({ password: hashedPassword }));
 
     await expect(
-      sut.login({ password: createUserProps().password } as LoginProps)
+      sut.authorize({ password: createUserProps().password } as LoginProps)
     ).rejects.toThrow(validationErrors.missingParamError("email"));
   });
 
@@ -120,7 +120,7 @@ describe("LoginService", () => {
     jest.spyOn(emailValidator, "isValid").mockReturnValue(false);
 
     await expect(
-      sut.login({
+      sut.authorize({
         email: "invalid-email",
         password: createUserProps().password,
       } as LoginProps)
@@ -132,7 +132,7 @@ describe("LoginService", () => {
     await userRepository.create(createUserProps({ password: hashedPassword }));
 
     await expect(
-      sut.login({ email: createUserProps().email } as LoginProps)
+      sut.authorize({ email: createUserProps().email } as LoginProps)
     ).rejects.toThrow(validationErrors.missingParamError("senha"));
   });
 
@@ -141,7 +141,7 @@ describe("LoginService", () => {
     await userRepository.create(createUserProps({ password: hashedPassword }));
 
     await expect(
-      sut.login({
+      sut.authorize({
         email: createUserProps().email,
         // less than 8 characters = invalid password
         password: "invalid",
@@ -154,7 +154,7 @@ describe("LoginService", () => {
     await userRepository.create(createUserProps({ password: hashedPassword }));
 
     await expect(
-      sut.login({
+      sut.authorize({
         email: "invalid-email",
         password: createUserProps().password,
       } as LoginProps)
@@ -170,7 +170,7 @@ describe("LoginService", () => {
       .mockReturnValue(new Promise((resolve) => resolve(false)));
 
     await expect(
-      sut.login({
+      sut.authorize({
         email: createUserProps().email,
         password: "wrong-password",
       } as LoginProps)

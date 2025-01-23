@@ -11,9 +11,9 @@ import {
 } from "@/backend/domain/use-cases";
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { LoginProps, UserLogged, UserProps } from "@/backend/domain/entities";
+import { AuthorizeService } from "@/backend/data/services";
 import { HttpResponses } from "@/backend/presentation/helpers";
 import { LoginController } from "@/backend/presentation/controllers";
-import { LoginService } from "@/backend/data/services";
 import { LoginValidator } from "@/backend/data/validators";
 import { ValidationErrors } from "@/backend/data/helpers";
 
@@ -36,13 +36,13 @@ const makeSut = (): SutTypes => {
     encrypter,
     validationErrors,
   });
-  const loginService: LoginService = new LoginService({
+  const authorizeService: AuthorizeService = new AuthorizeService({
     authRepository,
     loginValidator,
   });
   const httpResponses = new HttpResponses();
   const sut = new LoginController({
-    loginService,
+    authorizeService,
     httpResponses,
   });
 
