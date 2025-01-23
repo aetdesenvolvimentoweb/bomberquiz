@@ -3,7 +3,12 @@ import {
   AuthRepositoryInMemory,
   UserRepositoryInMemory,
 } from "@/backend/infra/in-memory-repositories";
-import { EmailValidatorStub, EncrypterStub } from "@/backend/data/__mocks__";
+import { AuthorizeService, LoginService } from "@/backend/data/services";
+import {
+  EmailValidatorStub,
+  EncrypterStub,
+  TokenHandlerStub,
+} from "@/backend/data/__mocks__";
 import {
   EmailValidatorUseCase,
   EncrypterUseCase,
@@ -11,7 +16,6 @@ import {
 } from "@/backend/domain/use-cases";
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { LoginProps, UserLogged, UserProps } from "@/backend/domain/entities";
-import { AuthorizeService } from "@/backend/data/services";
 import { HttpResponses } from "@/backend/presentation/helpers";
 import { LoginController } from "@/backend/presentation/controllers";
 import { LoginValidator } from "@/backend/data/validators";
@@ -41,9 +45,14 @@ const makeSut = (): SutTypes => {
     loginValidator,
   });
   const httpResponses = new HttpResponses();
+  const tokenHandler = new TokenHandlerStub();
+  const loginService: LoginService = new LoginService({
+    tokenHandler,
+  });
   const sut = new LoginController({
     authorizeService,
     httpResponses,
+    loginService,
   });
 
   return { sut, userRepository };
@@ -85,11 +94,6 @@ describe("LoginController", () => {
       await sut.handle(httpRequest);
 
     expect(httpResponse.statusCode).toBe(200);
-    expect(httpResponse.body.data).toEqual({
-      id: expect.any(String),
-      name: createUserProps().name,
-      email: createUserProps().email,
-      role: createUserProps().role,
-    });
+    expect(httpResponse.body.data).toEqual(expect.any(String));
   });
 });

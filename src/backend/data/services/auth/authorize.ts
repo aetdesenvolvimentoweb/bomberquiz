@@ -5,13 +5,13 @@ import {
 import { LoginProps, UserLogged } from "@/backend/domain/entities";
 import { AuthRepository } from "../../repositories";
 
-interface LoginServiceProps {
+interface AuthorizeServiceProps {
   loginValidator: LoginValidatorUseCase;
   authRepository: AuthRepository;
 }
 
 export class AuthorizeService implements AuthorizeUseCase {
-  constructor(private props: LoginServiceProps) {}
+  constructor(private props: AuthorizeServiceProps) {}
 
   public readonly authorize = async (
     loginProps: LoginProps

@@ -4,10 +4,12 @@ import { AppError } from "@/backend/data/errors";
 import { AuthorizeService } from "@/backend/data/services";
 import { Controller } from "../../protocols/controller";
 import { HttpResponses } from "../../helpers/http-responses";
+import { LoginService } from "@/backend/data/services/auth/login";
 
 interface LoginControllerProps {
   authorizeService: AuthorizeService;
   httpResponses: HttpResponses;
+  loginService: LoginService;
 }
 
 export class LoginController implements Controller {
@@ -16,7 +18,7 @@ export class LoginController implements Controller {
   public readonly handle = async (
     request: HttpRequest<LoginProps>
   ): Promise<HttpResponse> => {
-    const { authorizeService, httpResponses } = this.props;
+    const { authorizeService, httpResponses, loginService } = this.props;
 
     try {
       const loginProps: LoginProps = request.body;
@@ -24,7 +26,9 @@ export class LoginController implements Controller {
       const userLogged: UserLogged =
         await authorizeService.authorize(loginProps);
 
-      return httpResponses.ok(userLogged);
+      const token: string = loginService.login(userLogged);
+
+      return httpResponses.ok(token);
     } catch (error) {
       if (error instanceof AppError) {
         return httpResponses.badRequest(error);
