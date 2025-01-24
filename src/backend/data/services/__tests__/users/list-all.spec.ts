@@ -56,5 +56,6 @@ describe("ListAllUsersService", () => {
     expect(usersListed[0]?.phone).toEqual(createUserProps.phone);
     expect(usersListed[0]?.birthdate).toEqual(createUserProps.birthdate);
     expect(usersListed[0]?.role).toEqual(createUserProps.role);
+    expect(usersListed[0]).not.toHaveProperty("password");
   });
 });
