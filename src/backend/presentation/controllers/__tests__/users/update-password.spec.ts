@@ -137,4 +137,24 @@ describe("UpdateUserPasswordController", () => {
       validationErrors.invalidParamError("id").message
     );
   });
+
+  test("should return 404 if unregistered id is provided", async () => {
+    await userRepository.create(createUserProps());
+
+    const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
+      body: {
+        id: "unregistered_id",
+        oldPassword: "any_password",
+        newPassword: "new_password",
+      },
+      dynamicParams: { id: "unregistered_id" },
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(404);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.unregisteredError("id").message
+    );
+  });
 });
