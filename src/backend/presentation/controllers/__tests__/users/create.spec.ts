@@ -126,4 +126,17 @@ describe("CreateUserController", () => {
       validationErrors.missingParamError("telefone").message
     );
   });
+
+  test("should return 400 if no birthdate is provided", async () => {
+    const httpRequest: HttpRequest<UserProps> = {
+      body: createUserProps({ birthdate: undefined }),
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.missingParamError("data de nascimento").message
+    );
+  });
 });
