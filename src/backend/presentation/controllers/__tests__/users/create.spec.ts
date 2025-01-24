@@ -88,7 +88,7 @@ describe("CreateUserController", () => {
     );
   });
 
-  test("should return 400 on missing params", async () => {
+  test("should return 400 if no name is provided", async () => {
     const httpRequest: HttpRequest<UserProps> = {
       body: createUserProps({ name: undefined }),
     };
