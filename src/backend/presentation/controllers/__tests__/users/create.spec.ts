@@ -152,4 +152,17 @@ describe("CreateUserController", () => {
       validationErrors.missingParamError("função").message
     );
   });
+
+  test("should return 400 if no role is provided", async () => {
+    const httpRequest: HttpRequest<UserProps> = {
+      body: createUserProps({ password: undefined }),
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.missingParamError("senha").message
+    );
+  });
 });
