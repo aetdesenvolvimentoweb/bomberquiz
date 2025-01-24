@@ -215,4 +215,26 @@ describe("UpdateUserProfileController", () => {
       validationErrors.missingParamError("nome").message
     );
   });
+
+  test("should return 400 if no email is provided", async () => {
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    const httpRequest: HttpRequest<UserProfile> = {
+      // @ts-expect-error teste
+      body: {
+        id: user!.id,
+        name: "new_name",
+        phone: "new_phone",
+        birthdate: new Date(),
+      },
+    };
+
+    const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toEqual(
+      validationErrors.missingParamError("email").message
+    );
+  });
 });
