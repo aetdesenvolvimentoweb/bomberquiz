@@ -148,4 +148,21 @@ describe("LoginController", () => {
       validationErrors.missingParamError("senha").message
     );
   });
+
+  test("should return 400 on invalid password", async () => {
+    const httpRequest: HttpRequest<LoginProps> = {
+      body: {
+        email: createUserProps().email,
+        password: "invalid",
+      } as LoginProps,
+    };
+
+    const httpResponse: HttpResponse<UserLogged> =
+      await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.invalidParamError("senha").message
+    );
+  });
 });
