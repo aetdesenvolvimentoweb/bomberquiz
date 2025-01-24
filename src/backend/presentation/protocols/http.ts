@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export type HttpRequest<T = any> = {
   body: T;
+  dynamicParams?: any;
 };
 
 export type HttpResponse<T = any> = {
