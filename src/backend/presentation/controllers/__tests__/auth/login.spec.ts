@@ -95,7 +95,7 @@ describe("LoginController", () => {
     expect(httpResponse.statusCode).toBe(204);
   });
 
-  test("should return 400 on missing params", async () => {
+  test("should return 400 on missing param email", async () => {
     const httpRequest: HttpRequest<LoginProps> = {
       body: {
         password: createUserProps().password,
@@ -108,6 +108,22 @@ describe("LoginController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
       validationErrors.missingParamError("email").message
+    );
+  });
+
+  test("should return 400 on missing param password", async () => {
+    const httpRequest: HttpRequest<LoginProps> = {
+      body: {
+        email: createUserProps().email,
+      } as LoginProps,
+    };
+
+    const httpResponse: HttpResponse<UserLogged> =
+      await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.missingParamError("senha").message
     );
   });
 });
