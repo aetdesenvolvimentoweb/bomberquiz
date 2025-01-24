@@ -9,10 +9,13 @@ const handler = async (request: NextRequest): Promise<NextResponse> => {
         statusCode: 204,
       });
 
-      response.headers.set(
-        "Set-Cookie",
-        "_BomberQuiz_Session_Token=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/; HttpOnly; Secure; SameSite=Strict"
-      );
+      response.cookies.set("_BomberQuiz_Session_Token", "", {
+        maxAge: -1,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+      });
 
       return response;
 
