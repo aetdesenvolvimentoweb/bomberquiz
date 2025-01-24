@@ -119,6 +119,7 @@ describe("LoginController", () => {
 
     const httpRequest: HttpRequest<LoginProps> = {
       body: {
+        email: "invalid_email",
         password: createUserProps().password,
       } as LoginProps,
     };
@@ -128,7 +129,7 @@ describe("LoginController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.missingParamError("email").message
+      validationErrors.invalidParamError("email").message
     );
   });
 
