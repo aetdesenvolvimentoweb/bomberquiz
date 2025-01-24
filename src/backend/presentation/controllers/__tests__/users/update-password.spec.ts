@@ -174,4 +174,24 @@ describe("UpdateUserPasswordController", () => {
       validationErrors.missingParamError("senha atual").message
     );
   });
+
+  test("should return 400 if invalid old password is provided", async () => {
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
+      body: {
+        id: user!.id,
+        oldPassword: "invalid",
+        newPassword: "new_password",
+      },
+    };
+
+    const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toEqual(
+      validationErrors.invalidParamError("senha atual").message
+    );
+  });
 });
