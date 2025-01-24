@@ -70,7 +70,14 @@ const handler = async (request: NextRequest): Promise<NextResponse> => {
 
       response.cookies.set(
         "_BomberQuiz_Session_Token",
-        httpResponse.headers!["tokenJwt"]
+        httpResponse.headers!["tokenJwt"],
+        {
+          maxAge: 86400,
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          path: "/",
+        }
       );
 
       return response;
