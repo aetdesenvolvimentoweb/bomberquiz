@@ -172,4 +172,25 @@ describe("UpdateUserProfileController", () => {
       validationErrors.invalidParamError("id").message
     );
   });
+
+  test("should return 404 if unregistered id is provided", async () => {
+    await userRepository.create(createUserProps());
+
+    const httpRequest: HttpRequest<UserProfile> = {
+      body: {
+        id: "unregistered_id",
+        name: "new_name",
+        email: "new_email",
+        phone: "new_phone",
+        birthdate: new Date(),
+      },
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(404);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.unregisteredError("id").message
+    );
+  });
 });
