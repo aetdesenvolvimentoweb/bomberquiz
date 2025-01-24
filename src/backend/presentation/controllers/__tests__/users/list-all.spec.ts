@@ -66,5 +66,13 @@ describe("ListAllUsersController", () => {
 
     expect(httpResponse.statusCode).toBe(200);
     expect(httpResponse).toEqual(httpResponses.ok(httpResponse.body.data));
+    expect(httpResponse.body.data?.length).toBe(1);
+    expect(httpResponse.body.data?.[0]).toHaveProperty("id");
+    expect(httpResponse.body.data?.[0].name).toEqual(createUserProps().name);
+    expect(httpResponse.body.data?.[0].email).toEqual(createUserProps().email);
+    expect(httpResponse.body.data?.[0].phone).toEqual(createUserProps().phone);
+    expect(httpResponse.body.data?.[0].birthdate).toEqual(expect.any(Date));
+    expect(httpResponse.body.data?.[0].role).toEqual(createUserProps().role);
+    expect(httpResponse.body.data?.[0]).not.toHaveProperty("password");
   });
 });
