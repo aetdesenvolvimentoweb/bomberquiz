@@ -22,6 +22,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 
 interface SutTypes {
   sut: CreateUserController;
+  dateValidator: DateValidatorUseCase;
   emailValidator: EmailValidatorUseCase;
   httpResponses: HttpResponses;
   phoneValidator: PhoneValidatorUseCase;
@@ -55,6 +56,7 @@ const makeSut = (): SutTypes => {
 
   return {
     sut,
+    dateValidator,
     emailValidator,
     httpResponses,
     phoneValidator,
@@ -64,6 +66,7 @@ const makeSut = (): SutTypes => {
 
 describe("CreateUserController", () => {
   let sut: CreateUserController;
+  let dateValidator: DateValidatorUseCase;
   let emailValidator: EmailValidatorUseCase;
   let httpResponses: HttpResponses;
   let phoneValidator: PhoneValidatorUseCase;
@@ -84,6 +87,7 @@ describe("CreateUserController", () => {
   beforeEach(() => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
+    dateValidator = sutInstance.dateValidator;
     emailValidator = sutInstance.emailValidator;
     httpResponses = sutInstance.httpResponses;
     phoneValidator = sutInstance.phoneValidator;
@@ -179,6 +183,21 @@ describe("CreateUserController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
       validationErrors.missingParamError("data de nascimento").message
+    );
+  });
+
+  test("should return 400 if invalid birthdate is provided", async () => {
+    jest.spyOn(dateValidator, "isValid").mockReturnValue(false);
+
+    const httpRequest: HttpRequest<UserProps> = {
+      body: createUserProps({ birthdate: new Date("invalid_birthdate") }),
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.invalidParamError("data de nascimento").message
     );
   });
 
