@@ -10,12 +10,12 @@ import {
   EncrypterUseCase,
   PhoneValidatorUseCase,
 } from "@/backend/domain/use-cases";
+import { UserProps, UserRole } from "@/backend/domain/entities";
 import { CreateUserController } from "@/backend/presentation/controllers";
 import { CreateUserService } from "@/backend/data/services";
 import { HttpRequest } from "@/backend/presentation/protocols";
 import { HttpResponses } from "@/backend/presentation/helpers";
 import { UserCreationPropsValidator } from "@/backend/data/validators";
-import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repositories";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 import { ValidationErrors } from "@/backend/data/helpers";
@@ -211,6 +211,19 @@ describe("CreateUserController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
       validationErrors.missingParamError("função").message
+    );
+  });
+
+  test("should return 400 if invalid role is provided", async () => {
+    const httpRequest: HttpRequest<UserProps> = {
+      body: createUserProps({ role: "invalid_role" as UserRole }),
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.invalidParamError("função").message
     );
   });
 
