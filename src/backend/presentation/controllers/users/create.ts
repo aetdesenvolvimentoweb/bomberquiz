@@ -19,7 +19,7 @@ export class CreateUserController implements Controller {
     const { createUserService, httpResponses } = this.props;
 
     try {
-      const userProps: UserProps = request.body;
+      const userProps = request.body;
 
       await createUserService.create(userProps);
 

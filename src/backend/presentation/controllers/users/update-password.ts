@@ -19,13 +19,9 @@ export class UpdateUserPasswordController implements Controller {
     const { updateUserPasswordService, httpResponses } = this.props;
 
     try {
-      const { id, oldPassword, newPassword } = request.body;
+      const updateUserPasswordProps = request.body;
 
-      await updateUserPasswordService.updatePassword({
-        id,
-        oldPassword,
-        newPassword,
-      });
+      await updateUserPasswordService.updatePassword(updateUserPasswordProps);
 
       return httpResponses.noContent();
     } catch (error) {

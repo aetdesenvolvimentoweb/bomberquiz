@@ -19,9 +19,9 @@ export class UpdateUserRoleController implements Controller {
     const { updateUserRoleService, httpResponses } = this.props;
 
     try {
-      const { id, role } = request.body;
+      const updateUserRoleProps = request.body;
 
-      await updateUserRoleService.updateRole({ id, role });
+      await updateUserRoleService.updateRole(updateUserRoleProps);
 
       return httpResponses.noContent();
     } catch (error) {
