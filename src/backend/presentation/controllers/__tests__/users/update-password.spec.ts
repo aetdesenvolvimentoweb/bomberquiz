@@ -1,4 +1,8 @@
 import { EncrypterStub, IdValidatorStub } from "@/backend/data/__mocks__";
+import {
+  EncrypterUseCase,
+  IdValidatorUseCase,
+} from "@/backend/domain/use-cases";
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import {
   UpdatePasswordPropsValidator,
@@ -6,7 +10,6 @@ import {
 } from "@/backend/data/validators";
 import { UpdateUserPasswordProps, UserProps } from "@/backend/domain/entities";
 import { HttpResponses } from "@/backend/presentation/helpers";
-import { IdValidatorUseCase } from "@/backend/domain/use-cases";
 import { UpdateUserPasswordController } from "@/backend/presentation/controllers";
 import { UpdateUserPasswordService } from "@/backend/data/services";
 import { UserRepository } from "@/backend/data/repositories";
@@ -15,6 +18,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 
 interface SutTypes {
   sut: UpdateUserPasswordController;
+  encrypter: EncrypterUseCase;
   idValidator: IdValidatorUseCase;
   httpResponses: HttpResponses;
   userRepository: UserRepository;
@@ -50,6 +54,7 @@ const makeSut = (): SutTypes => {
 
   return {
     sut,
+    encrypter,
     idValidator,
     httpResponses,
     userRepository,
@@ -59,6 +64,7 @@ const makeSut = (): SutTypes => {
 
 describe("UpdateUserPasswordController", () => {
   let sut: UpdateUserPasswordController;
+  let encrypter: EncrypterUseCase;
   let idValidator: IdValidatorUseCase;
   let httpResponses: HttpResponses;
   let userRepository: UserRepository;
@@ -79,6 +85,7 @@ describe("UpdateUserPasswordController", () => {
   beforeEach(() => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
+    encrypter = sutInstance.encrypter;
     idValidator = sutInstance.idValidator;
     httpResponses = sutInstance.httpResponses;
     userRepository = sutInstance.userRepository;
@@ -192,6 +199,29 @@ describe("UpdateUserPasswordController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toEqual(
       validationErrors.invalidParamError("senha atual").message
+    );
+  });
+
+  test("should return 401 if wrong old password is provided", async () => {
+    jest
+      .spyOn(encrypter, "verify")
+      .mockReturnValue(new Promise((resolve) => resolve(false)));
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
+      body: {
+        id: user!.id,
+        oldPassword: "wrong_password",
+        newPassword: "new_password",
+      },
+    };
+
+    const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(401);
+    expect(httpResponse.body.error).toEqual(
+      validationErrors.wrongPasswordError("senha atual").message
     );
   });
 
