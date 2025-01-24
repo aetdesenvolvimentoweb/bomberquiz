@@ -117,4 +117,20 @@ describe("DeleteUserController", () => {
       validationErrors.invalidParamError("id").message
     );
   });
+
+  test("should return 404 if unregistered id is provided", async () => {
+    await userRepository.create(createUserProps());
+
+    const httpRequest: HttpRequest = {
+      body: {},
+      dynamicParams: { id: "unregistered_id" },
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(404);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.unregisteredError("id").message
+    );
+  });
 });
