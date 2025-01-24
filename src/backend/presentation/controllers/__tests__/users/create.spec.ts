@@ -139,4 +139,17 @@ describe("CreateUserController", () => {
       validationErrors.missingParamError("data de nascimento").message
     );
   });
+
+  test("should return 400 if no role is provided", async () => {
+    const httpRequest: HttpRequest<UserProps> = {
+      body: createUserProps({ role: undefined }),
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.missingParamError("função").message
+    );
+  });
 });
