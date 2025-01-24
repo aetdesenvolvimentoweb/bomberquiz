@@ -22,6 +22,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 
 interface SutTypes {
   sut: CreateUserController;
+  emailValidator: EmailValidatorUseCase;
   httpResponses: HttpResponses;
   validationErrors: ValidationErrors;
 }
@@ -51,11 +52,12 @@ const makeSut = (): SutTypes => {
     httpResponses,
   });
 
-  return { sut, httpResponses, validationErrors };
+  return { sut, emailValidator, httpResponses, validationErrors };
 };
 
 describe("CreateUserController", () => {
   let sut: CreateUserController;
+  let emailValidator: EmailValidatorUseCase;
   let httpResponses: HttpResponses;
   let validationErrors: ValidationErrors;
 
@@ -74,6 +76,7 @@ describe("CreateUserController", () => {
   beforeEach(() => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
+    emailValidator = sutInstance.emailValidator;
     httpResponses = sutInstance.httpResponses;
     validationErrors = sutInstance.validationErrors;
   });
@@ -111,6 +114,21 @@ describe("CreateUserController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
       validationErrors.missingParamError("email").message
+    );
+  });
+
+  test("should return 400 if invalid email is provided", async () => {
+    jest.spyOn(emailValidator, "isValid").mockReturnValue(false);
+
+    const httpRequest: HttpRequest<UserProps> = {
+      body: createUserProps({ email: "invalid_email" }),
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.invalidParamError("email").message
     );
   });
 
