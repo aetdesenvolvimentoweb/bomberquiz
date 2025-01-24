@@ -80,7 +80,7 @@ describe("LoginController", () => {
     userRepository = sutInstance.userRepository;
   });
 
-  test("should return 200 if user logged", async () => {
+  test("should return 204 if user logged", async () => {
     await userRepository.create(createUserProps());
 
     const httpRequest: HttpRequest<LoginProps> = {
@@ -93,7 +93,7 @@ describe("LoginController", () => {
     const httpResponse: HttpResponse<UserLogged> =
       await sut.handle(httpRequest);
 
-    expect(httpResponse.statusCode).toBe(200);
+    expect(httpResponse.statusCode).toBe(204);
     expect(httpResponse.body.data).toEqual(expect.any(String));
   });
 });
