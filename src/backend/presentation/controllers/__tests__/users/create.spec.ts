@@ -24,6 +24,7 @@ interface SutTypes {
   sut: CreateUserController;
   emailValidator: EmailValidatorUseCase;
   httpResponses: HttpResponses;
+  phoneValidator: PhoneValidatorUseCase;
   validationErrors: ValidationErrors;
 }
 
@@ -52,13 +53,20 @@ const makeSut = (): SutTypes => {
     httpResponses,
   });
 
-  return { sut, emailValidator, httpResponses, validationErrors };
+  return {
+    sut,
+    emailValidator,
+    httpResponses,
+    phoneValidator,
+    validationErrors,
+  };
 };
 
 describe("CreateUserController", () => {
   let sut: CreateUserController;
   let emailValidator: EmailValidatorUseCase;
   let httpResponses: HttpResponses;
+  let phoneValidator: PhoneValidatorUseCase;
   let validationErrors: ValidationErrors;
 
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
@@ -78,6 +86,7 @@ describe("CreateUserController", () => {
     sut = sutInstance.sut;
     emailValidator = sutInstance.emailValidator;
     httpResponses = sutInstance.httpResponses;
+    phoneValidator = sutInstance.phoneValidator;
     validationErrors = sutInstance.validationErrors;
   });
 
@@ -142,6 +151,21 @@ describe("CreateUserController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
       validationErrors.missingParamError("telefone").message
+    );
+  });
+
+  test("should return 400 if invalid phone is provided", async () => {
+    jest.spyOn(phoneValidator, "isValid").mockReturnValue(false);
+
+    const httpRequest: HttpRequest<UserProps> = {
+      body: createUserProps({ phone: "invalid_phone" }),
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.invalidParamError("telefone").message
     );
   });
 
