@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   DateValidatorStub,
   EmailValidatorStub,
@@ -350,6 +349,29 @@ describe("UpdateUserProfileController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toEqual(
       validationErrors.missingParamError("data de nascimento").message
+    );
+  });
+
+  test("should return 400 if invalid birthdate is provided", async () => {
+    jest.spyOn(dateValidator, "isValid").mockReturnValue(false);
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    const httpRequest: HttpRequest<UserProfile> = {
+      body: {
+        id: user!.id,
+        name: "new_name",
+        email: "new_email",
+        phone: "new_phone",
+        birthdate: new Date("invalid_birthdate"),
+      },
+    };
+
+    const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toEqual(
+      validationErrors.invalidParamError("data de nascimento").message
     );
   });
 });
