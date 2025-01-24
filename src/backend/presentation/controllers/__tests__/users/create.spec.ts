@@ -23,6 +23,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 interface SutTypes {
   sut: CreateUserController;
   httpResponses: HttpResponses;
+  validationErrors: ValidationErrors;
 }
 
 const makeSut = (): SutTypes => {
@@ -50,12 +51,13 @@ const makeSut = (): SutTypes => {
     httpResponses,
   });
 
-  return { sut, httpResponses };
+  return { sut, httpResponses, validationErrors };
 };
 
 describe("CreateUserController", () => {
   let sut: CreateUserController;
   let httpResponses: HttpResponses;
+  let validationErrors: ValidationErrors;
 
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
     return {
@@ -73,6 +75,7 @@ describe("CreateUserController", () => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
     httpResponses = sutInstance.httpResponses;
+    validationErrors = sutInstance.validationErrors;
   });
 
   test("should return 201 if user was created", async () => {
@@ -82,6 +85,19 @@ describe("CreateUserController", () => {
 
     await expect(sut.handle(httpRequest)).resolves.toEqual(
       httpResponses.created()
+    );
+  });
+
+  test("should return 400 on missing params", async () => {
+    const httpRequest: HttpRequest<UserProps> = {
+      body: createUserProps({ name: undefined }),
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.missingParamError("nome").message
     );
   });
 });
