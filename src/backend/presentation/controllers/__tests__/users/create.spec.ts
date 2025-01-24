@@ -100,4 +100,17 @@ describe("CreateUserController", () => {
       validationErrors.missingParamError("nome").message
     );
   });
+
+  test("should return 400 if no name is provided", async () => {
+    const httpRequest: HttpRequest<UserProps> = {
+      body: createUserProps({ email: undefined }),
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.missingParamError("email").message
+    );
+  });
 });
