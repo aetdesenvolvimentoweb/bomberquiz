@@ -237,4 +237,27 @@ describe("UpdateUserProfileController", () => {
       validationErrors.missingParamError("email").message
     );
   });
+
+  test("should return 400 if invalid email is provided", async () => {
+    jest.spyOn(emailValidator, "isValid").mockReturnValue(false);
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    const httpRequest: HttpRequest<UserProfile> = {
+      body: {
+        id: user!.id,
+        name: "new_name",
+        email: "invalid_email",
+        phone: "new_phone",
+        birthdate: new Date(),
+      },
+    };
+
+    const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toEqual(
+      validationErrors.invalidParamError("email").message
+    );
+  });
 });
