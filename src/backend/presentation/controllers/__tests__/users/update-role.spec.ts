@@ -3,12 +3,16 @@ import {
   UpdateRoleValidator,
   UserIdValidator,
 } from "@/backend/data/validators";
+import {
+  UpdateUserRoleProps,
+  UserProps,
+  UserRole,
+} from "@/backend/domain/entities";
 import { HttpResponses } from "@/backend/presentation/helpers";
 import { IdValidatorStub } from "@/backend/data/__mocks__";
 import { IdValidatorUseCase } from "@/backend/domain/use-cases";
 import { UpdateUserRoleController } from "@/backend/presentation/controllers";
 import { UpdateUserRoleService } from "@/backend/data/services";
-import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repositories";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 import { ValidationErrors } from "@/backend/data/helpers";
@@ -82,13 +86,12 @@ describe("UpdateUserRoleController", () => {
     validationErrors = sutInstance.validationErrors;
   });
 
-  test("should return 200 if user role was updated", async () => {
+  test("should return 204 if user role was updated", async () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest = {
-      body: { role: "administrador" },
-      dynamicParams: { id: user?.id },
+    const httpRequest: HttpRequest<UpdateUserRoleProps> = {
+      body: { id: user!.id, role: "administrador" },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -98,8 +101,9 @@ describe("UpdateUserRoleController", () => {
   });
 
   test("should return 400 if no id is provided", async () => {
-    const httpRequest: HttpRequest = {
-      body: {},
+    const httpRequest: HttpRequest<UpdateUserRoleProps> = {
+      // @ts-expect-error teste
+      body: { role: "administrador" },
       dynamicParams: {},
     };
 
@@ -114,9 +118,8 @@ describe("UpdateUserRoleController", () => {
   test("should return 400 if invalid id is provided", async () => {
     jest.spyOn(idValidator, "isValid").mockReturnValue(false);
 
-    const httpRequest: HttpRequest = {
-      body: {},
-      dynamicParams: { id: "invalid_id" },
+    const httpRequest: HttpRequest<UpdateUserRoleProps> = {
+      body: { id: "invalid-id", role: "administrador" },
     };
 
     const httpResponse = await sut.handle(httpRequest);
@@ -130,9 +133,8 @@ describe("UpdateUserRoleController", () => {
   test("should return 404 if unregistered id is provided", async () => {
     await userRepository.create(createUserProps());
 
-    const httpRequest: HttpRequest = {
-      body: {},
-      dynamicParams: { id: "unregistered_id" },
+    const httpRequest: HttpRequest<UpdateUserRoleProps> = {
+      body: { id: "unregistered_id", role: "administrador" },
     };
 
     const httpResponse = await sut.handle(httpRequest);
@@ -147,8 +149,9 @@ describe("UpdateUserRoleController", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest = {
-      body: {},
+    const httpRequest: HttpRequest<UpdateUserRoleProps> = {
+      // @ts-expect-error teste
+      body: { id: user!.id },
       dynamicParams: { id: user?.id },
     };
 
@@ -164,8 +167,8 @@ describe("UpdateUserRoleController", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest = {
-      body: { role: "invalid-role" },
+    const httpRequest: HttpRequest<UpdateUserRoleProps> = {
+      body: { id: user!.id, role: "invalid-role" as UserRole },
       dynamicParams: { id: user?.id },
     };
 

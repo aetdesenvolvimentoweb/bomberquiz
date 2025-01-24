@@ -2,6 +2,7 @@ import { HttpRequest, HttpResponse } from "../../protocols";
 import { AppError } from "@/backend/data/errors";
 import { Controller } from "../../protocols/controller";
 import { HttpResponses } from "../../helpers/http-responses";
+import { UpdateUserRoleProps } from "@/backend/domain/entities";
 import { UpdateUserRoleService } from "@/backend/data/services";
 
 interface UpdateUserRoleControllerProps {
@@ -13,13 +14,12 @@ export class UpdateUserRoleController implements Controller {
   constructor(private readonly props: UpdateUserRoleControllerProps) {}
 
   public readonly handle = async (
-    request: HttpRequest
+    request: HttpRequest<UpdateUserRoleProps>
   ): Promise<HttpResponse> => {
     const { updateUserRoleService, httpResponses } = this.props;
 
     try {
-      const id: string = request.dynamicParams.id;
-      const { role } = request.body;
+      const { id, role } = request.body;
 
       await updateUserRoleService.updateRole({ id, role });
 
