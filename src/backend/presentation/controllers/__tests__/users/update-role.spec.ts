@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import {
   UpdateRoleValidator,
@@ -109,6 +108,22 @@ describe("UpdateUserRoleController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
       validationErrors.missingParamError("id").message
+    );
+  });
+
+  test("should return 400 if invalid id is provided", async () => {
+    jest.spyOn(idValidator, "isValid").mockReturnValue(false);
+
+    const httpRequest: HttpRequest = {
+      body: {},
+      dynamicParams: { id: "invalid_id" },
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.invalidParamError("id").message
     );
   });
 });
