@@ -24,6 +24,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 interface SutTypes {
   sut: LoginController;
   userRepository: UserRepository;
+  validationErrors: ValidationErrors;
 }
 
 const makeSut = (): SutTypes => {
@@ -51,12 +52,13 @@ const makeSut = (): SutTypes => {
     loginService,
   });
 
-  return { sut, userRepository };
+  return { sut, userRepository, validationErrors };
 };
 
 describe("LoginController", () => {
   let sut: LoginController;
   let userRepository: UserRepository;
+  let validationErrors: ValidationErrors;
 
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
     return {
@@ -74,6 +76,7 @@ describe("LoginController", () => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
     userRepository = sutInstance.userRepository;
+    validationErrors = sutInstance.validationErrors;
   });
 
   test("should return 204 if user logged", async () => {
@@ -90,5 +93,21 @@ describe("LoginController", () => {
       await sut.handle(httpRequest);
 
     expect(httpResponse.statusCode).toBe(204);
+  });
+
+  test("should return 400 on missing params", async () => {
+    const httpRequest: HttpRequest<LoginProps> = {
+      body: {
+        password: createUserProps().password,
+      } as LoginProps,
+    };
+
+    const httpResponse: HttpResponse<UserLogged> =
+      await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.missingParamError("email").message
+    );
   });
 });
