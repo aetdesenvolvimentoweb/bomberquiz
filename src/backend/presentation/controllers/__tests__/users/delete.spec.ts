@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { DeleteUserController } from "@/backend/presentation/controllers";
 import { DeleteUserService } from "@/backend/data/services";
 import { HttpRequest } from "@/backend/presentation/protocols";
@@ -100,6 +99,22 @@ describe("DeleteUserController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
       validationErrors.missingParamError("id").message
+    );
+  });
+
+  test("should return 400 if invalid id is provided", async () => {
+    jest.spyOn(idValidator, "isValid").mockReturnValue(false);
+
+    const httpRequest: HttpRequest = {
+      body: {},
+      dynamicParams: { id: "invalid_id" },
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.invalidParamError("id").message
     );
   });
 });
