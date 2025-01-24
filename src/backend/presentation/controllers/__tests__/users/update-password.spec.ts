@@ -103,4 +103,19 @@ describe("UpdateUserPasswordController", () => {
     expect(httpResponse.statusCode).toBe(204);
     expect(httpResponse).toEqual(httpResponses.noContent());
   });
+
+  test("should return 400 if no id is provided", async () => {
+    const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
+      // @ts-expect-error teste
+      body: { oldPassword: "any_password", newPassword: "new_password" },
+      dynamicParams: {},
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.missingParamError("id").message
+    );
+  });
 });
