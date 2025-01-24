@@ -97,4 +97,18 @@ describe("ListUserByIdController", () => {
     expect(httpResponse.body.data?.role).toEqual(createUserProps().role);
     expect(httpResponse.body.data).not.toHaveProperty("password");
   });
+
+  test("should return 400 if no id is provided", async () => {
+    const httpRequest: HttpRequest = {
+      body: {},
+      dynamicParams: {},
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.missingParamError("id").message
+    );
+  });
 });
