@@ -3,7 +3,6 @@ import {
   AuthRepositoryInMemory,
   UserRepositoryInMemory,
 } from "@/backend/infra/in-memory-repositories";
-import { AuthorizeService, LoginService } from "@/backend/data/services";
 import {
   EmailValidatorStub,
   EncrypterStub,
@@ -18,6 +17,7 @@ import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { LoginProps, UserLogged, UserProps } from "@/backend/domain/entities";
 import { HttpResponses } from "@/backend/presentation/helpers";
 import { LoginController } from "@/backend/presentation/controllers";
+import { LoginService } from "@/backend/data/services";
 import { LoginValidator } from "@/backend/data/validators";
 import { ValidationErrors } from "@/backend/data/helpers";
 
@@ -40,17 +40,13 @@ const makeSut = (): SutTypes => {
     encrypter,
     validationErrors,
   });
-  const authorizeService: AuthorizeService = new AuthorizeService({
-    authRepository,
-    loginValidator,
-  });
   const httpResponses = new HttpResponses();
   const tokenHandler = new TokenHandlerStub();
   const loginService: LoginService = new LoginService({
+    loginValidator,
     tokenHandler,
   });
   const sut = new LoginController({
-    authorizeService,
     httpResponses,
     loginService,
   });

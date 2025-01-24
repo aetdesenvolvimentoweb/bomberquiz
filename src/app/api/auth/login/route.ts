@@ -2,7 +2,6 @@ import {
   AuthRepositoryInMemory,
   UserRepositoryInMemory,
 } from "@/backend/infra/in-memory-repositories";
-import { AuthorizeService, LoginService } from "@/backend/data/services";
 import {
   EmailValidatorStub,
   EncrypterStub,
@@ -13,6 +12,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { HttpResponses } from "@/backend/presentation/helpers";
 import { LoginController } from "@/backend/presentation/controllers";
 import { LoginProps } from "@/backend/domain/entities";
+import { LoginService } from "@/backend/data/services";
 import { LoginValidator } from "@/backend/data/validators";
 import { ValidationErrors } from "@/backend/data/helpers";
 
@@ -43,17 +43,13 @@ const handler = async (request: NextRequest): Promise<NextResponse> => {
         encrypter,
         validationErrors,
       });
-      const authorizeService = new AuthorizeService({
-        authRepository,
-        loginValidator,
-      });
       const httpResponses = new HttpResponses();
       const tokenHandler = new TokenHandlerStub();
       const loginService = new LoginService({
+        loginValidator,
         tokenHandler,
       });
       const loginController = new LoginController({
-        authorizeService,
         httpResponses,
         loginService,
       });

@@ -3,8 +3,8 @@ import {
   EncrypterUseCase,
   LoginValidatorUseCase,
 } from "@/backend/domain/use-cases";
+import { LoginProps, UserLogged } from "@/backend/domain/entities";
 import { AuthRepository } from "../../repositories";
-import { LoginProps } from "@/backend/domain/entities";
 import { ValidationErrors } from "../../helpers";
 
 interface LoginValidatorProps {
@@ -54,7 +54,7 @@ export class LoginValidator implements LoginValidatorUseCase {
 
   private checkLoginPropsMatch = async (
     loginProps: LoginProps
-  ): Promise<void> => {
+  ): Promise<UserLogged> => {
     const userLogged = await this.authRepository.authorize(loginProps);
 
     if (!userLogged) {
@@ -66,12 +66,21 @@ export class LoginValidator implements LoginValidatorUseCase {
     ) {
       throw this.validationErrors.unauthorizedError();
     }
+
+    return {
+      id: userLogged.id,
+      name: userLogged.name,
+      email: userLogged.email,
+      role: userLogged.role,
+    };
   };
 
-  public validateLogin = async (loginProps: LoginProps): Promise<void> => {
+  public validateLogin = async (
+    loginProps: LoginProps
+  ): Promise<UserLogged> => {
     this.checkMissingLoginProps(loginProps);
     this.validateEmail(loginProps.email);
     this.validatePassword(loginProps.password);
-    await this.checkLoginPropsMatch(loginProps);
+    return await this.checkLoginPropsMatch(loginProps);
   };
 }

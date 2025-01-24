@@ -1,5 +1,5 @@
-import { UserLogged } from "../../entities";
+import { LoginProps } from "../../entities";
 
 export type LoginUseCase = {
-  login: (userLogged: UserLogged) => string;
+  login: (loginProps: LoginProps) => Promise<string>;
 };
