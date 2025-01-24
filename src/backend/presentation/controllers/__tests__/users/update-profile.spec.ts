@@ -151,4 +151,25 @@ describe("UpdateUserProfileController", () => {
       validationErrors.missingParamError("id").message
     );
   });
+
+  test("should return 400 if invalid id is provided", async () => {
+    jest.spyOn(idValidator, "isValid").mockReturnValue(false);
+
+    const httpRequest: HttpRequest<UserProfile> = {
+      body: {
+        id: "invalid_id",
+        name: "new_name",
+        email: "new_email",
+        phone: "new_phone",
+        birthdate: new Date(),
+      },
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.invalidParamError("id").message
+    );
+  });
 });
