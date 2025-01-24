@@ -28,7 +28,12 @@ export class LoginController implements Controller {
 
       const token: string = loginService.login(userLogged);
 
-      return httpResponses.ok(token);
+      const httpResponse: HttpResponse = httpResponses.noContent();
+      httpResponse.headers = {
+        tokenJwt: `Bearer_${token}`,
+      };
+
+      return httpResponse;
     } catch (error) {
       if (error instanceof AppError) {
         return httpResponses.badRequest(error);

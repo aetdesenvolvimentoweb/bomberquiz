@@ -8,5 +8,8 @@ export type HttpResponse<T = any> = {
     data?: T;
     error?: string;
   };
+  headers?: {
+    [key: string]: string;
+  };
   statusCode: number;
 };
