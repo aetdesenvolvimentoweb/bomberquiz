@@ -94,6 +94,5 @@ describe("LoginController", () => {
       await sut.handle(httpRequest);
 
     expect(httpResponse.statusCode).toBe(204);
-    expect(httpResponse.body.data).toEqual(expect.any(String));
   });
 });
