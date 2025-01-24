@@ -1,2 +1,4 @@
 echo "Conferindo o código..."
 pnpm exec lint-staged
+echo "Testando as mudanças..."
+pnpm test:staged

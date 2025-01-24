@@ -5,7 +5,6 @@
   ],
   "./src/**/*.(ts|tsx|js|jsx)": [
     "pnpm exec prettier --write --ignore-unknown --stdin-filepath \"{}\"\"",
-    "pnpm eslint --fix",
-    "pnpm test:staged"
+    "pnpm eslint --fix"
   ]
 }
