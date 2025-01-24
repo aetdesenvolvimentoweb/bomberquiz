@@ -260,4 +260,29 @@ describe("UpdateUserProfileController", () => {
       validationErrors.invalidParamError("email").message
     );
   });
+
+  test("should return 400 if already registered email is provided", async () => {
+    await userRepository.create(createUserProps());
+    await userRepository.create(createUserProps({ email: "another_email" }));
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    const httpRequest: HttpRequest<UserProfile> = {
+      body: {
+        id: user!.id,
+        name: "new_name",
+        // already registered email
+        email: "another_email",
+        phone: "new_phone",
+        birthdate: new Date(),
+      },
+    };
+
+    const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toEqual(
+      validationErrors.duplicatedKeyError({ entity: "usuário", key: "email" })
+        .message
+    );
+  });
 });
