@@ -24,6 +24,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 interface SutTypes {
   sut: LoginController;
   emailValidator: EmailValidatorUseCase;
+  encrypter: EncrypterUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
 }
@@ -53,12 +54,13 @@ const makeSut = (): SutTypes => {
     loginService,
   });
 
-  return { sut, emailValidator, userRepository, validationErrors };
+  return { sut, emailValidator, encrypter, userRepository, validationErrors };
 };
 
 describe("LoginController", () => {
   let sut: LoginController;
   let emailValidator: EmailValidatorUseCase;
+  let encrypter: EncrypterUseCase;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
 
@@ -78,6 +80,7 @@ describe("LoginController", () => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
     emailValidator = sutInstance.emailValidator;
+    encrypter = sutInstance.encrypter;
     userRepository = sutInstance.userRepository;
     validationErrors = sutInstance.validationErrors;
   });
@@ -173,6 +176,28 @@ describe("LoginController", () => {
       body: {
         email: "unregistered_email",
         password: createUserProps().password,
+      } as LoginProps,
+    };
+
+    const httpResponse: HttpResponse<UserLogged> =
+      await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(401);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.unauthorizedError().message
+    );
+  });
+
+  test("should return 401 on wrong password", async () => {
+    await userRepository.create(createUserProps());
+    jest
+      .spyOn(encrypter, "verify")
+      .mockReturnValue(new Promise((resolve) => resolve(false)));
+
+    const httpRequest: HttpRequest<LoginProps> = {
+      body: {
+        email: createUserProps().email,
+        password: "wrong_password",
       } as LoginProps,
     };
 
