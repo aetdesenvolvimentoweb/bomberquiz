@@ -26,6 +26,7 @@ interface SutTypes {
   emailValidator: EmailValidatorUseCase;
   httpResponses: HttpResponses;
   phoneValidator: PhoneValidatorUseCase;
+  userRepository: UserRepository;
   validationErrors: ValidationErrors;
 }
 
@@ -60,6 +61,7 @@ const makeSut = (): SutTypes => {
     emailValidator,
     httpResponses,
     phoneValidator,
+    userRepository,
     validationErrors,
   };
 };
@@ -70,6 +72,7 @@ describe("CreateUserController", () => {
   let emailValidator: EmailValidatorUseCase;
   let httpResponses: HttpResponses;
   let phoneValidator: PhoneValidatorUseCase;
+  let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
 
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
@@ -91,6 +94,7 @@ describe("CreateUserController", () => {
     emailValidator = sutInstance.emailValidator;
     httpResponses = sutInstance.httpResponses;
     phoneValidator = sutInstance.phoneValidator;
+    userRepository = sutInstance.userRepository;
     validationErrors = sutInstance.validationErrors;
   });
 
@@ -142,6 +146,22 @@ describe("CreateUserController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
       validationErrors.invalidParamError("email").message
+    );
+  });
+
+  test("should return 400 if already registered email is provided", async () => {
+    await userRepository.create(createUserProps());
+
+    const httpRequest: HttpRequest<UserProps> = {
+      body: createUserProps(),
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.duplicatedKeyError({ entity: "usuário", key: "email" })
+        .message
     );
   });
 
