@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { EncrypterStub, IdValidatorStub } from "@/backend/data/__mocks__";
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import {
@@ -116,6 +115,26 @@ describe("UpdateUserPasswordController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
       validationErrors.missingParamError("id").message
+    );
+  });
+
+  test("should return 400 if invalid id is provided", async () => {
+    jest.spyOn(idValidator, "isValid").mockReturnValue(false);
+
+    const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
+      body: {
+        id: "invalid_id",
+        oldPassword: "any_password",
+        newPassword: "new_password",
+      },
+      dynamicParams: { id: "invalid_id" },
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.invalidParamError("id").message
     );
   });
 });
