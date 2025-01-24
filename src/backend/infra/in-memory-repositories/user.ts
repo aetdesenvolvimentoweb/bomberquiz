@@ -53,7 +53,12 @@ export class UserRepositoryInMemory implements UserRepository {
   };
 
   public readonly listById = async (id: string): Promise<UserMapped | null> => {
-    return this.users.find((user) => user.id === id) || null;
+    const user = this.users.find((user) => user.id === id);
+    if (user) {
+      return this.userMapped(user);
+    } else {
+      return null;
+    }
   };
 
   public readonly updatePassword = async (
