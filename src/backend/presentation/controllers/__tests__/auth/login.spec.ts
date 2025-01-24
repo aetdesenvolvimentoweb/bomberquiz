@@ -165,4 +165,23 @@ describe("LoginController", () => {
       validationErrors.invalidParamError("senha").message
     );
   });
+
+  test("should return 401 on unregistered email", async () => {
+    await userRepository.create(createUserProps());
+
+    const httpRequest: HttpRequest<LoginProps> = {
+      body: {
+        email: "unregistered_email",
+        password: createUserProps().password,
+      } as LoginProps,
+    };
+
+    const httpResponse: HttpResponse<UserLogged> =
+      await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(401);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.unauthorizedError().message
+    );
+  });
 });
