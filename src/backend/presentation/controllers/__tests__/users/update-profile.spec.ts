@@ -131,4 +131,24 @@ describe("UpdateUserProfileController", () => {
     expect(httpResponse.statusCode).toBe(204);
     expect(httpResponse).toEqual(httpResponses.noContent());
   });
+
+  test("should return 400 if no id is provided", async () => {
+    const httpRequest: HttpRequest<UserProfile> = {
+      // @ts-expect-error teste
+      body: {
+        name: "new_name",
+        email: "new_email",
+        phone: "new_phone",
+        birthdate: new Date(),
+      },
+      dynamicParams: {},
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.missingParamError("id").message
+    );
+  });
 });
