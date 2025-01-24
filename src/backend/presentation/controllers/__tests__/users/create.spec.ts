@@ -101,7 +101,7 @@ describe("CreateUserController", () => {
     );
   });
 
-  test("should return 400 if no name is provided", async () => {
+  test("should return 400 if no email is provided", async () => {
     const httpRequest: HttpRequest<UserProps> = {
       body: createUserProps({ email: undefined }),
     };
@@ -111,6 +111,19 @@ describe("CreateUserController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
       validationErrors.missingParamError("email").message
+    );
+  });
+
+  test("should return 400 if no phone is provided", async () => {
+    const httpRequest: HttpRequest<UserProps> = {
+      body: createUserProps({ phone: undefined }),
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.missingParamError("telefone").message
     );
   });
 });
