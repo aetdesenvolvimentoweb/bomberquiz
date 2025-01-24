@@ -142,4 +142,21 @@ describe("UpdateUserRoleController", () => {
       validationErrors.unregisteredError("id").message
     );
   });
+
+  test("should return 400 if no user role is provided", async () => {
+    await userRepository.create(createUserProps());
+    const user = await userRepository.listByEmail(createUserProps().email);
+
+    const httpRequest: HttpRequest = {
+      body: {},
+      dynamicParams: { id: user?.id },
+    };
+
+    const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toEqual(
+      validationErrors.missingParamError("função").message
+    );
+  });
 });
