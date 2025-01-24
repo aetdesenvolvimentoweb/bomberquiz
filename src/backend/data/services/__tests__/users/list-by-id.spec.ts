@@ -81,6 +81,7 @@ describe("ListUserByIdService", () => {
     expect(userListed?.phone).toEqual(createUserProps.phone);
     expect(userListed?.birthdate).toEqual(createUserProps.birthdate);
     expect(userListed?.role).toEqual(createUserProps.role);
+    expect(userListed).not.toHaveProperty("password");
   });
 
   test("should throw if no id is provided", async () => {
