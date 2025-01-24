@@ -23,6 +23,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 
 interface SutTypes {
   sut: LoginController;
+  emailValidator: EmailValidatorUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
 }
@@ -52,11 +53,12 @@ const makeSut = (): SutTypes => {
     loginService,
   });
 
-  return { sut, userRepository, validationErrors };
+  return { sut, emailValidator, userRepository, validationErrors };
 };
 
 describe("LoginController", () => {
   let sut: LoginController;
+  let emailValidator: EmailValidatorUseCase;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
 
@@ -75,6 +77,7 @@ describe("LoginController", () => {
   beforeEach(() => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
+    emailValidator = sutInstance.emailValidator;
     userRepository = sutInstance.userRepository;
     validationErrors = sutInstance.validationErrors;
   });
@@ -96,6 +99,24 @@ describe("LoginController", () => {
   });
 
   test("should return 400 on missing param email", async () => {
+    const httpRequest: HttpRequest<LoginProps> = {
+      body: {
+        password: createUserProps().password,
+      } as LoginProps,
+    };
+
+    const httpResponse: HttpResponse<UserLogged> =
+      await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.missingParamError("email").message
+    );
+  });
+
+  test("should return 400 on invalid email", async () => {
+    jest.spyOn(emailValidator, "isValid").mockReturnValue(false);
+
     const httpRequest: HttpRequest<LoginProps> = {
       body: {
         password: createUserProps().password,
