@@ -227,7 +227,7 @@ describe("CreateUserController", () => {
     );
   });
 
-  test("should return 400 if no role is provided", async () => {
+  test("should return 400 if no password is provided", async () => {
     const httpRequest: HttpRequest<UserProps> = {
       body: createUserProps({ password: undefined }),
     };
@@ -237,6 +237,19 @@ describe("CreateUserController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
       validationErrors.missingParamError("senha").message
+    );
+  });
+
+  test("should return 400 if invalid password is provided", async () => {
+    const httpRequest: HttpRequest<UserProps> = {
+      body: createUserProps({ password: "invalid" }),
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(400);
+    expect(httpResponse.body.error).toBe(
+      validationErrors.invalidParamError("senha").message
     );
   });
 });
