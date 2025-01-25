@@ -1,3 +1,4 @@
 export * from "./create";
 export * from "./delete";
 export * from "./list-all";
+export * from "./list-by-id";
