@@ -9,16 +9,17 @@ import { UserRepository } from "../../repositories";
 interface CreateUserServiceProps {
   encrypter: EncrypterUseCase;
   userRepository: UserRepository;
-  userValidator: UserCretionPropsValidatorUseCase;
+  userCreationPropsValidator: UserCretionPropsValidatorUseCase;
 }
 
 export class CreateUserService implements CreateUserUseCase {
   constructor(private props: CreateUserServiceProps) {}
 
   public readonly create = async (userProps: UserProps): Promise<void> => {
-    const { encrypter, userRepository, userValidator } = this.props;
+    const { encrypter, userRepository, userCreationPropsValidator } =
+      this.props;
 
-    await userValidator.validateUserCreationProps(userProps);
+    await userCreationPropsValidator.validateUserCreationProps(userProps);
     const hashedPassword = await encrypter.encrypt(userProps.password);
     await userRepository.create({ ...userProps, password: hashedPassword });
   };

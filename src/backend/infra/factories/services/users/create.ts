@@ -16,7 +16,7 @@ export const makeCreateUserService = (): CreateUserService => {
   const userRepository = new UserRepositoryInMemory();
   const phoneValidator = new PhoneValidatorStub();
   const validationErrors = new ValidationErrors();
-  const userValidator = new UserCreationPropsValidator({
+  const userCreationPropsValidator = new UserCreationPropsValidator({
     dateValidator,
     emailValidator,
     phoneValidator,
@@ -26,6 +26,6 @@ export const makeCreateUserService = (): CreateUserService => {
   return new CreateUserService({
     encrypter,
     userRepository,
-    userValidator,
+    userCreationPropsValidator,
   });
 };

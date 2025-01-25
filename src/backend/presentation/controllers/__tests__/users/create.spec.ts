@@ -37,7 +37,7 @@ const makeSut = (): SutTypes => {
   const phoneValidator: PhoneValidatorUseCase = new PhoneValidatorStub();
   const userRepository: UserRepository = new UserRepositoryInMemory();
   const validationErrors = new ValidationErrors();
-  const userValidator = new UserCreationPropsValidator({
+  const userCreationPropsValidator = new UserCreationPropsValidator({
     dateValidator,
     emailValidator,
     phoneValidator,
@@ -47,7 +47,7 @@ const makeSut = (): SutTypes => {
   const createUserService: CreateUserService = new CreateUserService({
     encrypter,
     userRepository,
-    userValidator,
+    userCreationPropsValidator,
   });
   const httpResponses = new HttpResponses();
   const sut = new CreateUserController({
