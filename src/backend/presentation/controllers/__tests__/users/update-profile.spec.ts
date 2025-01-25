@@ -16,7 +16,7 @@ import {
   UserIdValidator,
 } from "@/backend/data/validators";
 import { UserProfile, UserProps } from "@/backend/domain/entities";
-import { HttpResponses } from "@/backend/presentation/helpers";
+import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { UpdateUserProfileController } from "@/backend/presentation/controllers";
 import { UpdateUserProfileService } from "@/backend/data/services";
 import { UserRepository } from "@/backend/data/repositories";
@@ -28,7 +28,7 @@ interface SutTypes {
   dateValidator: DateValidatorUseCase;
   emailValidator: EmailValidatorUseCase;
   idValidator: IdValidatorUseCase;
-  httpResponses: HttpResponses;
+  httpResponsesHelper: HttpResponsesHelper;
   phoneValidator: PhoneValidatorUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
@@ -59,10 +59,10 @@ const makeSut = (): SutTypes => {
       userIdValidator,
       userRepository,
     });
-  const httpResponses = new HttpResponses();
+  const httpResponsesHelper = new HttpResponsesHelper();
   const sut = new UpdateUserProfileController({
     updateUserProfileService,
-    httpResponses,
+    httpResponsesHelper,
   });
 
   return {
@@ -70,7 +70,7 @@ const makeSut = (): SutTypes => {
     dateValidator,
     emailValidator,
     idValidator,
-    httpResponses,
+    httpResponsesHelper,
     phoneValidator,
     userRepository,
     validationErrors,
@@ -82,7 +82,7 @@ describe("UpdateUserProfileController", () => {
   let dateValidator: DateValidatorUseCase;
   let emailValidator: EmailValidatorUseCase;
   let idValidator: IdValidatorUseCase;
-  let httpResponses: HttpResponses;
+  let httpResponsesHelper: HttpResponsesHelper;
   let phoneValidator: PhoneValidatorUseCase;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
@@ -105,7 +105,7 @@ describe("UpdateUserProfileController", () => {
     dateValidator = sutInstance.dateValidator;
     emailValidator = sutInstance.emailValidator;
     idValidator = sutInstance.idValidator;
-    httpResponses = sutInstance.httpResponses;
+    httpResponsesHelper = sutInstance.httpResponsesHelper;
     phoneValidator = sutInstance.phoneValidator;
     userRepository = sutInstance.userRepository;
     validationErrors = sutInstance.validationErrors;
@@ -128,7 +128,7 @@ describe("UpdateUserProfileController", () => {
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
 
     expect(httpResponse.statusCode).toBe(204);
-    expect(httpResponse).toEqual(httpResponses.noContent());
+    expect(httpResponse).toEqual(httpResponsesHelper.noContent());
   });
 
   test("should return 400 if no id is provided", async () => {

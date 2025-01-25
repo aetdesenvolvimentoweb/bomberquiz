@@ -1,13 +1,13 @@
 import { HttpRequest, HttpResponse } from "../../protocols";
 import { AppError } from "@/backend/data/errors";
 import { Controller } from "../../protocols/controller";
-import { HttpResponses } from "../../helpers/http-responses";
+import { HttpResponsesHelper } from "../../helpers/http-responses";
 import { UpdateUserPasswordProps } from "@/backend/domain/entities";
 import { UpdateUserPasswordService } from "@/backend/data/services";
 
 interface UpdateUserPasswordControllerProps {
   updateUserPasswordService: UpdateUserPasswordService;
-  httpResponses: HttpResponses;
+  httpResponsesHelper: HttpResponsesHelper;
 }
 
 export class UpdateUserPasswordController implements Controller {
@@ -16,20 +16,20 @@ export class UpdateUserPasswordController implements Controller {
   public readonly handle = async (
     request: HttpRequest<UpdateUserPasswordProps>
   ): Promise<HttpResponse> => {
-    const { updateUserPasswordService, httpResponses } = this.props;
+    const { updateUserPasswordService, httpResponsesHelper } = this.props;
 
     try {
       const updateUserPasswordProps = request.body;
 
       await updateUserPasswordService.updatePassword(updateUserPasswordProps);
 
-      return httpResponses.noContent();
+      return httpResponsesHelper.noContent();
     } catch (error) {
       if (error instanceof AppError) {
-        return httpResponses.badRequest(error);
+        return httpResponsesHelper.badRequest(error);
       }
 
-      return httpResponses.serverError();
+      return httpResponsesHelper.serverError();
     }
   };
 }

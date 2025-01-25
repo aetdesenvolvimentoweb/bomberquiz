@@ -1,13 +1,13 @@
 import { HttpRequest, HttpResponse } from "../../protocols";
 import { AppError } from "@/backend/data/errors";
 import { Controller } from "../../protocols/controller";
-import { HttpResponses } from "../../helpers/http-responses";
+import { HttpResponsesHelper } from "../../helpers/http-responses";
 import { ListAllUsersService } from "@/backend/data/services";
 import { UserMapped } from "@/backend/domain/entities";
 
 interface ListAllUsersControllerProps {
   listAllUsersService: ListAllUsersService;
-  httpResponses: HttpResponses;
+  httpResponsesHelper: HttpResponsesHelper;
 }
 
 export class ListAllUsersController implements Controller {
@@ -17,18 +17,18 @@ export class ListAllUsersController implements Controller {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     request: HttpRequest
   ): Promise<HttpResponse<UserMapped[]>> => {
-    const { listAllUsersService, httpResponses } = this.props;
+    const { listAllUsersService, httpResponsesHelper } = this.props;
 
     try {
       const users = await listAllUsersService.listAll();
 
-      return httpResponses.ok(users);
+      return httpResponsesHelper.ok(users);
     } catch (error) {
       if (error instanceof AppError) {
-        return httpResponses.badRequest(error);
+        return httpResponsesHelper.badRequest(error);
       }
 
-      return httpResponses.serverError();
+      return httpResponsesHelper.serverError();
     }
   };
 }

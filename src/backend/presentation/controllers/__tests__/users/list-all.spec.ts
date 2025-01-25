@@ -1,6 +1,6 @@
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { UserMapped, UserProps } from "@/backend/domain/entities";
-import { HttpResponses } from "@/backend/presentation/helpers";
+import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { ListAllUsersController } from "@/backend/presentation/controllers";
 import { ListAllUsersService } from "@/backend/data/services";
 import { UserRepository } from "@/backend/data/repositories";
@@ -8,7 +8,7 @@ import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 
 interface SutTypes {
   sut: ListAllUsersController;
-  httpResponses: HttpResponses;
+  httpResponsesHelper: HttpResponsesHelper;
   userRepository: UserRepository;
 }
 
@@ -17,22 +17,22 @@ const makeSut = (): SutTypes => {
   const listAllUsersService: ListAllUsersService = new ListAllUsersService({
     userRepository,
   });
-  const httpResponses = new HttpResponses();
+  const httpResponsesHelper = new HttpResponsesHelper();
   const sut = new ListAllUsersController({
     listAllUsersService,
-    httpResponses,
+    httpResponsesHelper,
   });
 
   return {
     sut,
-    httpResponses,
+    httpResponsesHelper,
     userRepository,
   };
 };
 
 describe("ListAllUsersController", () => {
   let sut: ListAllUsersController;
-  let httpResponses: HttpResponses;
+  let httpResponsesHelper: HttpResponsesHelper;
   let userRepository: UserRepository;
 
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
@@ -50,7 +50,7 @@ describe("ListAllUsersController", () => {
   beforeEach(() => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
-    httpResponses = sutInstance.httpResponses;
+    httpResponsesHelper = sutInstance.httpResponsesHelper;
     userRepository = sutInstance.userRepository;
   });
 
@@ -65,7 +65,9 @@ describe("ListAllUsersController", () => {
       await sut.handle(httpRequest);
 
     expect(httpResponse.statusCode).toBe(200);
-    expect(httpResponse).toEqual(httpResponses.ok(httpResponse.body.data));
+    expect(httpResponse).toEqual(
+      httpResponsesHelper.ok(httpResponse.body.data)
+    );
     expect(httpResponse.body.data?.length).toBe(1);
     expect(httpResponse.body.data?.[0]).toHaveProperty("id");
     expect(httpResponse.body.data?.[0].name).toEqual(createUserProps().name);

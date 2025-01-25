@@ -1,12 +1,12 @@
 import { HttpRequest, HttpResponse } from "../../protocols";
 import { AppError } from "@/backend/data/errors";
 import { Controller } from "../../protocols/controller";
-import { HttpResponses } from "../../helpers/http-responses";
+import { HttpResponsesHelper } from "../../helpers/http-responses";
 import { LoginProps } from "@/backend/domain/entities";
 import { LoginService } from "@/backend/data/services/auth/login";
 
 interface LoginControllerProps {
-  httpResponses: HttpResponses;
+  httpResponsesHelper: HttpResponsesHelper;
   loginService: LoginService;
 }
 
@@ -16,14 +16,14 @@ export class LoginController implements Controller {
   public readonly handle = async (
     request: HttpRequest<LoginProps>
   ): Promise<HttpResponse> => {
-    const { httpResponses, loginService } = this.props;
+    const { httpResponsesHelper, loginService } = this.props;
 
     try {
       const loginProps: LoginProps = request.body;
 
       const token: string = await loginService.login(loginProps);
 
-      const httpResponse: HttpResponse = httpResponses.noContent();
+      const httpResponse: HttpResponse = httpResponsesHelper.noContent();
       httpResponse.headers = {
         tokenJwt: `Bearer_${token}`,
       };
@@ -31,10 +31,10 @@ export class LoginController implements Controller {
       return httpResponse;
     } catch (error) {
       if (error instanceof AppError) {
-        return httpResponses.badRequest(error);
+        return httpResponsesHelper.badRequest(error);
       }
 
-      return httpResponses.serverError();
+      return httpResponsesHelper.serverError();
     }
   };
 }

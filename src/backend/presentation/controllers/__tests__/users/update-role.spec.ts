@@ -8,7 +8,7 @@ import {
   UserProps,
   UserRole,
 } from "@/backend/domain/entities";
-import { HttpResponses } from "@/backend/presentation/helpers";
+import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { IdValidatorStub } from "@/backend/data/__mocks__";
 import { IdValidatorUseCase } from "@/backend/domain/use-cases";
 import { UpdateUserRoleController } from "@/backend/presentation/controllers";
@@ -20,7 +20,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 interface SutTypes {
   sut: UpdateUserRoleController;
   idValidator: IdValidatorUseCase;
-  httpResponses: HttpResponses;
+  httpResponsesHelper: HttpResponsesHelper;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
 }
@@ -43,16 +43,16 @@ const makeSut = (): SutTypes => {
       userIdValidator,
       userRepository,
     });
-  const httpResponses = new HttpResponses();
+  const httpResponsesHelper = new HttpResponsesHelper();
   const sut = new UpdateUserRoleController({
     updateUserRoleService,
-    httpResponses,
+    httpResponsesHelper,
   });
 
   return {
     sut,
     idValidator,
-    httpResponses,
+    httpResponsesHelper,
     userRepository,
     validationErrors,
   };
@@ -61,7 +61,7 @@ const makeSut = (): SutTypes => {
 describe("UpdateUserRoleController", () => {
   let sut: UpdateUserRoleController;
   let idValidator: IdValidatorUseCase;
-  let httpResponses: HttpResponses;
+  let httpResponsesHelper: HttpResponsesHelper;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
 
@@ -81,7 +81,7 @@ describe("UpdateUserRoleController", () => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
     idValidator = sutInstance.idValidator;
-    httpResponses = sutInstance.httpResponses;
+    httpResponsesHelper = sutInstance.httpResponsesHelper;
     userRepository = sutInstance.userRepository;
     validationErrors = sutInstance.validationErrors;
   });
@@ -97,7 +97,7 @@ describe("UpdateUserRoleController", () => {
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
 
     expect(httpResponse.statusCode).toBe(204);
-    expect(httpResponse).toEqual(httpResponses.noContent());
+    expect(httpResponse).toEqual(httpResponsesHelper.noContent());
   });
 
   test("should return 400 if no id is provided", async () => {

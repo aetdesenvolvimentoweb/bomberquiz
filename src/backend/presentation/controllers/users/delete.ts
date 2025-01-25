@@ -2,11 +2,11 @@ import { HttpRequest, HttpResponse } from "../../protocols";
 import { AppError } from "@/backend/data/errors";
 import { Controller } from "../../protocols/controller";
 import { DeleteUserService } from "@/backend/data/services";
-import { HttpResponses } from "../../helpers/http-responses";
+import { HttpResponsesHelper } from "../../helpers/http-responses";
 
 interface DeleteUserControllerProps {
   deleteUserService: DeleteUserService;
-  httpResponses: HttpResponses;
+  httpResponsesHelper: HttpResponsesHelper;
 }
 
 export class DeleteUserController implements Controller {
@@ -15,20 +15,20 @@ export class DeleteUserController implements Controller {
   public readonly handle = async (
     request: HttpRequest
   ): Promise<HttpResponse> => {
-    const { deleteUserService, httpResponses } = this.props;
+    const { deleteUserService, httpResponsesHelper } = this.props;
 
     try {
       const id: string = request.dynamicParams.id;
 
       await deleteUserService.delete(id);
 
-      return httpResponses.noContent();
+      return httpResponsesHelper.noContent();
     } catch (error) {
       if (error instanceof AppError) {
-        return httpResponses.badRequest(error);
+        return httpResponsesHelper.badRequest(error);
       }
 
-      return httpResponses.serverError();
+      return httpResponsesHelper.serverError();
     }
   };
 }

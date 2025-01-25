@@ -1,13 +1,13 @@
 import { HttpRequest, HttpResponse } from "../../protocols";
 import { AppError } from "@/backend/data/errors";
 import { Controller } from "../../protocols/controller";
-import { HttpResponses } from "../../helpers/http-responses";
+import { HttpResponsesHelper } from "../../helpers/http-responses";
 import { ListUserByIdService } from "@/backend/data/services";
 import { UserMapped } from "@/backend/domain/entities";
 
 interface ListUserByIdControllerProps {
   listUserByIdService: ListUserByIdService;
-  httpResponses: HttpResponses;
+  httpResponsesHelper: HttpResponsesHelper;
 }
 
 export class ListUserByIdController implements Controller {
@@ -16,20 +16,20 @@ export class ListUserByIdController implements Controller {
   public readonly handle = async (
     request: HttpRequest
   ): Promise<HttpResponse> => {
-    const { listUserByIdService, httpResponses } = this.props;
+    const { listUserByIdService, httpResponsesHelper } = this.props;
 
     try {
       const id: string = request.dynamicParams.id;
 
       const user: UserMapped | null = await listUserByIdService.listById(id);
 
-      return httpResponses.ok(user);
+      return httpResponsesHelper.ok(user);
     } catch (error) {
       if (error instanceof AppError) {
-        return httpResponses.badRequest(error);
+        return httpResponsesHelper.badRequest(error);
       }
 
-      return httpResponses.serverError();
+      return httpResponsesHelper.serverError();
     }
   };
 }

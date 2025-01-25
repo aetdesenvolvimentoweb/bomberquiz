@@ -1,7 +1,7 @@
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { NextRequest, NextResponse } from "next/server";
 import { EncrypterStub } from "@/backend/data/__mocks__";
-import { HttpResponses } from "@/backend/presentation/helpers";
+import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { ListAllUsersController } from "@/backend/presentation/controllers";
 import { ListAllUsersService } from "@/backend/data/services";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
@@ -37,10 +37,10 @@ const handler = async (request: NextRequest): Promise<NextResponse> => {
       const listAllUsersService = new ListAllUsersService({
         userRepository,
       });
-      const httpResponses = new HttpResponses();
+      const httpResponsesHelper = new HttpResponsesHelper();
       const listAllUsersController = new ListAllUsersController({
         listAllUsersService,
-        httpResponses,
+        httpResponsesHelper,
       });
 
       const httpRequest: HttpRequest = {

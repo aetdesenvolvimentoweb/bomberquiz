@@ -1,7 +1,7 @@
 import { DeleteUserController } from "@/backend/presentation/controllers";
 import { DeleteUserService } from "@/backend/data/services";
 import { HttpRequest } from "@/backend/presentation/protocols";
-import { HttpResponses } from "@/backend/presentation/helpers";
+import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { IdValidatorStub } from "@/backend/data/__mocks__";
 import { IdValidatorUseCase } from "@/backend/domain/use-cases";
 import { UserIdValidator } from "@/backend/data/validators";
@@ -13,7 +13,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 interface SutTypes {
   sut: DeleteUserController;
   idValidator: IdValidatorUseCase;
-  httpResponses: HttpResponses;
+  httpResponsesHelper: HttpResponsesHelper;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
 }
@@ -31,16 +31,16 @@ const makeSut = (): SutTypes => {
     userIdValidator,
     userRepository,
   });
-  const httpResponses = new HttpResponses();
+  const httpResponsesHelper = new HttpResponsesHelper();
   const sut = new DeleteUserController({
     deleteUserService,
-    httpResponses,
+    httpResponsesHelper,
   });
 
   return {
     sut,
     idValidator,
-    httpResponses,
+    httpResponsesHelper,
     userRepository,
     validationErrors,
   };
@@ -49,7 +49,7 @@ const makeSut = (): SutTypes => {
 describe("DeleteUserController", () => {
   let sut: DeleteUserController;
   let idValidator: IdValidatorUseCase;
-  let httpResponses: HttpResponses;
+  let httpResponsesHelper: HttpResponsesHelper;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
 
@@ -69,7 +69,7 @@ describe("DeleteUserController", () => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
     idValidator = sutInstance.idValidator;
-    httpResponses = sutInstance.httpResponses;
+    httpResponsesHelper = sutInstance.httpResponsesHelper;
     userRepository = sutInstance.userRepository;
     validationErrors = sutInstance.validationErrors;
   });
@@ -84,7 +84,7 @@ describe("DeleteUserController", () => {
     };
 
     await expect(sut.handle(httpRequest)).resolves.toEqual(
-      httpResponses.noContent()
+      httpResponsesHelper.noContent()
     );
   });
 

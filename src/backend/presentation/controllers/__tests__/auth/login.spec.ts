@@ -15,7 +15,7 @@ import {
 } from "@/backend/domain/use-cases";
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { LoginProps, UserLogged, UserProps } from "@/backend/domain/entities";
-import { HttpResponses } from "@/backend/presentation/helpers";
+import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { LoginController } from "@/backend/presentation/controllers";
 import { LoginService } from "@/backend/data/services";
 import { LoginValidator } from "@/backend/data/validators";
@@ -43,14 +43,14 @@ const makeSut = (): SutTypes => {
     encrypter,
     validationErrors,
   });
-  const httpResponses = new HttpResponses();
+  const httpResponsesHelper = new HttpResponsesHelper();
   const tokenHandler = new TokenHandlerStub();
   const loginService: LoginService = new LoginService({
     loginValidator,
     tokenHandler,
   });
   const sut = new LoginController({
-    httpResponses,
+    httpResponsesHelper,
     loginService,
   });
 

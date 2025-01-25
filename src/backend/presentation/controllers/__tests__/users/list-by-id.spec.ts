@@ -1,6 +1,6 @@
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { UserMapped, UserProps } from "@/backend/domain/entities";
-import { HttpResponses } from "@/backend/presentation/helpers";
+import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { IdValidatorStub } from "@/backend/data/__mocks__";
 import { IdValidatorUseCase } from "@/backend/domain/use-cases";
 import { ListUserByIdController } from "@/backend/presentation/controllers";
@@ -13,7 +13,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 interface SutTypes {
   sut: ListUserByIdController;
   idValidator: IdValidatorUseCase;
-  httpResponses: HttpResponses;
+  httpResponsesHelper: HttpResponsesHelper;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
 }
@@ -31,16 +31,16 @@ const makeSut = (): SutTypes => {
     userIdValidator,
     userRepository,
   });
-  const httpResponses = new HttpResponses();
+  const httpResponsesHelper = new HttpResponsesHelper();
   const sut = new ListUserByIdController({
     listUserByIdService,
-    httpResponses,
+    httpResponsesHelper,
   });
 
   return {
     sut,
     idValidator,
-    httpResponses,
+    httpResponsesHelper,
     userRepository,
     validationErrors,
   };
@@ -49,7 +49,7 @@ const makeSut = (): SutTypes => {
 describe("ListUserByIdController", () => {
   let sut: ListUserByIdController;
   let idValidator: IdValidatorUseCase;
-  let httpResponses: HttpResponses;
+  let httpResponsesHelper: HttpResponsesHelper;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
 
@@ -69,7 +69,7 @@ describe("ListUserByIdController", () => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
     idValidator = sutInstance.idValidator;
-    httpResponses = sutInstance.httpResponses;
+    httpResponsesHelper = sutInstance.httpResponsesHelper;
     userRepository = sutInstance.userRepository;
     validationErrors = sutInstance.validationErrors;
   });
@@ -87,7 +87,9 @@ describe("ListUserByIdController", () => {
       await sut.handle(httpRequest);
 
     expect(httpResponse.statusCode).toBe(200);
-    expect(httpResponse).toEqual(httpResponses.ok(httpResponse.body.data));
+    expect(httpResponse).toEqual(
+      httpResponsesHelper.ok(httpResponse.body.data)
+    );
     expect(httpResponse.body.data).toHaveProperty("id");
     expect(httpResponse.body.data?.name).toEqual(createUserProps().name);
     expect(httpResponse.body.data?.email).toEqual(createUserProps().email);

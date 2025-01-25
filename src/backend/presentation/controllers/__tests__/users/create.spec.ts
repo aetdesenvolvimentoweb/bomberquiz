@@ -14,7 +14,7 @@ import { UserProps, UserRole } from "@/backend/domain/entities";
 import { CreateUserController } from "@/backend/presentation/controllers";
 import { CreateUserService } from "@/backend/data/services";
 import { HttpRequest } from "@/backend/presentation/protocols";
-import { HttpResponses } from "@/backend/presentation/helpers";
+import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { UserCreationPropsValidator } from "@/backend/data/validators";
 import { UserRepository } from "@/backend/data/repositories";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
@@ -24,7 +24,7 @@ interface SutTypes {
   sut: CreateUserController;
   dateValidator: DateValidatorUseCase;
   emailValidator: EmailValidatorUseCase;
-  httpResponses: HttpResponses;
+  httpResponsesHelper: HttpResponsesHelper;
   phoneValidator: PhoneValidatorUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
@@ -49,17 +49,17 @@ const makeSut = (): SutTypes => {
     userRepository,
     userCreationPropsValidator,
   });
-  const httpResponses = new HttpResponses();
+  const httpResponsesHelper = new HttpResponsesHelper();
   const sut = new CreateUserController({
     createUserService,
-    httpResponses,
+    httpResponsesHelper,
   });
 
   return {
     sut,
     dateValidator,
     emailValidator,
-    httpResponses,
+    httpResponsesHelper,
     phoneValidator,
     userRepository,
     validationErrors,
@@ -70,7 +70,7 @@ describe("CreateUserController", () => {
   let sut: CreateUserController;
   let dateValidator: DateValidatorUseCase;
   let emailValidator: EmailValidatorUseCase;
-  let httpResponses: HttpResponses;
+  let httpResponsesHelper: HttpResponsesHelper;
   let phoneValidator: PhoneValidatorUseCase;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
@@ -92,7 +92,7 @@ describe("CreateUserController", () => {
     sut = sutInstance.sut;
     dateValidator = sutInstance.dateValidator;
     emailValidator = sutInstance.emailValidator;
-    httpResponses = sutInstance.httpResponses;
+    httpResponsesHelper = sutInstance.httpResponsesHelper;
     phoneValidator = sutInstance.phoneValidator;
     userRepository = sutInstance.userRepository;
     validationErrors = sutInstance.validationErrors;
@@ -104,7 +104,7 @@ describe("CreateUserController", () => {
     };
 
     await expect(sut.handle(httpRequest)).resolves.toEqual(
-      httpResponses.created()
+      httpResponsesHelper.created()
     );
   });
 

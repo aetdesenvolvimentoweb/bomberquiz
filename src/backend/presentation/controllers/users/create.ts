@@ -2,12 +2,12 @@ import { HttpRequest, HttpResponse } from "../../protocols";
 import { AppError } from "@/backend/data/errors";
 import { Controller } from "../../protocols/controller";
 import { CreateUserService } from "@/backend/data/services";
-import { HttpResponses } from "../../helpers/http-responses";
+import { HttpResponsesHelper } from "../../helpers/http-responses";
 import { UserProps } from "@/backend/domain/entities";
 
 interface CreateUserControllerProps {
   createUserService: CreateUserService;
-  httpResponses: HttpResponses;
+  httpResponsesHelper: HttpResponsesHelper;
 }
 
 export class CreateUserController implements Controller {
@@ -16,20 +16,20 @@ export class CreateUserController implements Controller {
   public readonly handle = async (
     request: HttpRequest<UserProps>
   ): Promise<HttpResponse> => {
-    const { createUserService, httpResponses } = this.props;
+    const { createUserService, httpResponsesHelper } = this.props;
 
     try {
       const userProps = request.body;
 
       await createUserService.create(userProps);
 
-      return httpResponses.created();
+      return httpResponsesHelper.created();
     } catch (error) {
       if (error instanceof AppError) {
-        return httpResponses.badRequest(error);
+        return httpResponsesHelper.badRequest(error);
       }
 
-      return httpResponses.serverError();
+      return httpResponsesHelper.serverError();
     }
   };
 }

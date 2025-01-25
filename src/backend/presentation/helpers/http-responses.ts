@@ -1,7 +1,7 @@
 import { AppError } from "@/backend/data/errors";
 import { HttpResponse } from "../protocols";
 
-export class HttpResponses {
+export class HttpResponsesHelper {
   public readonly badRequest = (error: AppError): HttpResponse => {
     return {
       body: {

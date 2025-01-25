@@ -9,7 +9,7 @@ import {
 } from "@/backend/data/__mocks__";
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { NextRequest, NextResponse } from "next/server";
-import { HttpResponses } from "@/backend/presentation/helpers";
+import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { LoginController } from "@/backend/presentation/controllers";
 import { LoginProps } from "@/backend/domain/entities";
 import { LoginService } from "@/backend/data/services";
@@ -44,14 +44,14 @@ const handler = async (request: NextRequest): Promise<NextResponse> => {
         encrypter,
         validationErrors,
       });
-      const httpResponses = new HttpResponses();
+      const httpResponsesHelper = new HttpResponsesHelper();
       const tokenHandler = new TokenHandlerStub();
       const loginService = new LoginService({
         loginValidator,
         tokenHandler,
       });
       const loginController = new LoginController({
-        httpResponses,
+        httpResponsesHelper,
         loginService,
       });
 
