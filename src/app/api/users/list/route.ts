@@ -1,10 +1,8 @@
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { NextRequest, NextResponse } from "next/server";
 import { EncrypterStub } from "@/backend/data/__mocks__";
-import { HttpResponsesHelper } from "@/backend/presentation/helpers";
-import { ListAllUsersController } from "@/backend/presentation/controllers";
-import { ListAllUsersService } from "@/backend/data/services";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
+import { makeListAllUsersController } from "@/backend/infra/factories";
 
 const handler = async (request: NextRequest): Promise<NextResponse> => {
   switch (request.method) {
@@ -34,14 +32,8 @@ const handler = async (request: NextRequest): Promise<NextResponse> => {
           password: await encrypter.encrypt(password),
         });
       }
-      const listAllUsersService = new ListAllUsersService({
-        userRepository,
-      });
-      const httpResponsesHelper = new HttpResponsesHelper();
-      const listAllUsersController = new ListAllUsersController({
-        listAllUsersService,
-        httpResponsesHelper,
-      });
+
+      const listAllUsersController = makeListAllUsersController();
 
       const httpRequest: HttpRequest = {
         body: {},
