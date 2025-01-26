@@ -3,8 +3,8 @@ import {
   UserIdValidator,
 } from "@/backend/data/validators";
 import { IdValidatorStub } from "@/backend/data/__mocks__";
+import { PrismaUserRepositoryAdapter } from "@/backend/infra/adapters/prisma";
 import { UpdateUserRoleService } from "@/backend/data/services";
-import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 import { ValidationErrors } from "@/backend/data/helpers";
 
 export const makeUpdateUserRoleService = (): UpdateUserRoleService => {
@@ -13,7 +13,7 @@ export const makeUpdateUserRoleService = (): UpdateUserRoleService => {
     validationErrors,
   });
   const idValidator = new IdValidatorStub();
-  const userRepository = new UserRepositoryInMemory();
+  const userRepository = new PrismaUserRepositoryAdapter();
   const userIdValidator = new UserIdValidator({
     idValidator,
     userRepository,

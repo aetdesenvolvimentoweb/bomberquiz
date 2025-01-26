@@ -8,15 +8,15 @@ import {
   UpdateProfilePropsValidator,
   UserIdValidator,
 } from "@/backend/data/validators";
+import { PrismaUserRepositoryAdapter } from "@/backend/infra/adapters/prisma";
 import { UpdateUserProfileService } from "@/backend/data/services";
-import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 import { ValidationErrors } from "@/backend/data/helpers";
 
 export const makeUpdateUserProfileService = (): UpdateUserProfileService => {
   const dateValidator = new DateValidatorStub();
   const emailValidator = new EmailValidatorStub();
   const phoneValidator = new PhoneValidatorStub();
-  const userRepository = new UserRepositoryInMemory();
+  const userRepository = new PrismaUserRepositoryAdapter();
   const validationErrors = new ValidationErrors();
   const updateProfilePropsValidator = new UpdateProfilePropsValidator({
     dateValidator,
