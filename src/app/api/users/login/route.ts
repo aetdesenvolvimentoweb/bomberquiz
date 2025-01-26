@@ -1,18 +1,22 @@
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { NextRequest, NextResponse } from "next/server";
+import {
+  PrismaUserRepositoryAdapter,
+  db,
+} from "@/backend/infra/adapters/prisma";
 import { EncrypterStub } from "@/backend/data/__mocks__";
 import { LoginProps } from "@/backend/domain/entities";
-import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 import { makeLoginController } from "@/backend/infra/factories";
 
 const handler = async (request: NextRequest): Promise<NextResponse> => {
   switch (request.method) {
     case "GET":
+      await db.user.deleteMany({});
       const email = "valid_email";
       const password = "any_password";
       const encrypter = new EncrypterStub();
 
-      const userRepository = new UserRepositoryInMemory();
+      const userRepository = new PrismaUserRepositoryAdapter();
 
       if ((await userRepository.listAll()).length === 0) {
         await userRepository.create({

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { HttpResponse } from "@/backend/presentation/protocols";
+import { db } from "@/backend/infra/adapters/prisma";
 
 const handler = async (request: NextRequest): Promise<NextResponse> => {
   switch (request.method) {
     case "GET":
+      await db.user.deleteMany({});
       const response = NextResponse.json<HttpResponse>({
         body: {},
         statusCode: 204,
