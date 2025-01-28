@@ -4,7 +4,7 @@ import {
   PrismaUserRepositoryAdapter,
   db,
 } from "@/backend/infra/adapters/prisma";
-import { EncrypterStub } from "@/backend/data/__mocks__";
+import { BcryptEncrypterAdapter } from "@/backend/infra/adapters/bcrypt/encrypter";
 import { LoginProps } from "@/backend/domain/entities";
 import { makeLoginController } from "@/backend/infra/factories";
 
@@ -14,7 +14,7 @@ const handler = async (request: NextRequest): Promise<NextResponse> => {
       await db.user.deleteMany({});
       const email = "valid_email";
       const password = "any_password";
-      const encrypter = new EncrypterStub();
+      const encrypter = new BcryptEncrypterAdapter();
 
       const userRepository = new PrismaUserRepositoryAdapter();
 
