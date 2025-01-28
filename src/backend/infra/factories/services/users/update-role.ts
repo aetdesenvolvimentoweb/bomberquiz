@@ -1,9 +1,11 @@
 import {
+  MongoDBIdValidator,
+  PrismaUserRepositoryAdapter,
+} from "@/backend/infra/adapters";
+import {
   UpdateRoleValidator,
   UserIdValidator,
 } from "@/backend/data/validators";
-import { MongoDBIdValidator } from "@/backend/infra/adapters/mongo-db/id-validator";
-import { PrismaUserRepositoryAdapter } from "@/backend/infra/adapters/prisma";
 import { UpdateUserRoleService } from "@/backend/data/services";
 import { ValidationErrors } from "@/backend/data/helpers";
 

@@ -1,6 +1,8 @@
+import {
+  MongoDBIdValidator,
+  PrismaUserRepositoryAdapter,
+} from "@/backend/infra/adapters";
 import { DeleteUserService } from "@/backend/data/services";
-import { MongoDBIdValidator } from "@/backend/infra/adapters/mongo-db/id-validator";
-import { PrismaUserRepositoryAdapter } from "@/backend/infra/adapters/prisma";
 import { UserIdValidator } from "@/backend/data/validators";
 import { ValidationErrors } from "@/backend/data/helpers";
 

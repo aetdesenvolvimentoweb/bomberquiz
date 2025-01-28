@@ -1,10 +1,12 @@
 import {
+  BcryptEncrypterAdapter,
+  MongoDBIdValidator,
+  PrismaUserRepositoryAdapter,
+} from "@/backend/infra/adapters";
+import {
   UpdatePasswordPropsValidator,
   UserIdValidator,
 } from "@/backend/data/validators";
-import { BcryptEncrypterAdapter } from "@/backend/infra/adapters/bcrypt/encrypter";
-import { MongoDBIdValidator } from "@/backend/infra/adapters/mongo-db/id-validator";
-import { PrismaUserRepositoryAdapter } from "@/backend/infra/adapters/prisma";
 import { UpdateUserPasswordService } from "@/backend/data/services";
 import { ValidationErrors } from "@/backend/data/helpers";
 
