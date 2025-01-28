@@ -4,9 +4,9 @@ import {
   PrismaUserRepositoryAdapter,
   ValidatorJsEmailValidatorAdapter,
 } from "@/backend/infra/adapters";
+import { JwtTokenHandlerAdapter } from "@/backend/infra/adapters/jsonwebtoken/token-handler";
 import { LoginService } from "@/backend/data/services";
 import { LoginValidator } from "@/backend/data/validators";
-import { TokenHandlerStub } from "@/backend/__mocks__";
 import { ValidationErrors } from "@/backend/data/helpers";
 
 export const makeLoginService = (): LoginService => {
@@ -21,7 +21,7 @@ export const makeLoginService = (): LoginService => {
     encrypter,
     validationErrors,
   });
-  const tokenHandler = new TokenHandlerStub();
+  const tokenHandler = new JwtTokenHandlerAdapter();
   return new LoginService({
     loginValidator,
     tokenHandler,

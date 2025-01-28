@@ -12,7 +12,7 @@ const handler = async (request: NextRequest): Promise<NextResponse> => {
   switch (request.method) {
     case "GET":
       await db.user.deleteMany({});
-      const email = "valid_email";
+      const email = "email@teste.com";
       const password = "any_password";
       const encrypter = new BcryptEncrypterAdapter();
 
@@ -39,6 +39,8 @@ const handler = async (request: NextRequest): Promise<NextResponse> => {
       };
 
       const httpResponse = await loginController.handle(httpRequest);
+
+      console.log("qual o httpResponse", httpResponse);
 
       const response = NextResponse.json<HttpResponse>({
         body: {},
