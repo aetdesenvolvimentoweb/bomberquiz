@@ -1,4 +1,4 @@
-import { EmailValidatorStub, TokenHandlerStub } from "@/backend/data/__mocks__";
+import { EmailValidatorStub, TokenHandlerStub } from "@/backend/__mocks__";
 import {
   PrismaAuthRepositoryAdapter,
   PrismaUserRepositoryAdapter,

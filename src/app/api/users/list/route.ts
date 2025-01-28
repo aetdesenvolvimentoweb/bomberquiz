@@ -1,6 +1,6 @@
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { NextRequest, NextResponse } from "next/server";
-import { EncrypterStub } from "@/backend/data/__mocks__";
+import { EncrypterStub } from "@/backend/__mocks__";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 import { makeListAllUsersController } from "@/backend/infra/factories";
 

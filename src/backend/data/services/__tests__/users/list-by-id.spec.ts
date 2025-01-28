@@ -2,7 +2,7 @@ import {
   IdValidatorUseCase,
   UserIdValidatorUseCase,
 } from "@/backend/domain/use-cases";
-import { IdValidatorStub } from "@/backend/data/__mocks__";
+import { IdValidatorStub } from "@/backend/__mocks__";
 import { ListUserByIdService } from "@/backend/data/services";
 import { UserIdValidator } from "@/backend/data/validators";
 import { UserProps } from "@/backend/domain/entities";

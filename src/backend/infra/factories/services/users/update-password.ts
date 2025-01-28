@@ -3,7 +3,7 @@ import {
   UserIdValidator,
 } from "@/backend/data/validators";
 import { BcryptEncrypterAdapter } from "@/backend/infra/adapters/bcrypt/encrypter";
-import { IdValidatorStub } from "@/backend/data/__mocks__";
+import { IdValidatorStub } from "@/backend/__mocks__";
 import { PrismaUserRepositoryAdapter } from "@/backend/infra/adapters/prisma";
 import { UpdateUserPasswordService } from "@/backend/data/services";
 import { ValidationErrors } from "@/backend/data/helpers";

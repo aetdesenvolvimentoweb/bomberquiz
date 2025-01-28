@@ -3,7 +3,7 @@ import {
   EmailValidatorStub,
   EncrypterStub,
   PhoneValidatorStub,
-} from "@/backend/data/__mocks__";
+} from "@/backend/__mocks__";
 import {
   DateValidatorUseCase,
   EmailValidatorUseCase,

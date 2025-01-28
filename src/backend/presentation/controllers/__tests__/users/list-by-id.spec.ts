@@ -1,7 +1,7 @@
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { UserMapped, UserProps } from "@/backend/domain/entities";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
-import { IdValidatorStub } from "@/backend/data/__mocks__";
+import { IdValidatorStub } from "@/backend/__mocks__";
 import { IdValidatorUseCase } from "@/backend/domain/use-cases";
 import { ListUserByIdController } from "@/backend/presentation/controllers";
 import { ListUserByIdService } from "@/backend/data/services";

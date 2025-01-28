@@ -3,7 +3,7 @@ import {
   UserIdValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { DeleteUserService } from "@/backend/data/services";
-import { IdValidatorStub } from "@/backend/data/__mocks__";
+import { IdValidatorStub } from "@/backend/__mocks__";
 import { UserIdValidator } from "@/backend/data/validators";
 import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repositories";

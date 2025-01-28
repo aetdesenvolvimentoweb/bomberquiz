@@ -2,7 +2,7 @@ import { DeleteUserController } from "@/backend/presentation/controllers";
 import { DeleteUserService } from "@/backend/data/services";
 import { HttpRequest } from "@/backend/presentation/protocols";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
-import { IdValidatorStub } from "@/backend/data/__mocks__";
+import { IdValidatorStub } from "@/backend/__mocks__";
 import { IdValidatorUseCase } from "@/backend/domain/use-cases";
 import { UserIdValidator } from "@/backend/data/validators";
 import { UserProps } from "@/backend/domain/entities";

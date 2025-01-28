@@ -1,6 +1,6 @@
 import { AuthRepository, UserRepository } from "@/backend/data/repositories";
 
-import { EncrypterStub } from "@/backend/data/__mocks__";
+import { EncrypterStub } from "@/backend/__mocks__";
 import { EncrypterUseCase } from "@/backend/domain/use-cases";
 import { PrismaAuthRepositoryAdapter } from "../auth";
 import { PrismaUserRepositoryAdapter } from "../user";

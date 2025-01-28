@@ -1,4 +1,4 @@
-import { EncrypterStub, IdValidatorStub } from "@/backend/data/__mocks__";
+import { EncrypterStub, IdValidatorStub } from "@/backend/__mocks__";
 import {
   EncrypterUseCase,
   IdValidatorUseCase,

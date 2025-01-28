@@ -3,7 +3,7 @@ import {
   EmailValidatorStub,
   IdValidatorStub,
   PhoneValidatorStub,
-} from "@/backend/data/__mocks__";
+} from "@/backend/__mocks__";
 import {
   UpdateProfilePropsValidator,
   UserIdValidator,

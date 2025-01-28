@@ -9,7 +9,7 @@ import {
   UserRole,
 } from "@/backend/domain/entities";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
-import { IdValidatorStub } from "@/backend/data/__mocks__";
+import { IdValidatorStub } from "@/backend/__mocks__";
 import { IdValidatorUseCase } from "@/backend/domain/use-cases";
 import { UpdateUserRoleController } from "@/backend/presentation/controllers";
 import { UpdateUserRoleService } from "@/backend/data/services";

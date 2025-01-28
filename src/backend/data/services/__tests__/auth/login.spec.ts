@@ -6,7 +6,7 @@ import {
   EmailValidatorStub,
   EncrypterStub,
   TokenHandlerStub,
-} from "@/backend/data/__mocks__";
+} from "@/backend/__mocks__";
 import {
   EmailValidatorUseCase,
   EncrypterUseCase,

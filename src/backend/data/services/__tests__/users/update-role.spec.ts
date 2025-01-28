@@ -12,7 +12,7 @@ import {
   UserProps,
   UserRole,
 } from "@/backend/domain/entities";
-import { IdValidatorStub } from "@/backend/data/__mocks__";
+import { IdValidatorStub } from "@/backend/__mocks__";
 import { UpdateUserRoleService } from "@/backend/data/services";
 import { UserRepository } from "@/backend/data/repositories";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";

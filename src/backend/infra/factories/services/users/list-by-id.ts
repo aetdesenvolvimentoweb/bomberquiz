@@ -1,4 +1,4 @@
-import { IdValidatorStub } from "@/backend/data/__mocks__";
+import { IdValidatorStub } from "@/backend/__mocks__";
 import { ListUserByIdService } from "@/backend/data/services";
 import { PrismaUserRepositoryAdapter } from "@/backend/infra/adapters/prisma";
 import { UserIdValidator } from "@/backend/data/validators";

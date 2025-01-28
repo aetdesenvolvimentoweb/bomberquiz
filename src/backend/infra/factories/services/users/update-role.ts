@@ -2,7 +2,7 @@ import {
   UpdateRoleValidator,
   UserIdValidator,
 } from "@/backend/data/validators";
-import { IdValidatorStub } from "@/backend/data/__mocks__";
+import { IdValidatorStub } from "@/backend/__mocks__";
 import { PrismaUserRepositoryAdapter } from "@/backend/infra/adapters/prisma";
 import { UpdateUserRoleService } from "@/backend/data/services";
 import { ValidationErrors } from "@/backend/data/helpers";

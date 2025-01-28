@@ -2,7 +2,7 @@ import {
   DateValidatorStub,
   EmailValidatorStub,
   PhoneValidatorStub,
-} from "@/backend/data/__mocks__";
+} from "@/backend/__mocks__";
 import { BcryptEncrypterAdapter } from "@/backend/infra/adapters/bcrypt/encrypter";
 import { CreateUserService } from "@/backend/data/services";
 import { PrismaUserRepositoryAdapter } from "@/backend/infra/adapters/prisma";
