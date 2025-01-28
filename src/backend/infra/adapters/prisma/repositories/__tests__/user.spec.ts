@@ -1,6 +1,7 @@
-import { PrismaUserRepositoryAdapter, db } from "../../adapters/prisma";
+import { PrismaUserRepositoryAdapter } from "../user";
 import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repositories";
+import { db } from "../../prisma-client";
 
 interface SutTypes {
   sut: UserRepository;

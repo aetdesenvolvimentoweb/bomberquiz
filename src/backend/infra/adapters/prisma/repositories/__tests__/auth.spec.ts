@@ -1,12 +1,11 @@
 import { AuthRepository, UserRepository } from "@/backend/data/repositories";
-import {
-  PrismaAuthRepositoryAdapter,
-  PrismaUserRepositoryAdapter,
-  db,
-} from "../../adapters/prisma";
+
 import { EncrypterStub } from "@/backend/data/__mocks__";
 import { EncrypterUseCase } from "@/backend/domain/use-cases";
+import { PrismaAuthRepositoryAdapter } from "../auth";
+import { PrismaUserRepositoryAdapter } from "../user";
 import { UserProps } from "@/backend/domain/entities";
+import { db } from "../../prisma-client";
 
 interface SutTypes {
   sut: AuthRepository;
