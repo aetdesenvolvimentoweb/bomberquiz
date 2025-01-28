@@ -164,7 +164,7 @@ describe("CreateUserService", () => {
   test("should throw if invalid birthdate is provided", async () => {
     const userProps = createUserProps();
 
-    jest.spyOn(dateValidator, "isValid").mockReturnValue(false);
+    jest.spyOn(dateValidator, "isBirthdateValid").mockReturnValue(false);
 
     await expect(sut.create(userProps)).rejects.toThrow(
       validationErrors.invalidParamError("data de nascimento")

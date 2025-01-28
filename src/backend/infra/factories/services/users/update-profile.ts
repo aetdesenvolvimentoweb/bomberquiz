@@ -1,5 +1,5 @@
-import { DateValidatorStub, PhoneValidatorStub } from "@/backend/__mocks__";
 import {
+  DateFnsDateValidatorAdapter,
   MongoDBIdValidator,
   PrismaUserRepositoryAdapter,
   ValidatorJsEmailValidatorAdapter,
@@ -8,11 +8,12 @@ import {
   UpdateProfilePropsValidator,
   UserIdValidator,
 } from "@/backend/data/validators";
+import { PhoneValidatorStub } from "@/backend/__mocks__";
 import { UpdateUserProfileService } from "@/backend/data/services";
 import { ValidationErrors } from "@/backend/data/helpers";
 
 export const makeUpdateUserProfileService = (): UpdateUserProfileService => {
-  const dateValidator = new DateValidatorStub();
+  const dateValidator = new DateFnsDateValidatorAdapter();
   const emailValidator = new ValidatorJsEmailValidatorAdapter();
   const phoneValidator = new PhoneValidatorStub();
   const userRepository = new PrismaUserRepositoryAdapter();

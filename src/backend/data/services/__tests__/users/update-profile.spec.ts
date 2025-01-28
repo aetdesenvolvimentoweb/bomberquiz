@@ -264,7 +264,7 @@ describe("UpdateUserProfileService", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    jest.spyOn(dateValidator, "isValid").mockReturnValue(false);
+    jest.spyOn(dateValidator, "isBirthdateValid").mockReturnValue(false);
 
     await expect(
       sut.updateProfile({

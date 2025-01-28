@@ -353,7 +353,7 @@ describe("UpdateUserProfileController", () => {
   });
 
   test("should return 400 if invalid birthdate is provided", async () => {
-    jest.spyOn(dateValidator, "isValid").mockReturnValue(false);
+    jest.spyOn(dateValidator, "isBirthdateValid").mockReturnValue(false);
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 

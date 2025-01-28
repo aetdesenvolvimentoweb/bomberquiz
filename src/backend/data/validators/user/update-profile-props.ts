@@ -78,7 +78,7 @@ export class UpdateProfilePropsValidator
   };
 
   private validateBirthdate = (birthdate: Date): void => {
-    if (!this.dateValidator.isValid(birthdate)) {
+    if (!this.dateValidator.isBirthdateValid(birthdate)) {
       throw this.validationErrors.invalidParamError("data de nascimento");
     }
   };

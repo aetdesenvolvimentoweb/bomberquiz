@@ -2,6 +2,7 @@ import { PrismaUserRepositoryAdapter } from "../user";
 import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repositories";
 import { db } from "../../prisma-client";
+import { subYears } from "date-fns";
 
 interface SutTypes {
   sut: UserRepository;
@@ -18,7 +19,7 @@ describe("PrismaUserRepositoryAdapter", () => {
     name: "any_name",
     email: "valid_email",
     phone: "any_phone",
-    birthdate: new Date(),
+    birthdate: subYears(new Date(Date.now()), 18),
     role: "cliente",
     password: "any_password",
   };

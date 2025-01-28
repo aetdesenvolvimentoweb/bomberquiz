@@ -207,7 +207,7 @@ describe("CreateUserController", () => {
   });
 
   test("should return 400 if invalid birthdate is provided", async () => {
-    jest.spyOn(dateValidator, "isValid").mockReturnValue(false);
+    jest.spyOn(dateValidator, "isBirthdateValid").mockReturnValue(false);
 
     const httpRequest: HttpRequest<UserProps> = {
       body: createUserProps({ birthdate: new Date("invalid_birthdate") }),
