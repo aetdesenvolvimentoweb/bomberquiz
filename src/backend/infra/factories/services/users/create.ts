@@ -1,11 +1,11 @@
 import {
   BcryptEncrypterAdapter,
   DateFnsDateValidatorAdapter,
+  LibPhoneNumberJsPhoneValidatorAdapter,
   PrismaUserRepositoryAdapter,
   ValidatorJsEmailValidatorAdapter,
 } from "@/backend/infra/adapters";
 import { CreateUserService } from "@/backend/data/services";
-import { PhoneValidatorStub } from "@/backend/__mocks__";
 import { UserCreationPropsValidator } from "@/backend/data/validators";
 import { ValidationErrors } from "@/backend/data/helpers";
 
@@ -14,7 +14,7 @@ export const makeCreateUserService = (): CreateUserService => {
   const emailValidator = new ValidatorJsEmailValidatorAdapter();
   const encrypter = new BcryptEncrypterAdapter();
   const userRepository = new PrismaUserRepositoryAdapter();
-  const phoneValidator = new PhoneValidatorStub();
+  const phoneValidator = new LibPhoneNumberJsPhoneValidatorAdapter();
   const validationErrors = new ValidationErrors();
   const userCreationPropsValidator = new UserCreationPropsValidator({
     dateValidator,
