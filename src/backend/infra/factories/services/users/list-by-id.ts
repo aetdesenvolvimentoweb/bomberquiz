@@ -1,11 +1,11 @@
-import { IdValidatorStub } from "@/backend/__mocks__";
 import { ListUserByIdService } from "@/backend/data/services";
+import { MongoDBIdValidator } from "@/backend/infra/adapters/mongo-db/id-validator";
 import { PrismaUserRepositoryAdapter } from "@/backend/infra/adapters/prisma";
 import { UserIdValidator } from "@/backend/data/validators";
 import { ValidationErrors } from "@/backend/data/helpers";
 
 export const makeListUserByIdService = (): ListUserByIdService => {
-  const idValidator = new IdValidatorStub();
+  const idValidator = new MongoDBIdValidator();
   const userRepository = new PrismaUserRepositoryAdapter();
   const validationErrors = new ValidationErrors();
   const userIdValidator = new UserIdValidator({

@@ -2,7 +2,7 @@ import {
   UpdateRoleValidator,
   UserIdValidator,
 } from "@/backend/data/validators";
-import { IdValidatorStub } from "@/backend/__mocks__";
+import { MongoDBIdValidator } from "@/backend/infra/adapters/mongo-db/id-validator";
 import { PrismaUserRepositoryAdapter } from "@/backend/infra/adapters/prisma";
 import { UpdateUserRoleService } from "@/backend/data/services";
 import { ValidationErrors } from "@/backend/data/helpers";
@@ -12,7 +12,7 @@ export const makeUpdateUserRoleService = (): UpdateUserRoleService => {
   const updateRoleValidator = new UpdateRoleValidator({
     validationErrors,
   });
-  const idValidator = new IdValidatorStub();
+  const idValidator = new MongoDBIdValidator();
   const userRepository = new PrismaUserRepositoryAdapter();
   const userIdValidator = new UserIdValidator({
     idValidator,

@@ -1,13 +1,13 @@
 import {
   DateValidatorStub,
   EmailValidatorStub,
-  IdValidatorStub,
   PhoneValidatorStub,
 } from "@/backend/__mocks__";
 import {
   UpdateProfilePropsValidator,
   UserIdValidator,
 } from "@/backend/data/validators";
+import { MongoDBIdValidator } from "@/backend/infra/adapters/mongo-db/id-validator";
 import { PrismaUserRepositoryAdapter } from "@/backend/infra/adapters/prisma";
 import { UpdateUserProfileService } from "@/backend/data/services";
 import { ValidationErrors } from "@/backend/data/helpers";
@@ -25,7 +25,7 @@ export const makeUpdateUserProfileService = (): UpdateUserProfileService => {
     userRepository,
     validationErrors,
   });
-  const idValidator = new IdValidatorStub();
+  const idValidator = new MongoDBIdValidator();
   const userIdValidator = new UserIdValidator({
     idValidator,
     userRepository,

@@ -1,11 +1,11 @@
 import { DeleteUserService } from "@/backend/data/services";
-import { IdValidatorStub } from "@/backend/__mocks__";
+import { MongoDBIdValidator } from "@/backend/infra/adapters/mongo-db/id-validator";
 import { PrismaUserRepositoryAdapter } from "@/backend/infra/adapters/prisma";
 import { UserIdValidator } from "@/backend/data/validators";
 import { ValidationErrors } from "@/backend/data/helpers";
 
 export const makeDeleteUserService = (): DeleteUserService => {
-  const idValidator = new IdValidatorStub();
+  const idValidator = new MongoDBIdValidator();
   const userRepository = new PrismaUserRepositoryAdapter();
   const validationErrors = new ValidationErrors();
   const userIdValidator = new UserIdValidator({
