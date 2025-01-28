@@ -19,6 +19,7 @@
     "@prisma/client": "6.2.1",
     "@vercel/speed-insights": "^1.1.0",
     "bcrypt": "^5.1.1",
+    "date-fns": "^4.1.0",
     "mongodb": "^6.12.0",
     "next": "15.1.5",
     "react": "^19.0.0",
