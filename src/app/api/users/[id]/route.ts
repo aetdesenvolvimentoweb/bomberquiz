@@ -1,16 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import { HttpResponse } from "@/backend/presentation/protocols";
 import { NextjsRouteAdapter } from "@/backend/infra/adapters";
-import { makeLoginController } from "@/backend/infra/factories";
+import { makeDeleteUserController } from "@/backend/infra/factories";
 
 const handler = async (request: NextRequest): Promise<NextResponse> => {
   switch (request.method) {
-    case "POST":
-      const controller = makeLoginController();
-      const nextjsRouteAdapter = new NextjsRouteAdapter();
-      return await nextjsRouteAdapter.handle({
+    case "DELETE":
+      const deleteUserController = makeDeleteUserController();
+      const routeDeleteUser = new NextjsRouteAdapter();
+
+      return await routeDeleteUser.handle({
         request,
-        controller,
+        controller: deleteUserController,
+        dynamicParams: { id: request.nextUrl.pathname.split("/").pop() },
       });
 
     default:
@@ -23,4 +25,4 @@ const handler = async (request: NextRequest): Promise<NextResponse> => {
   }
 };
 
-export { handler as POST };
+export { handler as DELETE };

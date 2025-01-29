@@ -40,6 +40,7 @@ const makeSut = (): SutTypes => {
       validationErrors,
     });
   const sut = new UpdateUserPasswordService({
+    encrypter,
     updatePasswordPropsValidator,
     userRepository,
     userIdValidator,

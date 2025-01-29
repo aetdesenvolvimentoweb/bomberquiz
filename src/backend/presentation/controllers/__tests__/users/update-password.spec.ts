@@ -42,6 +42,7 @@ const makeSut = (): SutTypes => {
   });
   const updateUserPasswordService: UpdateUserPasswordService =
     new UpdateUserPasswordService({
+      encrypter,
       updatePasswordPropsValidator,
       userIdValidator,
       userRepository,
@@ -102,6 +103,7 @@ describe("UpdateUserPasswordController", () => {
         oldPassword: "any_password",
         newPassword: "new_password",
       },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -172,6 +174,7 @@ describe("UpdateUserPasswordController", () => {
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       // @ts-expect-error teste
       body: { id: user!.id, newPassword: "new_password" },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -192,6 +195,7 @@ describe("UpdateUserPasswordController", () => {
         oldPassword: "invalid",
         newPassword: "new_password",
       },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -215,6 +219,7 @@ describe("UpdateUserPasswordController", () => {
         oldPassword: "wrong_password",
         newPassword: "new_password",
       },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -232,6 +237,7 @@ describe("UpdateUserPasswordController", () => {
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       // @ts-expect-error teste
       body: { id: user!.id, oldPassword: "any_password" },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -252,6 +258,7 @@ describe("UpdateUserPasswordController", () => {
         oldPassword: "any_password",
         newPassword: "invalid",
       },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);

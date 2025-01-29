@@ -1,15 +1,15 @@
 import { EncrypterUseCase } from "@/backend/domain/use-cases";
-import bcrypt from "bcrypt";
+import argon2 from "argon2";
 
-export class BcryptEncrypterAdapter implements EncrypterUseCase {
+export class Argon2EncrypterAdapter implements EncrypterUseCase {
   public readonly encrypt = async (password: string): Promise<string> => {
-    return await bcrypt.hash(password, 10);
+    return await argon2.hash(password);
   };
 
   public readonly verify = async (
     password: string,
     passwordHash: string
   ): Promise<boolean> => {
-    return await bcrypt.compare(password, passwordHash);
+    return await argon2.verify(passwordHash, password);
   };
 }

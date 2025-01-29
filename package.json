@@ -18,7 +18,7 @@
   "dependencies": {
     "@prisma/client": "6.3.0",
     "@vercel/speed-insights": "^1.1.0",
-    "bcrypt": "^5.1.1",
+    "argon2": "^0.41.1",
     "date-fns": "^4.1.0",
     "jsonwebtoken": "^9.0.2",
     "libphonenumber-js": "^1.11.18",
@@ -36,7 +36,7 @@
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
-    "@types/bcrypt": "^5.0.2",
+    "@types/argon2": "^0.15.4",
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.8",
     "@types/node": "^20",

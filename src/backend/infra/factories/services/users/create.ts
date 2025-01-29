@@ -1,5 +1,5 @@
 import {
-  BcryptEncrypterAdapter,
+  Argon2EncrypterAdapter,
   DateFnsDateValidatorAdapter,
   LibPhoneNumberJsPhoneValidatorAdapter,
   PrismaUserRepositoryAdapter,
@@ -12,7 +12,7 @@ import { ValidationErrors } from "@/backend/data/helpers";
 export const makeCreateUserService = (): CreateUserService => {
   const dateValidator = new DateFnsDateValidatorAdapter();
   const emailValidator = new ValidatorJsEmailValidatorAdapter();
-  const encrypter = new BcryptEncrypterAdapter();
+  const encrypter = new Argon2EncrypterAdapter();
   const userRepository = new PrismaUserRepositoryAdapter();
   const phoneValidator = new LibPhoneNumberJsPhoneValidatorAdapter();
   const validationErrors = new ValidationErrors();

@@ -1,4 +1,5 @@
 import {
+  EncrypterUseCase,
   UpdatePasswordPropsValidatorUseCase,
   UpdateUserPasswordUseCase,
   UserIdValidatorUseCase,
@@ -7,6 +8,7 @@ import { UpdateUserPasswordProps } from "@/backend/domain/entities";
 import { UserRepository } from "../../repositories";
 
 interface UpdateUserPasswordServiceProps {
+  encrypter: EncrypterUseCase;
   userRepository: UserRepository;
   userIdValidator: UserIdValidatorUseCase;
   updatePasswordPropsValidator: UpdatePasswordPropsValidatorUseCase;
@@ -18,11 +20,19 @@ export class UpdateUserPasswordService implements UpdateUserPasswordUseCase {
   public readonly updatePassword = async (
     props: UpdateUserPasswordProps
   ): Promise<void> => {
-    const { updatePasswordPropsValidator, userRepository, userIdValidator } =
-      this.props;
+    const {
+      encrypter,
+      updatePasswordPropsValidator,
+      userRepository,
+      userIdValidator,
+    } = this.props;
 
     await userIdValidator.validateUserId(props.id);
     await updatePasswordPropsValidator.validateUpdatePasswordProps(props);
-    await userRepository.delete(props.id);
+    const hashedPassword = await encrypter.encrypt(props.newPassword);
+    await userRepository.updatePassword({
+      ...props,
+      newPassword: hashedPassword,
+    });
   };
 }

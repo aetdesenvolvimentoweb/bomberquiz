@@ -1,5 +1,5 @@
 import {
-  BcryptEncrypterAdapter,
+  Argon2EncrypterAdapter,
   PrismaAuthRepositoryAdapter,
   PrismaUserRepositoryAdapter,
   ValidatorJsEmailValidatorAdapter,
@@ -13,7 +13,7 @@ export const makeLoginService = (): LoginService => {
   const userRepository = new PrismaUserRepositoryAdapter();
   const authRepository = new PrismaAuthRepositoryAdapter(userRepository);
   const emailValidator = new ValidatorJsEmailValidatorAdapter();
-  const encrypter = new BcryptEncrypterAdapter();
+  const encrypter = new Argon2EncrypterAdapter();
   const validationErrors = new ValidationErrors();
   const loginValidator = new LoginValidator({
     authRepository,
