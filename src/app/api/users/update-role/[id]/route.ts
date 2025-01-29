@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { HttpResponse } from "@/backend/presentation/protocols";
 import { NextjsRouteAdapter } from "@/backend/infra/adapters";
-import { makeUpdateUserPasswordController } from "@/backend/infra/factories";
+import { makeUpdateUserRoleController } from "@/backend/infra/factories";
 
 const handler = async (request: NextRequest): Promise<NextResponse> => {
   switch (request.method) {
     case "PATCH":
-      const updateUserPasswordController = makeUpdateUserPasswordController();
+      const updateUserRoleController = makeUpdateUserRoleController();
       const routeUpdateUserPassword = new NextjsRouteAdapter();
       return await routeUpdateUserPassword.handle({
         request,
-        controller: updateUserPasswordController,
+        controller: updateUserRoleController,
         dynamicParams: { id: request.nextUrl.pathname.split("/").pop() },
       });
 

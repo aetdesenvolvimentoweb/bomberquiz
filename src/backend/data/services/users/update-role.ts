@@ -22,6 +22,6 @@ export class UpdateUserRoleService implements UpdateUserRoleUseCase {
 
     await userIdValidator.validateUserId(props.id);
     await updateRoleValidator.validateUpdateRole(props.role);
-    await userRepository.delete(props.id);
+    await userRepository.updateRole(props);
   };
 }

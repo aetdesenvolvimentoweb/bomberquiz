@@ -19,7 +19,9 @@ export class UpdateUserRoleController implements Controller {
     const { updateUserRoleService, httpResponsesHelper } = this.props;
 
     try {
-      const updateUserRoleProps = request.body;
+      console.log("body", request.body);
+      const id: string = request.dynamicParams.id;
+      const updateUserRoleProps = { ...request.body, id };
 
       await updateUserRoleService.updateRole(updateUserRoleProps);
 

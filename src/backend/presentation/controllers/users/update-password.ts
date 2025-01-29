@@ -19,19 +19,13 @@ export class UpdateUserPasswordController implements Controller {
     const { updateUserPasswordService, httpResponsesHelper } = this.props;
 
     try {
-      console.log("request completo", request);
       const id: string = request.dynamicParams.id;
       const updateUserPasswordProps = { ...request.body, id };
-      console.log(
-        "controller updateUserPasswordProps",
-        updateUserPasswordProps
-      );
 
       await updateUserPasswordService.updatePassword(updateUserPasswordProps);
 
       return httpResponsesHelper.noContent();
     } catch (error) {
-      console.log("error", error);
       if (error instanceof AppError) {
         return httpResponsesHelper.badRequest(error);
       }

@@ -92,6 +92,7 @@ describe("UpdateUserRoleController", () => {
 
     const httpRequest: HttpRequest<UpdateUserRoleProps> = {
       body: { id: user!.id, role: "administrador" },
+      dynamicParams: { id: user?.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -120,6 +121,7 @@ describe("UpdateUserRoleController", () => {
 
     const httpRequest: HttpRequest<UpdateUserRoleProps> = {
       body: { id: "invalid-id", role: "administrador" },
+      dynamicParams: { id: "invalid-id" },
     };
 
     const httpResponse = await sut.handle(httpRequest);
@@ -135,6 +137,7 @@ describe("UpdateUserRoleController", () => {
 
     const httpRequest: HttpRequest<UpdateUserRoleProps> = {
       body: { id: "unregistered_id", role: "administrador" },
+      dynamicParams: { id: "unregistered-id" },
     };
 
     const httpResponse = await sut.handle(httpRequest);

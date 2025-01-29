@@ -21,6 +21,6 @@ export class UpdateUserProfileService implements UpdateUserProfileUseCase {
 
     await userIdValidator.validateUserId(props.id);
     await updateProfilePropsValidator.validateUpdateProfileProps(props);
-    await userRepository.delete(props.id);
+    await userRepository.updateProfile(props);
   };
 }
