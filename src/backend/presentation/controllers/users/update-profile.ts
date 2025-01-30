@@ -19,7 +19,8 @@ export class UpdateUserProfileController implements Controller {
     const { updateUserProfileService, httpResponsesHelper } = this.props;
 
     try {
-      const userProfile = request.body;
+      const id = request.dynamicParams.id;
+      const userProfile = { ...request.body, id };
 
       await updateUserProfileService.updateProfile(userProfile);
 

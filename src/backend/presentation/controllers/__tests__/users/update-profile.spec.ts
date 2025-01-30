@@ -123,6 +123,7 @@ describe("UpdateUserProfileController", () => {
         phone: "new_phone",
         birthdate: new Date(),
       },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -162,6 +163,7 @@ describe("UpdateUserProfileController", () => {
         phone: "new_phone",
         birthdate: new Date(),
       },
+      dynamicParams: { id: "invalid_id" },
     };
 
     const httpResponse = await sut.handle(httpRequest);
@@ -183,6 +185,7 @@ describe("UpdateUserProfileController", () => {
         phone: "new_phone",
         birthdate: new Date(),
       },
+      dynamicParams: { id: "unregistered_id" },
     };
 
     const httpResponse = await sut.handle(httpRequest);
@@ -205,6 +208,7 @@ describe("UpdateUserProfileController", () => {
         phone: "new_phone",
         birthdate: new Date(),
       },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -227,6 +231,7 @@ describe("UpdateUserProfileController", () => {
         phone: "new_phone",
         birthdate: new Date(),
       },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -250,6 +255,7 @@ describe("UpdateUserProfileController", () => {
         phone: "new_phone",
         birthdate: new Date(),
       },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -274,6 +280,7 @@ describe("UpdateUserProfileController", () => {
         phone: "new_phone",
         birthdate: new Date(),
       },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -297,6 +304,7 @@ describe("UpdateUserProfileController", () => {
         email: "new_email",
         birthdate: new Date(),
       },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -320,6 +328,7 @@ describe("UpdateUserProfileController", () => {
         phone: "invalid_phone",
         birthdate: new Date(),
       },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -342,6 +351,7 @@ describe("UpdateUserProfileController", () => {
         email: "new_email",
         phone: "new_phone",
       },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
@@ -365,6 +375,7 @@ describe("UpdateUserProfileController", () => {
         phone: "new_phone",
         birthdate: new Date("invalid_birthdate"),
       },
+      dynamicParams: { id: user!.id },
     };
 
     const httpResponse: HttpResponse = await sut.handle(httpRequest);
