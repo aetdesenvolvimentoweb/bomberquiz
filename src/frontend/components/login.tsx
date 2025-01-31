@@ -1,5 +1,6 @@
 "use client";
 
+import { LoginProps } from "@/backend/domain/entities";
 import { useRouter } from "next/navigation";
 
 export const LoginButton = () => {
@@ -11,7 +12,7 @@ export const LoginButton = () => {
       body: JSON.stringify({
         email: "andredavid1@gmail.com",
         password: "12345678",
-      }),
+      } as LoginProps),
     });
 
     if (response.ok) {
