@@ -15,7 +15,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-br" suppressHydrationWarning>
-      <body>
+      <body className="w-full min-h-screen flex justify-center items-center">
         {children}
         <SpeedInsights />
       </body>
