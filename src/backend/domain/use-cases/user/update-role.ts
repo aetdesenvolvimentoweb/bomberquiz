@@ -1,5 +1,5 @@
-import { UpdateUserRoleProps } from "../../entities";
+import { UserRole } from "../../entities";
 
 export type UpdateUserRoleUseCase = {
-  updateRole: (updateUserRoleProps: UpdateUserRoleProps) => Promise<void>;
+  updateRole: (props: { id: string; role: UserRole }) => Promise<void>;
 };

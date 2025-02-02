@@ -2,28 +2,28 @@ import { HttpRequest, HttpResponse } from "../../protocols";
 import { AppError } from "@/backend/data/errors";
 import { Controller } from "../../protocols/controller";
 import { HttpResponsesHelper } from "../../helpers/http-responses";
-import { UpdateUserRoleProps } from "@/backend/domain/entities";
 import { UpdateUserRoleService } from "@/backend/data/services";
+import { UserRole } from "@/backend/domain/entities";
 
-interface UpdateUserRoleControllerProps {
+interface ConstructorProps {
   updateUserRoleService: UpdateUserRoleService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
 export class UpdateUserRoleController implements Controller {
-  constructor(private readonly props: UpdateUserRoleControllerProps) {}
+  constructor(private readonly constructorProps: ConstructorProps) {}
 
   public readonly handle = async (
-    request: HttpRequest<UpdateUserRoleProps>
+    request: HttpRequest<{ role: UserRole }>
   ): Promise<HttpResponse> => {
-    const { updateUserRoleService, httpResponsesHelper } = this.props;
+    const { updateUserRoleService, httpResponsesHelper } =
+      this.constructorProps;
 
     try {
-      console.log("body", request.body);
       const id: string = request.dynamicParams.id;
-      const updateUserRoleProps = { ...request.body, id };
+      const role = request.body.role;
 
-      await updateUserRoleService.updateRole(updateUserRoleProps);
+      await updateUserRoleService.updateRole({ id, role });
 
       return httpResponsesHelper.noContent();
     } catch (error) {

@@ -7,11 +7,7 @@ import {
   UpdateRoleValidator,
   UserIdValidator,
 } from "@/backend/data/validators";
-import {
-  UpdateUserRoleProps,
-  UserProps,
-  UserRole,
-} from "@/backend/domain/entities";
+import { UserProps, UserRole } from "@/backend/domain/entities";
 import { IdValidatorStub } from "@/backend/__mocks__";
 import { UpdateUserRoleService } from "@/backend/data/services";
 import { UserRepository } from "@/backend/data/repositories";
@@ -92,9 +88,10 @@ describe("UpdateUserRoleService", () => {
 
   test("should throws if no id is provided", async () => {
     await expect(
+      // @ts-expect-error teste
       sut.updateRole({
         role: "administrador",
-      } as UpdateUserRoleProps)
+      })
     ).rejects.toThrow(validationErrors.missingParamError("id"));
   });
 
@@ -105,7 +102,7 @@ describe("UpdateUserRoleService", () => {
       sut.updateRole({
         id: "invalid-id",
         role: "administrador",
-      } as UpdateUserRoleProps)
+      })
     ).rejects.toThrow(validationErrors.invalidParamError("id"));
   });
 
@@ -114,7 +111,7 @@ describe("UpdateUserRoleService", () => {
       sut.updateRole({
         id: "unregistered-id",
         role: "administrador",
-      } as UpdateUserRoleProps)
+      })
     ).rejects.toThrow(validationErrors.unregisteredError("id"));
   });
 
@@ -123,9 +120,10 @@ describe("UpdateUserRoleService", () => {
     const user = await userRepository.listByEmail(createUserProps().email);
 
     await expect(
+      // @ts-expect-error teste
       sut.updateRole({
         id: user!.id,
-      } as UpdateUserRoleProps)
+      })
     ).rejects.toThrow(validationErrors.missingParamError("função"));
   });
 
@@ -137,7 +135,7 @@ describe("UpdateUserRoleService", () => {
       sut.updateRole({
         id: user!.id,
         role: "invalid-role" as UserRole,
-      } as UpdateUserRoleProps)
+      })
     ).rejects.toThrow(validationErrors.invalidParamError("função"));
   });
 });

@@ -1,10 +1,10 @@
 import {
   UpdateUserPasswordProps,
-  UpdateUserRoleProps,
   User,
   UserMapped,
-  UserProfile,
+  UserProfileProps,
   UserProps,
+  UserRole,
 } from "@/backend/domain/entities";
 import {
   prismaConnectionError,
@@ -115,17 +115,20 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
     return this.userMapper(user);
   };
 
-  public readonly updatePassword = async (
-    updateUserPasswordProps: UpdateUserPasswordProps
-  ) => {
+  public readonly updatePassword = async (updatePasswordProps: {
+    id: string;
+    props: UpdateUserPasswordProps;
+  }) => {
+    const { id, props } = updatePasswordProps;
+
     await this.dbConnect();
     await db.user
       .update({
         where: {
-          id: updateUserPasswordProps.id,
+          id,
         },
         data: {
-          password: updateUserPasswordProps.newPassword,
+          password: props.newPassword,
         },
       })
       .catch(async () => {
@@ -136,20 +139,20 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
       });
   };
 
-  public readonly updateProfile = async (
-    userProfile: UserProfile
-  ): Promise<void> => {
+  public readonly updateProfile = async (updateProfileProps: {
+    id: string;
+    props: UserProfileProps;
+  }): Promise<void> => {
+    const { id, props } = updateProfileProps;
+
     await this.dbConnect();
     await db.user
       .update({
         where: {
-          id: userProfile.id,
+          id,
         },
         data: {
-          name: userProfile.name,
-          email: userProfile.email,
-          phone: userProfile.phone,
-          birthdate: userProfile.birthdate,
+          ...props,
         },
       })
       .catch(async () => {
@@ -160,17 +163,20 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
       });
   };
 
-  public readonly updateRole = async (
-    updateUserRoleProps: UpdateUserRoleProps
-  ) => {
+  public readonly updateRole = async (updateRoleProps: {
+    id: string;
+    role: UserRole;
+  }) => {
+    const { id, role } = updateRoleProps;
+
     await this.dbConnect();
     await db.user
       .update({
         where: {
-          id: updateUserRoleProps.id,
+          id,
         },
         data: {
-          role: updateUserRoleProps.role,
+          role,
         },
       })
       .catch(async () => {

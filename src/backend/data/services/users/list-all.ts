@@ -2,15 +2,15 @@ import { ListAllUsersUseCase } from "@/backend/domain/use-cases";
 import { UserMapped } from "@/backend/domain/entities";
 import { UserRepository } from "../../repositories";
 
-interface ListAllUsersServiceProps {
+interface ConstructorProps {
   userRepository: UserRepository;
 }
 
 export class ListAllUsersService implements ListAllUsersUseCase {
-  constructor(private props: ListAllUsersServiceProps) {}
+  constructor(private constructorProps: ConstructorProps) {}
 
   public readonly listAll = async (): Promise<UserMapped[]> => {
-    const { userRepository } = this.props;
+    const { userRepository } = this.constructorProps;
 
     return await userRepository.listAll();
   };

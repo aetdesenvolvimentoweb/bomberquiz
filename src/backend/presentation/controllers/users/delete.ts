@@ -4,18 +4,18 @@ import { Controller } from "../../protocols/controller";
 import { DeleteUserService } from "@/backend/data/services";
 import { HttpResponsesHelper } from "../../helpers/http-responses";
 
-interface DeleteUserControllerProps {
+interface ConstructorProps {
   deleteUserService: DeleteUserService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
 export class DeleteUserController implements Controller {
-  constructor(private readonly props: DeleteUserControllerProps) {}
+  constructor(private readonly constructorProps: ConstructorProps) {}
 
   public readonly handle = async (
     request: HttpRequest
   ): Promise<HttpResponse> => {
-    const { deleteUserService, httpResponsesHelper } = this.props;
+    const { deleteUserService, httpResponsesHelper } = this.constructorProps;
 
     try {
       const id: string = request.dynamicParams.id;

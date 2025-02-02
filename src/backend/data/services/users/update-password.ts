@@ -7,7 +7,7 @@ import {
 import { UpdateUserPasswordProps } from "@/backend/domain/entities";
 import { UserRepository } from "../../repositories";
 
-interface UpdateUserPasswordServiceProps {
+interface ConstructorProps {
   encrypter: EncrypterUseCase;
   userRepository: UserRepository;
   userIdValidator: UserIdValidatorUseCase;
@@ -15,24 +15,31 @@ interface UpdateUserPasswordServiceProps {
 }
 
 export class UpdateUserPasswordService implements UpdateUserPasswordUseCase {
-  constructor(private props: UpdateUserPasswordServiceProps) {}
+  constructor(private constructorProps: ConstructorProps) {}
 
-  public readonly updatePassword = async (
-    props: UpdateUserPasswordProps
-  ): Promise<void> => {
+  public readonly updatePassword = async (updatePasswordProps: {
+    id: string;
+    props: UpdateUserPasswordProps;
+  }): Promise<void> => {
     const {
       encrypter,
       updatePasswordPropsValidator,
       userRepository,
       userIdValidator,
-    } = this.props;
+    } = this.constructorProps;
+    const { id, props } = updatePasswordProps;
 
-    await userIdValidator.validateUserId(props.id);
-    await updatePasswordPropsValidator.validateUpdatePasswordProps(props);
+    await userIdValidator.validateUserId(id);
+    await updatePasswordPropsValidator.validateUpdatePasswordProps(
+      updatePasswordProps
+    );
     const hashedPassword = await encrypter.encrypt(props.newPassword);
     await userRepository.updatePassword({
-      ...props,
-      newPassword: hashedPassword,
+      ...updatePasswordProps,
+      props: {
+        ...props,
+        newPassword: hashedPassword,
+      },
     });
   };
 }

@@ -15,7 +15,7 @@ import {
   UpdateProfilePropsValidator,
   UserIdValidator,
 } from "@/backend/data/validators";
-import { UserProfile, UserProps } from "@/backend/domain/entities";
+import { UserProfileProps, UserProps } from "@/backend/domain/entities";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { UpdateUserProfileController } from "@/backend/presentation/controllers";
 import { UpdateUserProfileService } from "@/backend/data/services";
@@ -115,14 +115,13 @@ describe("UpdateUserProfileController", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfile> = {
+    const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
-        id: user!.id,
         name: "new_name",
         email: "new_email",
         phone: "new_phone",
         birthdate: new Date(),
-      },
+      } as UserProfileProps,
       dynamicParams: { id: user!.id },
     };
 
@@ -133,14 +132,13 @@ describe("UpdateUserProfileController", () => {
   });
 
   test("should return 400 if no id is provided", async () => {
-    const httpRequest: HttpRequest<UserProfile> = {
-      // @ts-expect-error teste
+    const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
         name: "new_name",
         email: "new_email",
         phone: "new_phone",
         birthdate: new Date(),
-      },
+      } as UserProfileProps,
       dynamicParams: {},
     };
 
@@ -155,14 +153,13 @@ describe("UpdateUserProfileController", () => {
   test("should return 400 if invalid id is provided", async () => {
     jest.spyOn(idValidator, "isValid").mockReturnValue(false);
 
-    const httpRequest: HttpRequest<UserProfile> = {
+    const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
-        id: "invalid_id",
         name: "new_name",
         email: "new_email",
         phone: "new_phone",
         birthdate: new Date(),
-      },
+      } as UserProfileProps,
       dynamicParams: { id: "invalid_id" },
     };
 
@@ -177,14 +174,13 @@ describe("UpdateUserProfileController", () => {
   test("should return 404 if unregistered id is provided", async () => {
     await userRepository.create(createUserProps());
 
-    const httpRequest: HttpRequest<UserProfile> = {
+    const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
-        id: "unregistered_id",
         name: "new_name",
         email: "new_email",
         phone: "new_phone",
         birthdate: new Date(),
-      },
+      } as UserProfileProps,
       dynamicParams: { id: "unregistered_id" },
     };
 
@@ -200,14 +196,12 @@ describe("UpdateUserProfileController", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfile> = {
-      // @ts-expect-error teste
+    const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
-        id: user!.id,
         email: "new_email",
         phone: "new_phone",
         birthdate: new Date(),
-      },
+      } as UserProfileProps,
       dynamicParams: { id: user!.id },
     };
 
@@ -223,14 +217,12 @@ describe("UpdateUserProfileController", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfile> = {
-      // @ts-expect-error teste
+    const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
-        id: user!.id,
         name: "new_name",
         phone: "new_phone",
         birthdate: new Date(),
-      },
+      } as UserProfileProps,
       dynamicParams: { id: user!.id },
     };
 
@@ -247,14 +239,13 @@ describe("UpdateUserProfileController", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfile> = {
+    const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
-        id: user!.id,
         name: "new_name",
         email: "invalid_email",
         phone: "new_phone",
         birthdate: new Date(),
-      },
+      } as UserProfileProps,
       dynamicParams: { id: user!.id },
     };
 
@@ -271,15 +262,14 @@ describe("UpdateUserProfileController", () => {
     await userRepository.create(createUserProps({ email: "another_email" }));
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfile> = {
+    const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
-        id: user!.id,
         name: "new_name",
         // already registered email
         email: "another_email",
         phone: "new_phone",
         birthdate: new Date(),
-      },
+      } as UserProfileProps,
       dynamicParams: { id: user!.id },
     };
 
@@ -296,14 +286,12 @@ describe("UpdateUserProfileController", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfile> = {
-      // @ts-expect-error teste
+    const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
-        id: user!.id,
         name: "new_name",
         email: "new_email",
         birthdate: new Date(),
-      },
+      } as UserProfileProps,
       dynamicParams: { id: user!.id },
     };
 
@@ -320,14 +308,13 @@ describe("UpdateUserProfileController", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfile> = {
+    const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
-        id: user!.id,
         name: "new_name",
         email: "new_email",
         phone: "invalid_phone",
         birthdate: new Date(),
-      },
+      } as UserProfileProps,
       dynamicParams: { id: user!.id },
     };
 
@@ -343,14 +330,12 @@ describe("UpdateUserProfileController", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfile> = {
-      // @ts-expect-error teste
+    const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
-        id: user!.id,
         name: "new_name",
         email: "new_email",
         phone: "new_phone",
-      },
+      } as UserProfileProps,
       dynamicParams: { id: user!.id },
     };
 
@@ -367,14 +352,13 @@ describe("UpdateUserProfileController", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfile> = {
+    const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
-        id: user!.id,
         name: "new_name",
         email: "new_email",
         phone: "new_phone",
         birthdate: new Date("invalid_birthdate"),
-      },
+      } as UserProfileProps,
       dynamicParams: { id: user!.id },
     };
 

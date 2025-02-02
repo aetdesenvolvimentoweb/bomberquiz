@@ -99,10 +99,9 @@ describe("UpdateUserPasswordController", () => {
 
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       body: {
-        id: user!.id,
         oldPassword: "any_password",
         newPassword: "new_password",
-      },
+      } as UpdateUserPasswordProps,
       dynamicParams: { id: user!.id },
     };
 
@@ -114,8 +113,10 @@ describe("UpdateUserPasswordController", () => {
 
   test("should return 400 if no id is provided", async () => {
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
-      // @ts-expect-error teste
-      body: { oldPassword: "any_password", newPassword: "new_password" },
+      body: {
+        oldPassword: "any_password",
+        newPassword: "new_password",
+      } as UpdateUserPasswordProps,
       dynamicParams: {},
     };
 
@@ -132,10 +133,9 @@ describe("UpdateUserPasswordController", () => {
 
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       body: {
-        id: "invalid_id",
         oldPassword: "any_password",
         newPassword: "new_password",
-      },
+      } as UpdateUserPasswordProps,
       dynamicParams: { id: "invalid_id" },
     };
 
@@ -152,10 +152,9 @@ describe("UpdateUserPasswordController", () => {
 
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       body: {
-        id: "unregistered_id",
         oldPassword: "any_password",
         newPassword: "new_password",
-      },
+      } as UpdateUserPasswordProps,
       dynamicParams: { id: "unregistered_id" },
     };
 
@@ -172,8 +171,7 @@ describe("UpdateUserPasswordController", () => {
     const user = await userRepository.listByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
-      // @ts-expect-error teste
-      body: { id: user!.id, newPassword: "new_password" },
+      body: { newPassword: "new_password" } as UpdateUserPasswordProps,
       dynamicParams: { id: user!.id },
     };
 
@@ -191,10 +189,9 @@ describe("UpdateUserPasswordController", () => {
 
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       body: {
-        id: user!.id,
         oldPassword: "invalid",
         newPassword: "new_password",
-      },
+      } as UpdateUserPasswordProps,
       dynamicParams: { id: user!.id },
     };
 
@@ -215,10 +212,9 @@ describe("UpdateUserPasswordController", () => {
 
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       body: {
-        id: user!.id,
         oldPassword: "wrong_password",
         newPassword: "new_password",
-      },
+      } as UpdateUserPasswordProps,
       dynamicParams: { id: user!.id },
     };
 
@@ -235,8 +231,7 @@ describe("UpdateUserPasswordController", () => {
     const user = await userRepository.listByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
-      // @ts-expect-error teste
-      body: { id: user!.id, oldPassword: "any_password" },
+      body: { oldPassword: "any_password" } as UpdateUserPasswordProps,
       dynamicParams: { id: user!.id },
     };
 
@@ -254,10 +249,9 @@ describe("UpdateUserPasswordController", () => {
 
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       body: {
-        id: user!.id,
         oldPassword: "any_password",
         newPassword: "invalid",
-      },
+      } as UpdateUserPasswordProps,
       dynamicParams: { id: user!.id },
     };
 

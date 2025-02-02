@@ -5,18 +5,18 @@ import { CreateUserService } from "@/backend/data/services";
 import { HttpResponsesHelper } from "../../helpers/http-responses";
 import { UserProps } from "@/backend/domain/entities";
 
-interface CreateUserControllerProps {
+interface ConstructorProps {
   createUserService: CreateUserService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
 export class CreateUserController implements Controller {
-  constructor(private readonly props: CreateUserControllerProps) {}
+  constructor(private readonly constructorProps: ConstructorProps) {}
 
   public readonly handle = async (
     request: HttpRequest<UserProps>
   ): Promise<HttpResponse> => {
-    const { createUserService, httpResponsesHelper } = this.props;
+    const { createUserService, httpResponsesHelper } = this.constructorProps;
 
     try {
       const userProps = request.body;

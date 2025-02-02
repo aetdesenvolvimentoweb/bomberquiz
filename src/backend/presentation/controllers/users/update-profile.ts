@@ -3,26 +3,27 @@ import { AppError } from "@/backend/data/errors";
 import { Controller } from "../../protocols/controller";
 import { HttpResponsesHelper } from "../../helpers/http-responses";
 import { UpdateUserProfileService } from "@/backend/data/services";
-import { UserProfile } from "@/backend/domain/entities";
+import { UserProfileProps } from "@/backend/domain/entities";
 
-interface UpdateUserProfileControllerProps {
+interface ConstructorProps {
   updateUserProfileService: UpdateUserProfileService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
 export class UpdateUserProfileController implements Controller {
-  constructor(private readonly props: UpdateUserProfileControllerProps) {}
+  constructor(private readonly constructorProps: ConstructorProps) {}
 
   public readonly handle = async (
-    request: HttpRequest<UserProfile>
+    request: HttpRequest<UserProfileProps>
   ): Promise<HttpResponse> => {
-    const { updateUserProfileService, httpResponsesHelper } = this.props;
+    const { updateUserProfileService, httpResponsesHelper } =
+      this.constructorProps;
 
     try {
       const id = request.dynamicParams.id;
-      const userProfile = { ...request.body, id };
+      const props = request.body;
 
-      await updateUserProfileService.updateProfile(userProfile);
+      await updateUserProfileService.updateProfile({ id, props });
 
       return httpResponsesHelper.noContent();
     } catch (error) {

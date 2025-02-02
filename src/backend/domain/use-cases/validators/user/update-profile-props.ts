@@ -1,5 +1,8 @@
-import { UserProfile } from "../../../entities";
+import { UserProfileProps } from "../../../entities";
 
 export type UpdateProfilePropsValidatorUseCase = {
-  validateUpdateProfileProps: (userProfile: UserProfile) => Promise<void>;
+  validateUpdateProfileProps: (props: {
+    id: string;
+    props: UserProfileProps;
+  }) => Promise<void>;
 };

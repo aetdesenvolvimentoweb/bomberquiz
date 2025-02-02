@@ -4,7 +4,7 @@ import {
   PhoneValidatorUseCase,
   UpdateProfilePropsValidatorUseCase,
 } from "@/backend/domain/use-cases";
-import { UserProfile, UserProfileProps } from "@/backend/domain/entities";
+import { UserProfileProps } from "@/backend/domain/entities";
 import { UserRepository } from "../../repositories";
 import { ValidationErrors } from "../../helpers";
 
@@ -83,18 +83,21 @@ export class UpdateProfilePropsValidator
     }
   };
 
-  public readonly validateUpdateProfileProps = async (
-    userProfile: UserProfile
-  ): Promise<void> => {
+  public readonly validateUpdateProfileProps = async (updateProfileProps: {
+    id: string;
+    props: UserProfileProps;
+  }): Promise<void> => {
+    const { id, props } = updateProfileProps;
+
     this.checkMissingUpdateProfileProps({
-      name: userProfile.name,
-      email: userProfile.email,
-      phone: userProfile.phone,
-      birthdate: userProfile.birthdate,
+      name: props.name,
+      email: props.email,
+      phone: props.phone,
+      birthdate: props.birthdate,
     });
-    this.validateEmail(userProfile.email);
-    await this.checkAlreadyRegisteredEmail(userProfile.id, userProfile.email);
-    this.validatePhone(userProfile.phone);
-    this.validateBirthdate(userProfile.birthdate);
+    this.validateEmail(props.email);
+    await this.checkAlreadyRegisteredEmail(id, props.email);
+    this.validatePhone(props.phone);
+    this.validateBirthdate(props.birthdate);
   };
 }

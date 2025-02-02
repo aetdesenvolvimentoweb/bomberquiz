@@ -6,7 +6,7 @@ import { UpdateUserPasswordProps } from "@/backend/domain/entities";
 import { UserRepository } from "../../repositories";
 import { ValidationErrors } from "../../helpers";
 
-interface UpdatePasswordPropsValidatorDependencies {
+interface ConstructorProps {
   encrypter: EncrypterUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
@@ -19,7 +19,7 @@ export class UpdatePasswordPropsValidator
   private userRepository;
   private validationErrors;
 
-  constructor(private props: UpdatePasswordPropsValidatorDependencies) {
+  constructor(private props: ConstructorProps) {
     this.encrypter = props.encrypter;
     this.userRepository = props.userRepository;
     this.validationErrors = props.validationErrors;
@@ -63,15 +63,16 @@ export class UpdatePasswordPropsValidator
     }
   };
 
-  public readonly validateUpdatePasswordProps = async (
-    updateUserPasswordProps: UpdateUserPasswordProps
-  ): Promise<void> => {
-    this.checkMissingUpdatePasswordProps(updateUserPasswordProps);
-    this.validatePassword(updateUserPasswordProps.oldPassword, "senha atual");
-    await this.checkMatchingPassword(
-      updateUserPasswordProps.id,
-      updateUserPasswordProps.oldPassword
-    );
-    this.validatePassword(updateUserPasswordProps.newPassword, "nova senha");
-  };
+  public readonly validateUpdatePasswordProps =
+    async (updateUserPasswordProps: {
+      id: string;
+      props: UpdateUserPasswordProps;
+    }): Promise<void> => {
+      const { id, props } = updateUserPasswordProps;
+
+      this.checkMissingUpdatePasswordProps(props);
+      this.validatePassword(props.oldPassword, "senha atual");
+      await this.checkMatchingPassword(id, props.oldPassword);
+      this.validatePassword(props.newPassword, "nova senha");
+    };
 }

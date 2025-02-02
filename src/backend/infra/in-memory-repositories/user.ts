@@ -1,10 +1,10 @@
 import {
   UpdateUserPasswordProps,
-  UpdateUserRoleProps,
   User,
   UserMapped,
-  UserProfile,
+  UserProfileProps,
   UserProps,
+  UserRole,
 } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repositories";
 import { randomUUID } from "crypto";
@@ -61,14 +61,16 @@ export class UserRepositoryInMemory implements UserRepository {
     }
   };
 
-  public readonly updatePassword = async (
-    updateUserPasswordProps: UpdateUserPasswordProps
-  ): Promise<void> => {
+  public readonly updatePassword = async (updatePasswordProps: {
+    id: string;
+    props: UpdateUserPasswordProps;
+  }): Promise<void> => {
+    const { id, props } = updatePasswordProps;
     this.users = this.users.map((user) => {
-      if (user.id === updateUserPasswordProps.id) {
+      if (user.id === id) {
         return {
           ...user,
-          password: updateUserPasswordProps.newPassword,
+          password: props.newPassword,
           updatedAt: new Date(),
         };
       }
@@ -77,17 +79,20 @@ export class UserRepositoryInMemory implements UserRepository {
     });
   };
 
-  public readonly updateProfile = async (
-    userProfile: UserProfile
-  ): Promise<void> => {
+  public readonly updateProfile = async (updateProfileProps: {
+    id: string;
+    props: UserProfileProps;
+  }): Promise<void> => {
+    const { id, props } = updateProfileProps;
+
     this.users = this.users.map((user) => {
-      if (user.id === userProfile.id) {
+      if (user.id === id) {
         return {
           ...user,
-          name: userProfile.name,
-          email: userProfile.email,
-          phone: userProfile.phone,
-          birthdate: userProfile.birthdate,
+          name: props.name,
+          email: props.email,
+          phone: props.phone,
+          birthdate: props.birthdate,
           updatedAt: new Date(),
         };
       }
@@ -96,14 +101,17 @@ export class UserRepositoryInMemory implements UserRepository {
     });
   };
 
-  public readonly updateRole = async (
-    updateUserRoleProps: UpdateUserRoleProps
-  ): Promise<void> => {
+  public readonly updateRole = async (updateRoleProps: {
+    id: string;
+    role: UserRole;
+  }): Promise<void> => {
+    const { id, role } = updateRoleProps;
+
     this.users = this.users.map((user) => {
-      if (user.id === updateUserRoleProps.id) {
+      if (user.id === id) {
         return {
           ...user,
-          role: updateUserRoleProps.role,
+          role,
           updatedAt: new Date(),
         };
       }

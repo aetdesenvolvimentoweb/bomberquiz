@@ -5,19 +5,19 @@ import { HttpResponsesHelper } from "../../helpers/http-responses";
 import { ListAllUsersService } from "@/backend/data/services";
 import { UserMapped } from "@/backend/domain/entities";
 
-interface ListAllUsersControllerProps {
+interface ConstructorProps {
   listAllUsersService: ListAllUsersService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
 export class ListAllUsersController implements Controller {
-  constructor(private readonly props: ListAllUsersControllerProps) {}
+  constructor(private readonly constructorProps: ConstructorProps) {}
 
   public readonly handle = async (
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     request: HttpRequest
   ): Promise<HttpResponse<UserMapped[]>> => {
-    const { listAllUsersService, httpResponsesHelper } = this.props;
+    const { listAllUsersService, httpResponsesHelper } = this.constructorProps;
 
     try {
       const users = await listAllUsersService.listAll();

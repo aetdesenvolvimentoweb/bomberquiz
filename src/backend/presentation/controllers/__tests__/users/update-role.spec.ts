@@ -3,11 +3,7 @@ import {
   UpdateRoleValidator,
   UserIdValidator,
 } from "@/backend/data/validators";
-import {
-  UpdateUserRoleProps,
-  UserProps,
-  UserRole,
-} from "@/backend/domain/entities";
+import { UserProps, UserRole } from "@/backend/domain/entities";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { IdValidatorStub } from "@/backend/__mocks__";
 import { IdValidatorUseCase } from "@/backend/domain/use-cases";
@@ -90,8 +86,8 @@ describe("UpdateUserRoleController", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UpdateUserRoleProps> = {
-      body: { id: user!.id, role: "administrador" },
+    const httpRequest: HttpRequest<{ role: UserRole }> = {
+      body: { role: "administrador" },
       dynamicParams: { id: user?.id },
     };
 
@@ -102,8 +98,7 @@ describe("UpdateUserRoleController", () => {
   });
 
   test("should return 400 if no id is provided", async () => {
-    const httpRequest: HttpRequest<UpdateUserRoleProps> = {
-      // @ts-expect-error teste
+    const httpRequest: HttpRequest<{ role: UserRole }> = {
       body: { role: "administrador" },
       dynamicParams: {},
     };
@@ -119,8 +114,8 @@ describe("UpdateUserRoleController", () => {
   test("should return 400 if invalid id is provided", async () => {
     jest.spyOn(idValidator, "isValid").mockReturnValue(false);
 
-    const httpRequest: HttpRequest<UpdateUserRoleProps> = {
-      body: { id: "invalid-id", role: "administrador" },
+    const httpRequest: HttpRequest<{ role: UserRole }> = {
+      body: { role: "administrador" },
       dynamicParams: { id: "invalid-id" },
     };
 
@@ -135,8 +130,8 @@ describe("UpdateUserRoleController", () => {
   test("should return 404 if unregistered id is provided", async () => {
     await userRepository.create(createUserProps());
 
-    const httpRequest: HttpRequest<UpdateUserRoleProps> = {
-      body: { id: "unregistered_id", role: "administrador" },
+    const httpRequest: HttpRequest<{ role: UserRole }> = {
+      body: { role: "administrador" },
       dynamicParams: { id: "unregistered-id" },
     };
 
@@ -152,9 +147,9 @@ describe("UpdateUserRoleController", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UpdateUserRoleProps> = {
+    const httpRequest: HttpRequest<{ role: UserRole }> = {
       // @ts-expect-error teste
-      body: { id: user!.id },
+      body: {},
       dynamicParams: { id: user?.id },
     };
 
@@ -170,8 +165,8 @@ describe("UpdateUserRoleController", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.listByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UpdateUserRoleProps> = {
-      body: { id: user!.id, role: "invalid-role" as UserRole },
+    const httpRequest: HttpRequest<{ role: UserRole }> = {
+      body: { role: "invalid-role" as UserRole },
       dynamicParams: { id: user?.id },
     };
 

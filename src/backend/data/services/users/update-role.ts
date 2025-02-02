@@ -3,25 +3,28 @@ import {
   UpdateUserRoleUseCase,
   UserIdValidatorUseCase,
 } from "@/backend/domain/use-cases";
-import { UpdateUserRoleProps } from "@/backend/domain/entities";
 import { UserRepository } from "../../repositories";
+import { UserRole } from "@prisma/client";
 
-interface UpdateUserRoleServiceProps {
+interface constructorProps {
   userRepository: UserRepository;
   userIdValidator: UserIdValidatorUseCase;
   updateRoleValidator: UpdateRoleValidatorUseCase;
 }
 
 export class UpdateUserRoleService implements UpdateUserRoleUseCase {
-  constructor(private props: UpdateUserRoleServiceProps) {}
+  constructor(private constructorProps: constructorProps) {}
 
-  public readonly updateRole = async (
-    props: UpdateUserRoleProps
-  ): Promise<void> => {
-    const { updateRoleValidator, userRepository, userIdValidator } = this.props;
+  public readonly updateRole = async (updateRoleProps: {
+    id: string;
+    role: UserRole;
+  }): Promise<void> => {
+    const { updateRoleValidator, userRepository, userIdValidator } =
+      this.constructorProps;
+    const { id, role } = updateRoleProps;
 
-    await userIdValidator.validateUserId(props.id);
-    await updateRoleValidator.validateUpdateRole(props.role);
-    await userRepository.updateRole(props);
+    await userIdValidator.validateUserId(id);
+    await updateRoleValidator.validateUpdateRole(role);
+    await userRepository.updateRole(updateRoleProps);
   };
 }

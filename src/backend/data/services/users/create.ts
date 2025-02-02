@@ -6,21 +6,21 @@ import {
 import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "../../repositories";
 
-interface CreateUserServiceProps {
+interface ConstructorProps {
   encrypter: EncrypterUseCase;
   userRepository: UserRepository;
   userCreationPropsValidator: UserCretionPropsValidatorUseCase;
 }
 
 export class CreateUserService implements CreateUserUseCase {
-  constructor(private props: CreateUserServiceProps) {}
+  constructor(private constructorProps: ConstructorProps) {}
 
-  public readonly create = async (userProps: UserProps): Promise<void> => {
+  public readonly create = async (createProps: UserProps): Promise<void> => {
     const { encrypter, userRepository, userCreationPropsValidator } =
-      this.props;
+      this.constructorProps;
 
-    await userCreationPropsValidator.validateUserCreationProps(userProps);
-    const hashedPassword = await encrypter.encrypt(userProps.password);
-    await userRepository.create({ ...userProps, password: hashedPassword });
+    await userCreationPropsValidator.validateUserCreationProps(createProps);
+    const hashedPassword = await encrypter.encrypt(createProps.password);
+    await userRepository.create({ ...createProps, password: hashedPassword });
   };
 }

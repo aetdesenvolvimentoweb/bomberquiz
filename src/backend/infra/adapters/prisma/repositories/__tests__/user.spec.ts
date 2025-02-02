@@ -98,8 +98,10 @@ describe("PrismaUserRepositoryAdapter", () => {
     await expect(
       sut.updatePassword({
         id: user!.id,
-        oldPassword: "any_password",
-        newPassword: "new_password",
+        props: {
+          oldPassword: "any_password",
+          newPassword: "new_password",
+        },
       })
     ).resolves.not.toThrow();
   });
@@ -111,10 +113,12 @@ describe("PrismaUserRepositoryAdapter", () => {
     await expect(
       sut.updateProfile({
         id: user!.id,
-        name: "new_name",
-        email: "new_email",
-        phone: "new_phone",
-        birthdate: new Date(),
+        props: {
+          name: "new_name",
+          email: "new_email",
+          phone: "new_phone",
+          birthdate: new Date(),
+        },
       })
     ).resolves.not.toThrow();
   });

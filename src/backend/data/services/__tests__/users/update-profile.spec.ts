@@ -16,7 +16,7 @@ import {
   UpdateProfilePropsValidator,
   UserIdValidator,
 } from "@/backend/data/validators";
-import { UserProfile, UserProps } from "@/backend/domain/entities";
+import { UserProfileProps, UserProps } from "@/backend/domain/entities";
 import { UpdateUserProfileService } from "@/backend/data/services";
 import { UserRepository } from "@/backend/data/repositories";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
@@ -108,22 +108,27 @@ describe("UpdateUserProfileService", () => {
     await expect(
       sut.updateProfile({
         id: user!.id,
-        name: "new_name",
-        email: "new_email",
-        phone: "new_phone",
-        birthdate: new Date(),
-      } as UserProfile)
+        props: {
+          name: "new_name",
+          email: "new_email",
+          phone: "new_phone",
+          birthdate: new Date(),
+        } as UserProfileProps,
+      })
     ).resolves.not.toThrow();
   });
 
   test("should throws if no id is provided", async () => {
     await expect(
+      // @ts-expect-error teste
       sut.updateProfile({
-        name: "new_name",
-        email: "new_email",
-        phone: "new_phone",
-        birthdate: new Date(),
-      } as UserProfile)
+        props: {
+          name: "new_name",
+          email: "new_email",
+          phone: "new_phone",
+          birthdate: new Date(),
+        } as UserProfileProps,
+      })
     ).rejects.toThrow(validationErrors.missingParamError("id"));
   });
 
@@ -132,11 +137,13 @@ describe("UpdateUserProfileService", () => {
     await expect(
       sut.updateProfile({
         id: "invalid-id",
-        name: "new_name",
-        email: "new_email",
-        phone: "new_phone",
-        birthdate: new Date(),
-      } as UserProfile)
+        props: {
+          name: "new_name",
+          email: "new_email",
+          phone: "new_phone",
+          birthdate: new Date(),
+        } as UserProfileProps,
+      })
     ).rejects.toThrow(validationErrors.invalidParamError("id"));
   });
 
@@ -144,11 +151,13 @@ describe("UpdateUserProfileService", () => {
     await expect(
       sut.updateProfile({
         id: "unregistered-id",
-        name: "new_name",
-        email: "new_email",
-        phone: "new_phone",
-        birthdate: new Date(),
-      } as UserProfile)
+        props: {
+          name: "new_name",
+          email: "new_email",
+          phone: "new_phone",
+          birthdate: new Date(),
+        } as UserProfileProps,
+      })
     ).rejects.toThrow(validationErrors.unregisteredError("id"));
   });
 
@@ -159,10 +168,12 @@ describe("UpdateUserProfileService", () => {
     await expect(
       sut.updateProfile({
         id: user!.id,
-        email: "new_email",
-        phone: "new_phone",
-        birthdate: new Date(),
-      } as UserProfile)
+        props: {
+          email: "new_email",
+          phone: "new_phone",
+          birthdate: new Date(),
+        } as UserProfileProps,
+      })
     ).rejects.toThrow(validationErrors.missingParamError("nome"));
   });
 
@@ -173,10 +184,12 @@ describe("UpdateUserProfileService", () => {
     await expect(
       sut.updateProfile({
         id: user!.id,
-        name: "new_name",
-        phone: "new_phone",
-        birthdate: new Date(),
-      } as UserProfile)
+        props: {
+          name: "new_name",
+          phone: "new_phone",
+          birthdate: new Date(),
+        } as UserProfileProps,
+      })
     ).rejects.toThrow(validationErrors.missingParamError("email"));
   });
 
@@ -188,11 +201,13 @@ describe("UpdateUserProfileService", () => {
     await expect(
       sut.updateProfile({
         id: user!.id,
-        name: "new_name",
-        email: "new_email",
-        phone: "new_phone",
-        birthdate: new Date(),
-      } as UserProfile)
+        props: {
+          name: "new_name",
+          email: "new_email",
+          phone: "new_phone",
+          birthdate: new Date(),
+        } as UserProfileProps,
+      })
     ).rejects.toThrow(validationErrors.invalidParamError("email"));
   });
 
@@ -204,12 +219,14 @@ describe("UpdateUserProfileService", () => {
     await expect(
       sut.updateProfile({
         id: user!.id,
-        name: "new_name",
-        // email already registered
-        email: "another_email",
-        phone: "new_phone",
-        birthdate: new Date(),
-      } as UserProfile)
+        props: {
+          name: "new_name",
+          // email already registered
+          email: "another_email",
+          phone: "new_phone",
+          birthdate: new Date(),
+        } as UserProfileProps,
+      })
     ).rejects.toThrow(
       validationErrors.duplicatedKeyError({ entity: "usuário", key: "email" })
     );
@@ -222,10 +239,12 @@ describe("UpdateUserProfileService", () => {
     await expect(
       sut.updateProfile({
         id: user!.id,
-        name: "new_name",
-        email: "new_email",
-        birthdate: new Date(),
-      } as UserProfile)
+        props: {
+          name: "new_name",
+          email: "new_email",
+          birthdate: new Date(),
+        } as UserProfileProps,
+      })
     ).rejects.toThrow(validationErrors.missingParamError("telefone"));
   });
 
@@ -238,11 +257,13 @@ describe("UpdateUserProfileService", () => {
     await expect(
       sut.updateProfile({
         id: user!.id,
-        name: "new_name",
-        email: "new_email",
-        phone: "invalid-phone",
-        birthdate: new Date(),
-      } as UserProfile)
+        props: {
+          name: "new_name",
+          email: "new_email",
+          phone: "invalid-phone",
+          birthdate: new Date(),
+        } as UserProfileProps,
+      })
     ).rejects.toThrow(validationErrors.invalidParamError("telefone"));
   });
 
@@ -253,10 +274,12 @@ describe("UpdateUserProfileService", () => {
     await expect(
       sut.updateProfile({
         id: user!.id,
-        name: "new_name",
-        email: "new_email",
-        phone: "new_phone",
-      } as UserProfile)
+        props: {
+          name: "new_name",
+          email: "new_email",
+          phone: "new_phone",
+        } as UserProfileProps,
+      })
     ).rejects.toThrow(validationErrors.missingParamError("data de nascimento"));
   });
 
@@ -269,11 +292,13 @@ describe("UpdateUserProfileService", () => {
     await expect(
       sut.updateProfile({
         id: user!.id,
-        name: "new_name",
-        email: "new_email",
-        phone: "new_phone",
-        birthdate: new Date("invalid-date"),
-      } as UserProfile)
+        props: {
+          name: "new_name",
+          email: "new_email",
+          phone: "new_phone",
+          birthdate: new Date("invalid-date"),
+        } as UserProfileProps,
+      })
     ).rejects.toThrow(validationErrors.invalidParamError("data de nascimento"));
   });
 });

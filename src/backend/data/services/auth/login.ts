@@ -5,13 +5,13 @@ import {
 } from "@/backend/domain/use-cases";
 import { LoginProps } from "@/backend/domain/entities";
 
-interface LoginServiceProps {
+interface ConstructorProps {
   loginValidator: LoginValidatorUseCase;
   tokenHandler: TokenHandlerUseCase;
 }
 
 export class LoginService implements LoginUseCase {
-  constructor(private props: LoginServiceProps) {}
+  constructor(private props: ConstructorProps) {}
 
   public readonly login = async (loginProps: LoginProps): Promise<string> => {
     const { loginValidator, tokenHandler } = this.props;

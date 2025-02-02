@@ -3,24 +3,29 @@ import {
   UpdateUserProfileUseCase,
   UserIdValidatorUseCase,
 } from "@/backend/domain/use-cases";
-import { UserProfile } from "@/backend/domain/entities";
+import { UserProfileProps } from "@/backend/domain/entities";
 import { UserRepository } from "../../repositories";
 
-interface UpdateUserProfileServiceProps {
+interface constructorProps {
   userRepository: UserRepository;
   userIdValidator: UserIdValidatorUseCase;
   updateProfilePropsValidator: UpdateProfilePropsValidatorUseCase;
 }
 
 export class UpdateUserProfileService implements UpdateUserProfileUseCase {
-  constructor(private props: UpdateUserProfileServiceProps) {}
+  constructor(private constructorProps: constructorProps) {}
 
-  public readonly updateProfile = async (props: UserProfile): Promise<void> => {
+  public readonly updateProfile = async (updateProfileProps: {
+    id: string;
+    props: UserProfileProps;
+  }): Promise<void> => {
     const { updateProfilePropsValidator, userRepository, userIdValidator } =
-      this.props;
+      this.constructorProps;
 
-    await userIdValidator.validateUserId(props.id);
-    await updateProfilePropsValidator.validateUpdateProfileProps(props);
-    await userRepository.updateProfile(props);
+    await userIdValidator.validateUserId(updateProfileProps.id);
+    await updateProfilePropsValidator.validateUpdateProfileProps(
+      updateProfileProps
+    );
+    await userRepository.updateProfile(updateProfileProps);
   };
 }

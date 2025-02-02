@@ -1,5 +1,8 @@
-import { UserProfile } from "../../entities";
+import { UserProfileProps } from "../../entities";
 
 export type UpdateUserProfileUseCase = {
-  updateProfile: (userProfile: UserProfile) => Promise<void>;
+  updateProfile: (props: {
+    id: string;
+    props: UserProfileProps;
+  }) => Promise<void>;
 };

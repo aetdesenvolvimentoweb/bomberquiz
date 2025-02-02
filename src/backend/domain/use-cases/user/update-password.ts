@@ -1,7 +1,8 @@
 import { UpdateUserPasswordProps } from "../../entities";
 
 export type UpdateUserPasswordUseCase = {
-  updatePassword: (
-    updateUserPasswordProps: UpdateUserPasswordProps
-  ) => Promise<void>;
+  updatePassword: (props: {
+    id: string;
+    props: UpdateUserPasswordProps;
+  }) => Promise<void>;
 };

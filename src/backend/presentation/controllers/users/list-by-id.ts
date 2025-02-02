@@ -5,18 +5,18 @@ import { HttpResponsesHelper } from "../../helpers/http-responses";
 import { ListUserByIdService } from "@/backend/data/services";
 import { UserMapped } from "@/backend/domain/entities";
 
-interface ListUserByIdControllerProps {
+interface ConstructorProps {
   listUserByIdService: ListUserByIdService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
 export class ListUserByIdController implements Controller {
-  constructor(private readonly props: ListUserByIdControllerProps) {}
+  constructor(private readonly constructroProps: ConstructorProps) {}
 
   public readonly handle = async (
     request: HttpRequest
   ): Promise<HttpResponse> => {
-    const { listUserByIdService, httpResponsesHelper } = this.props;
+    const { listUserByIdService, httpResponsesHelper } = this.constructroProps;
 
     try {
       const id: string = request.dynamicParams.id;

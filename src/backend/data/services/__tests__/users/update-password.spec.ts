@@ -9,8 +9,8 @@ import {
   UpdatePasswordPropsValidator,
   UserIdValidator,
 } from "@/backend/data/validators";
-import { UpdateUserPasswordProps, UserProps } from "@/backend/domain/entities";
-import { UpdateUserPasswordService } from "@/backend/data/services";
+import { UpdateUserPasswordService } from "../../users";
+import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repositories";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 import { ValidationErrors } from "@/backend/data/helpers";
@@ -91,18 +91,23 @@ describe("UpdateUserPasswordService", () => {
     await expect(
       sut.updatePassword({
         id: user!.id,
-        oldPassword: "any_password",
-        newPassword: "new_password",
+        props: {
+          oldPassword: "any_password",
+          newPassword: "new_password",
+        },
       })
     ).resolves.not.toThrow();
   });
 
   test("should throw if no id is provided", async () => {
     await expect(
+      // @ts-expect-error teste
       sut.updatePassword({
-        oldPassword: "any_password",
-        newPassword: "new_password",
-      } as UpdateUserPasswordProps)
+        props: {
+          oldPassword: "any_password",
+          newPassword: "new_password",
+        },
+      })
     ).rejects.toThrow(validationErrors.missingParamError("id"));
   });
 
@@ -112,8 +117,10 @@ describe("UpdateUserPasswordService", () => {
     await expect(
       sut.updatePassword({
         id: "invalid-id",
-        oldPassword: "any_password",
-        newPassword: "new_password",
+        props: {
+          oldPassword: "any_password",
+          newPassword: "new_password",
+        },
       })
     ).rejects.toThrow(validationErrors.invalidParamError("id"));
   });
@@ -122,8 +129,10 @@ describe("UpdateUserPasswordService", () => {
     await expect(
       sut.updatePassword({
         id: "unregistered-id",
-        oldPassword: "any_password",
-        newPassword: "new_password",
+        props: {
+          oldPassword: "any_password",
+          newPassword: "new_password",
+        },
       })
     ).rejects.toThrow(validationErrors.unregisteredError("id"));
   });
@@ -135,8 +144,11 @@ describe("UpdateUserPasswordService", () => {
     await expect(
       sut.updatePassword({
         id: user!.id,
-        newPassword: "new_password",
-      } as UpdateUserPasswordProps)
+        //@ts-expect-error teste
+        props: {
+          newPassword: "new_password",
+        },
+      })
     ).rejects.toThrow(validationErrors.missingParamError("senha atual"));
   });
 
@@ -147,9 +159,11 @@ describe("UpdateUserPasswordService", () => {
     await expect(
       sut.updatePassword({
         id: user!.id,
-        oldPassword: "invalid",
-        newPassword: "new_password",
-      } as UpdateUserPasswordProps)
+        props: {
+          oldPassword: "invalid",
+          newPassword: "new_password",
+        },
+      })
     ).rejects.toThrow(validationErrors.invalidParamError("senha atual"));
   });
 
@@ -165,9 +179,11 @@ describe("UpdateUserPasswordService", () => {
     await expect(
       sut.updatePassword({
         id: user!.id,
-        oldPassword: "wrong_password",
-        newPassword: "new_password",
-      } as UpdateUserPasswordProps)
+        props: {
+          oldPassword: "wrong_password",
+          newPassword: "new_password",
+        },
+      })
     ).rejects.toThrow(validationErrors.wrongPasswordError("senha atual"));
   });
 
@@ -179,8 +195,11 @@ describe("UpdateUserPasswordService", () => {
     await expect(
       sut.updatePassword({
         id: user!.id,
-        oldPassword: "any_password",
-      } as UpdateUserPasswordProps)
+        //@ts-expect-error teste
+        props: {
+          oldPassword: "any_password",
+        },
+      })
     ).rejects.toThrow(validationErrors.missingParamError("nova senha"));
   });
 
@@ -192,9 +211,11 @@ describe("UpdateUserPasswordService", () => {
     await expect(
       sut.updatePassword({
         id: user!.id,
-        oldPassword: "any_password",
-        newPassword: "invalid",
-      } as UpdateUserPasswordProps)
+        props: {
+          oldPassword: "any_password",
+          newPassword: "invalid",
+        },
+      })
     ).rejects.toThrow(validationErrors.invalidParamError("nova senha"));
   });
 });
