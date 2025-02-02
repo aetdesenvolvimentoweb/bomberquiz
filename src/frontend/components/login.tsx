@@ -17,6 +17,7 @@ export const LoginButton = () => {
 
     if (response.ok) {
       router.push("/dashboard");
+      router.refresh();
     }
 
     const errorMessage = await response.json();

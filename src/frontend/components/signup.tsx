@@ -24,6 +24,7 @@ export const SignupButton = () => {
       console.log(message);
       if (!message.body.error) {
         router.push("/login");
+        router.refresh();
       }
     }
   };

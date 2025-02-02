@@ -17,6 +17,7 @@ export const LogoutButton = () => {
     }
 
     router.push("/login");
+    router.refresh();
   };
 
   return (
