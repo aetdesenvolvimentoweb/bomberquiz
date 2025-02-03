@@ -1,6 +1,7 @@
 import "@/frontend/styles/globals.css";
 import type { Metadata } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { ThemeProvider } from "next-themes";
 
 export const metadata: Metadata = {
   title: "BomberQuiz",
@@ -15,8 +16,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-br" suppressHydrationWarning>
-      <body className="w-full min-h-screen flex justify-center items-center">
-        {children}
+      <body>
+        <ThemeProvider
+          attribute={"class"}
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
         <SpeedInsights />
       </body>
     </html>

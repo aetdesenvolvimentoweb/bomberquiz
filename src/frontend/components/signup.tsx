@@ -31,7 +31,7 @@ export const SignupButton = () => {
 
   return (
     <button
-      className="w-full bg-green-500 hover:bg-green-700 text-white py-2 px-6 rounded-md transition-colors duration-150"
+      className="w-fit bg-green-500 hover:bg-green-700 text-white py-2 px-6 rounded-md transition-colors duration-150"
       onClick={handleSignup}
     >
       Cadastrar

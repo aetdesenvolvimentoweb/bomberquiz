@@ -4,7 +4,9 @@ export const DashboardPage = () => {
   return (
     <>
       <h1 className="text-center text-3xl pb-4">BomberQuiz</h1>
-      <LogoutButton />
+      <div className="flex items-center justify-center">
+        <LogoutButton />
+      </div>
     </>
   );
 };

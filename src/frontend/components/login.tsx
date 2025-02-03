@@ -26,7 +26,7 @@ export const LoginButton = () => {
 
   return (
     <button
-      className="w-full bg-blue-500 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors duration-150"
+      className="w-fit bg-blue-500 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors duration-150"
       onClick={handleLogin}
     >
       Entrar
