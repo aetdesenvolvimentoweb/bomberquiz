@@ -129,7 +129,7 @@ const Header = ({
         <nav className="hidden justify-between lg:flex items-center p-2">
           <div className="flex items-center gap-6">
             <Link href={logo.url} className="flex items-center gap-2">
-              <Image src={logo.src} className="w-8" alt={logo.alt} />
+              <Image src={logo.src} alt={logo.alt} width={32} height={32} />
               <span className="text-lg font-semibold">{logo.title}</span>
             </Link>
             <div className="flex items-center">
@@ -174,7 +174,7 @@ const Header = ({
         <div className="block lg:hidden">
           <div className="flex items-center justify-between">
             <Link href={logo.url} className="flex items-center gap-2">
-              <Image src={logo.src} className="w-8" alt={logo.alt} />
+              <Image src={logo.src} alt={logo.alt} width={32} height={32} />
               <span className="text-lg font-semibold">{logo.title}</span>
             </Link>
             <Sheet>
@@ -187,7 +187,12 @@ const Header = ({
                 <SheetHeader>
                   <SheetTitle>
                     <Link href={logo.url} className="flex items-center gap-2">
-                      <Image src={logo.src} className="w-8" alt={logo.alt} />
+                      <Image
+                        src={logo.src}
+                        alt={logo.alt}
+                        width={32}
+                        height={32}
+                      />
                       <span className="text-lg font-semibold">
                         {logo.title}
                       </span>
