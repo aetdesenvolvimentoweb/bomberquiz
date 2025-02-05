@@ -26,6 +26,7 @@ export const SignupButton = () => {
         router.push("/login");
         router.refresh();
       }
+      //toastify de erro
     }
   };
 

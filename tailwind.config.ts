@@ -73,6 +73,11 @@ export default {
             height: "0",
           },
         },
+        spin: {
+          to: {
+            transform: "rotate(360deg) 1s linear infinite",
+          },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",

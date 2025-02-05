@@ -1,5 +1,5 @@
 import "@/frontend/styles/globals.css";
-import { Header } from "@/frontend/components/header";
+import { Header } from "@/frontend/components/header/public";
 
 export default function RootLayout({
   children,
