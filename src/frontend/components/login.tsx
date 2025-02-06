@@ -1,5 +1,6 @@
 "use client";
 
+import { FiLogIn } from "react-icons/fi";
 import { LoginProps } from "@/backend/domain/entities";
 import { useRouter } from "next/navigation";
 
@@ -26,10 +27,12 @@ export const LoginButton = () => {
 
   return (
     <button
-      className="w-fit bg-blue-500 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors duration-150"
+      className="flex items-center justify-center gap-2 min-w-8 min-h-8 bg-green-300 hover:bg-green-200 font-semibold py-2 px-3 rounded-md text-lg md:text-base"
+      title="Entrar"
       onClick={handleLogin}
     >
-      Entrar
+      <FiLogIn className="w-6 h-6" />
+      <span className="hidden md:block">Entrar</span>
     </button>
   );
 };

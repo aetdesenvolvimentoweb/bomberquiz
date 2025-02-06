@@ -1,5 +1,6 @@
 "use client";
 
+import { FiLogOut } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 
 export const LogoutButton = () => {
@@ -22,10 +23,12 @@ export const LogoutButton = () => {
 
   return (
     <button
-      className="w-fit bg-red-500 hover:bg-red-700 text-white py-2 px-6 rounded-md transition-colors duration-150"
+      className="flex items-center justify-center gap-2 min-w-8 min-h-8 bg-red-600 hover:bg-red-500 text-white font-semibold py-2 px-3 rounded-md text-lg md:text-base"
+      title="Sair"
       onClick={handleLogout}
     >
-      Sair
+      <FiLogOut className="w-6 h-6" />
+      <span className="hidden md:block">Sair</span>
     </button>
   );
 };

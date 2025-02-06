@@ -1,5 +1,6 @@
 "use client";
 
+import { FiUserPlus } from "react-icons/fi";
 import { UserProps } from "@/backend/domain/entities";
 import { useRouter } from "next/navigation";
 
@@ -32,10 +33,12 @@ export const SignupButton = () => {
 
   return (
     <button
-      className="w-fit bg-green-500 hover:bg-green-700 text-white py-2 px-6 rounded-md transition-colors duration-150"
+      className="flex items-center justify-center gap-2 min-w-8 min-h-8 bg-blue-300 hover:bg-blue-200 font-semibold py-2 px-3 rounded-md text-lg md:text-base"
+      title="Cadastrar"
       onClick={handleSignup}
     >
-      Cadastrar
+      <FiUserPlus className="w-6 h-6" />
+      <span className="hidden md:block">Cadastrar</span>
     </button>
   );
 };
