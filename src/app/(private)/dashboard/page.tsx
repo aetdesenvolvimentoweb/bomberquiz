@@ -1,7 +1,11 @@
 import { DashboardPage } from "@/frontend/pages/dashboard";
 
 const getUsers = async () => {
-  const response = await fetch("http://localhost:3000/api/users", {
+  const url =
+    process.env.NODE_ENV === "production"
+      ? "https://bomberquiz.vercel.app"
+      : "http://localhost:3000";
+  const response = await fetch(`${url}/api/users`, {
     method: "GET",
   });
   const users = await response.json();
