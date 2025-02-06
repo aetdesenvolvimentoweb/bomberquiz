@@ -1,21 +1,17 @@
-import { FaBomb } from "react-icons/fa";
+import Image from "next/image";
 import Link from "next/link";
+import brandImage from "@/frontend/assets/images/bomberquiz.jpg";
 
 export const Brand = () => {
   return (
-    <Link href={"/"}>
-      <div className="flex items-center gap-1">
-        <div>
-          {/* aqui vai uma image logo */}
-          <FaBomb className="w-6 h-6" />
-        </div>
-        <div className="flex items-center gap-[1.5px]">
-          <h2 className="text-xl font-semibold uppercase">Bomber</h2>
-          <h2 className="font-semibold bg-gray-900 text-white py-0.5 px-2 rounded-lg">
-            Quiz
-          </h2>
-        </div>
-      </div>
+    <Link className="focus:outline-none m-0 p-0" href={"/"}>
+      <Image
+        className="rounded-md"
+        src={brandImage}
+        width={96}
+        height={96}
+        alt="logo"
+      />
     </Link>
   );
 };

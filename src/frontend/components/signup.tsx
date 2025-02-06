@@ -33,7 +33,7 @@ export const SignupButton = () => {
 
   return (
     <button
-      className="flex items-center justify-center gap-2 min-w-8 min-h-8 bg-blue-300 hover:bg-blue-200 font-semibold py-2 px-3 rounded-md text-lg md:text-base"
+      className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 focus:bg-blue-500 font-semibold text-white py-2 px-3"
       title="Cadastrar"
       onClick={handleSignup}
     >

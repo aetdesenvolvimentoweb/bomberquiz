@@ -27,7 +27,7 @@ export const LoginButton = () => {
 
   return (
     <button
-      className="flex items-center justify-center gap-2 min-w-8 min-h-8 bg-green-300 hover:bg-green-200 font-semibold py-2 px-3 rounded-md text-lg md:text-base"
+      className="flex items-center justify-center gap-2 p-1 md:px-2 font-semibold bg-green-700 hover:bg-green-800 text-white border-2 border-transparent hover:border-white focus:border-white"
       title="Entrar"
       onClick={handleLogin}
     >
