@@ -1,4 +1,5 @@
 import "@/frontend/styles/globals.css";
+import { ErrorBoundary } from "@/frontend/components/error-boundary";
 import type { Metadata } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "next-themes";
@@ -17,14 +18,16 @@ export default function RootLayout({
   return (
     <html lang="pt-br" suppressHydrationWarning>
       <body>
-        <ThemeProvider
-          attribute={"class"}
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {children}
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider
+            attribute={"class"}
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
+        </ErrorBoundary>
         <SpeedInsights />
       </body>
     </html>
