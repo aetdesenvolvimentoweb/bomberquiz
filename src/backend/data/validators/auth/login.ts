@@ -62,7 +62,10 @@ export class LoginValidator implements LoginValidatorUseCase {
     }
 
     if (
-      !(await this.encrypter.verify(loginProps.password, userLogged.password!))
+      !(await this.encrypter.verify({
+        password: loginProps.password,
+        passwordHash: userLogged.password!,
+      }))
     ) {
       throw this.validationErrors.unauthorizedError();
     }

@@ -6,7 +6,10 @@ export class EncrypterStub implements EncrypterUseCase {
     return "hashed_password";
   }
 
-  async verify(password: string, passwordHash: string): Promise<boolean> {
+  async verify(props: {
+    password: string;
+    passwordHash: string;
+  }): Promise<boolean> {
     return true;
   }
 }

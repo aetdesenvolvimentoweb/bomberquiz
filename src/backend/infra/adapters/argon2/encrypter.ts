@@ -6,10 +6,13 @@ export class Argon2EncrypterAdapter implements EncrypterUseCase {
     return await argon2.hash(password);
   };
 
-  public readonly verify = async (
-    password: string,
-    passwordHash: string
-  ): Promise<boolean> => {
+  public readonly verify = async ({
+    password,
+    passwordHash,
+  }: {
+    password: string;
+    passwordHash: string;
+  }): Promise<boolean> => {
     return await argon2.verify(passwordHash, password);
   };
 }

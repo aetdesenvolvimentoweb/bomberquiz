@@ -58,7 +58,9 @@ export class UpdatePasswordPropsValidator
   ): Promise<void> => {
     const userMapped = await this.userRepository.findById(id);
     const user = await this.userRepository.findByEmail(userMapped!.email);
-    if (!(await this.encrypter.verify(password, user!.password))) {
+    if (
+      !(await this.encrypter.verify({ password, passwordHash: user!.password }))
+    ) {
       throw this.validationErrors.wrongPasswordError("senha atual");
     }
   };
