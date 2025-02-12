@@ -6,26 +6,25 @@ import {
 import {
   UpdatePasswordPropsValidator,
   UserIdValidator,
-} from "@/backend/data/validators";
-import { UpdateUserPasswordService } from "@/backend/data/services";
-import { ValidationErrors } from "@/backend/data/helpers";
+} from "@/backend/data/use-cases";
+import { UserUpdatePasswordService } from "@/backend/data/services";
 
-export const makeUpdateUserPasswordService = (): UpdateUserPasswordService => {
+export const makeUserUpdatePasswordService = (): UserUpdatePasswordService => {
   const encrypter = new Argon2EncrypterAdapter();
   const userRepository = new PrismaUserRepositoryAdapter();
-  const validationErrors = new ValidationErrors();
+  const ErrorsValidation = new ErrorsValidation();
   const updatePasswordPropsValidator = new UpdatePasswordPropsValidator({
     encrypter,
     userRepository,
-    validationErrors,
+    ErrorsValidation,
   });
   const idValidator = new MongoDBIdValidator();
   const userIdValidator = new UserIdValidator({
     idValidator,
     userRepository,
-    validationErrors,
+    ErrorsValidation,
   });
-  return new UpdateUserPasswordService({
+  return new UserUpdatePasswordService({
     encrypter,
     userRepository,
     updatePasswordPropsValidator,

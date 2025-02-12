@@ -1,12 +1,12 @@
 import { HttpRequest, HttpResponse } from "../../protocols";
-import { AppError } from "@/backend/data/errors";
 import { Controller } from "../../protocols/controller";
-import { HttpResponsesHelper } from "../../helpers/http-responses";
-import { ListUserByIdService } from "@/backend/data/services";
+import { ErrorApp } from "@/backend/data/shared/errors";
+import { HttpResponsesHelper } from "../../helpers";
+import { UserFindByIdService } from "@/backend/data/services";
 import { UserMapped } from "@/backend/domain/entities";
 
 interface ConstructorProps {
-  listUserByIdService: ListUserByIdService;
+  userFindByIdService: UserFindByIdService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
@@ -16,16 +16,16 @@ export class ListUserByIdController implements Controller {
   public readonly handle = async (
     request: HttpRequest
   ): Promise<HttpResponse> => {
-    const { listUserByIdService, httpResponsesHelper } = this.constructroProps;
+    const { userFindByIdService, httpResponsesHelper } = this.constructroProps;
 
     try {
       const id: string = request.dynamicParams.id;
 
-      const user: UserMapped | null = await listUserByIdService.findById(id);
+      const user: UserMapped | null = await userFindByIdService.findById(id);
 
       return httpResponsesHelper.ok(user);
     } catch (error) {
-      if (error instanceof AppError) {
+      if (error instanceof ErrorApp) {
         return httpResponsesHelper.badRequest(error);
       }
 

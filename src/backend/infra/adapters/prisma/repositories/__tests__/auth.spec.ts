@@ -1,4 +1,4 @@
-import { AuthRepository, UserRepository } from "@/backend/data/repositories";
+import { AuthRepository, UserRepository } from "@/backend/data/repository";
 
 import { EncrypterStub } from "@/backend/__mocks__";
 import { EncrypterUseCase } from "@/backend/domain/use-cases";

@@ -1,12 +1,12 @@
 import { HttpRequest, HttpResponse } from "../../protocols";
-import { AppError } from "@/backend/data/errors";
 import { Controller } from "../../protocols/controller";
-import { HttpResponsesHelper } from "../../helpers/http-responses";
-import { ListAllUsersService } from "@/backend/data/services";
+import { ErrorApp } from "@/backend/data/shared/errors";
+import { HttpResponsesHelper } from "../../helpers";
+import { UserFindAllService } from "@/backend/data/services";
 import { UserMapped } from "@/backend/domain/entities";
 
 interface ConstructorProps {
-  listAllUsersService: ListAllUsersService;
+  userFindAllService: UserFindAllService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
@@ -17,14 +17,14 @@ export class ListAllUsersController implements Controller {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     request: HttpRequest
   ): Promise<HttpResponse<UserMapped[]>> => {
-    const { listAllUsersService, httpResponsesHelper } = this.constructorProps;
+    const { userFindAllService, httpResponsesHelper } = this.constructorProps;
 
     try {
-      const users = await listAllUsersService.findAll();
+      const users = await userFindAllService.findAll();
 
       return httpResponsesHelper.ok(users);
     } catch (error) {
-      if (error instanceof AppError) {
+      if (error instanceof ErrorApp) {
         return httpResponsesHelper.badRequest(error);
       }
 

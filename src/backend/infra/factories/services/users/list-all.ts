@@ -1,9 +1,9 @@
-import { ListAllUsersService } from "@/backend/data/services";
 import { PrismaUserRepositoryAdapter } from "@/backend/infra/adapters";
+import { UserFindAllService } from "@/backend/data/services";
 
-export const makeListAllUsersService = (): ListAllUsersService => {
+export const makeUserFindAllService = (): UserFindAllService => {
   const userRepository = new PrismaUserRepositoryAdapter();
-  return new ListAllUsersService({
+  return new UserFindAllService({
     userRepository,
   });
 };

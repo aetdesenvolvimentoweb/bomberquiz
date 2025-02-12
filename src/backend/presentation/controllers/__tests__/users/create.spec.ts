@@ -12,13 +12,13 @@ import {
 } from "@/backend/domain/use-cases";
 import { UserProps, UserRole } from "@/backend/domain/entities";
 import { CreateUserController } from "@/backend/presentation/controllers";
-import { CreateUserService } from "@/backend/data/services";
+import { ErrorsValidation } from "@/backend/data/shared/errors";
 import { HttpRequest } from "@/backend/presentation/protocols";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
-import { UserCreationPropsValidator } from "@/backend/data/validators";
-import { UserRepository } from "@/backend/data/repositories";
+import { UserCreateService } from "@/backend/data/services";
+import { UserCreationPropsValidator } from "@/backend/data/use-cases";
+import { UserRepository } from "@/backend/data/repository";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
-import { ValidationErrors } from "@/backend/data/helpers";
 
 interface SutTypes {
   sut: CreateUserController;
@@ -27,7 +27,7 @@ interface SutTypes {
   httpResponsesHelper: HttpResponsesHelper;
   phoneValidator: UserPhoneValidatorUseCase;
   userRepository: UserRepository;
-  validationErrors: ValidationErrors;
+  errorsValidation: ErrorsValidation;
 }
 
 const makeSut = (): SutTypes => {
@@ -36,22 +36,22 @@ const makeSut = (): SutTypes => {
   const encrypter: EncrypterUseCase = new EncrypterStub();
   const phoneValidator: UserPhoneValidatorUseCase = new PhoneValidatorStub();
   const userRepository: UserRepository = new UserRepositoryInMemory();
-  const validationErrors = new ValidationErrors();
+  const errorsValidation = new ErrorsValidation();
   const userCreationPropsValidator = new UserCreationPropsValidator({
     dateValidator,
     emailValidator,
     phoneValidator,
     userRepository,
-    validationErrors,
+    errorsValidation,
   });
-  const createUserService: CreateUserService = new CreateUserService({
+  const userCreateService: UserCreateService = new UserCreateService({
     encrypter,
     userRepository,
     userCreationPropsValidator,
   });
   const httpResponsesHelper = new HttpResponsesHelper();
   const sut = new CreateUserController({
-    createUserService,
+    userCreateService,
     httpResponsesHelper,
   });
 
@@ -62,7 +62,7 @@ const makeSut = (): SutTypes => {
     httpResponsesHelper,
     phoneValidator,
     userRepository,
-    validationErrors,
+    errorsValidation,
   };
 };
 
@@ -73,7 +73,7 @@ describe("CreateUserController", () => {
   let httpResponsesHelper: HttpResponsesHelper;
   let phoneValidator: UserPhoneValidatorUseCase;
   let userRepository: UserRepository;
-  let validationErrors: ValidationErrors;
+  let errorsValidation: ErrorsValidation;
 
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
     return {
@@ -95,7 +95,7 @@ describe("CreateUserController", () => {
     httpResponsesHelper = sutInstance.httpResponsesHelper;
     phoneValidator = sutInstance.phoneValidator;
     userRepository = sutInstance.userRepository;
-    validationErrors = sutInstance.validationErrors;
+    errorsValidation = sutInstance.errorsValidation;
   });
 
   test("should return 201 if user was created", async () => {
@@ -117,7 +117,7 @@ describe("CreateUserController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.missingParamError("nome").message
+      errorsValidation.missingParamError("nome").message
     );
   });
 
@@ -130,7 +130,7 @@ describe("CreateUserController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.missingParamError("email").message
+      errorsValidation.missingParamError("email").message
     );
   });
 
@@ -145,7 +145,7 @@ describe("CreateUserController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.invalidParamError("email").message
+      errorsValidation.invalidParamError("email").message
     );
   });
 
@@ -160,7 +160,7 @@ describe("CreateUserController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.duplicatedKeyError({ entity: "usuário", key: "email" })
+      errorsValidation.duplicatedKeyError({ entity: "usuário", key: "email" })
         .message
     );
   });
@@ -174,7 +174,7 @@ describe("CreateUserController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.missingParamError("telefone").message
+      errorsValidation.missingParamError("telefone").message
     );
   });
 
@@ -189,7 +189,7 @@ describe("CreateUserController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.invalidParamError("telefone").message
+      errorsValidation.invalidParamError("telefone").message
     );
   });
 
@@ -202,7 +202,7 @@ describe("CreateUserController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.missingParamError("data de nascimento").message
+      errorsValidation.missingParamError("data de nascimento").message
     );
   });
 
@@ -217,7 +217,7 @@ describe("CreateUserController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.invalidParamError("data de nascimento").message
+      errorsValidation.invalidParamError("data de nascimento").message
     );
   });
 
@@ -230,7 +230,7 @@ describe("CreateUserController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.missingParamError("função").message
+      errorsValidation.missingParamError("função").message
     );
   });
 
@@ -243,7 +243,7 @@ describe("CreateUserController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.invalidParamError("função").message
+      errorsValidation.invalidParamError("função").message
     );
   });
 
@@ -256,7 +256,7 @@ describe("CreateUserController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.missingParamError("senha").message
+      errorsValidation.missingParamError("senha").message
     );
   });
 
@@ -269,7 +269,7 @@ describe("CreateUserController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.invalidParamError("senha").message
+      errorsValidation.invalidParamError("senha").message
     );
   });
 });

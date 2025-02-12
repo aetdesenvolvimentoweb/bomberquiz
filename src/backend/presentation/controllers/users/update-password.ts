@@ -1,12 +1,12 @@
 import { HttpRequest, HttpResponse } from "../../protocols";
-import { AppError } from "@/backend/data/errors";
 import { Controller } from "../../protocols/controller";
-import { HttpResponsesHelper } from "../../helpers/http-responses";
+import { ErrorApp } from "@/backend/data/shared/errors";
+import { HttpResponsesHelper } from "../../helpers";
 import { UpdateUserPasswordProps } from "@/backend/domain/entities";
-import { UpdateUserPasswordService } from "@/backend/data/services";
+import { UserUpdatePasswordService } from "@/backend/data/services";
 
 interface ConstructorProps {
-  updateUserPasswordService: UpdateUserPasswordService;
+  userUpdatePasswordService: UserUpdatePasswordService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
@@ -16,21 +16,21 @@ export class UpdateUserPasswordController implements Controller {
   public readonly handle = async (
     request: HttpRequest<UpdateUserPasswordProps>
   ): Promise<HttpResponse> => {
-    const { updateUserPasswordService, httpResponsesHelper } =
+    const { userUpdatePasswordService, httpResponsesHelper } =
       this.constructorProps;
 
     try {
       const id: string = request.dynamicParams.id;
       const props = request.body;
 
-      await updateUserPasswordService.updatePassword({
+      await userUpdatePasswordService.updatePassword({
         id,
         props,
       });
 
       return httpResponsesHelper.noContent();
     } catch (error) {
-      if (error instanceof AppError) {
+      if (error instanceof ErrorApp) {
         return httpResponsesHelper.badRequest(error);
       }
 

@@ -1,39 +1,39 @@
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { UserMapped, UserProps } from "@/backend/domain/entities";
+import { ErrorsValidation } from "@/backend/data/shared/errors";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { IdValidatorStub } from "@/backend/__mocks__";
 import { IdValidatorUseCase } from "@/backend/domain/use-cases";
 import { ListUserByIdController } from "@/backend/presentation/controllers";
-import { ListUserByIdService } from "@/backend/data/services";
-import { UserIdValidator } from "@/backend/data/validators";
-import { UserRepository } from "@/backend/data/repositories";
+import { UserFindByIdService } from "@/backend/data/services";
+import { UserIdValidator } from "@/backend/data/use-cases";
+import { UserRepository } from "@/backend/data/repository";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
-import { ValidationErrors } from "@/backend/data/helpers";
 
 interface SutTypes {
   sut: ListUserByIdController;
   idValidator: IdValidatorUseCase;
   httpResponsesHelper: HttpResponsesHelper;
   userRepository: UserRepository;
-  validationErrors: ValidationErrors;
+  errorsValidation: ErrorsValidation;
 }
 
 const makeSut = (): SutTypes => {
   const idValidator: IdValidatorUseCase = new IdValidatorStub();
   const userRepository: UserRepository = new UserRepositoryInMemory();
-  const validationErrors = new ValidationErrors();
+  const errorsValidation = new ErrorsValidation();
   const userIdValidator = new UserIdValidator({
     idValidator,
     userRepository,
-    validationErrors,
+    errorsValidation,
   });
-  const listUserByIdService: ListUserByIdService = new ListUserByIdService({
+  const userFindByIdService: UserFindByIdService = new UserFindByIdService({
     userIdValidator,
     userRepository,
   });
   const httpResponsesHelper = new HttpResponsesHelper();
   const sut = new ListUserByIdController({
-    listUserByIdService,
+    userFindByIdService,
     httpResponsesHelper,
   });
 
@@ -42,7 +42,7 @@ const makeSut = (): SutTypes => {
     idValidator,
     httpResponsesHelper,
     userRepository,
-    validationErrors,
+    errorsValidation,
   };
 };
 
@@ -51,7 +51,7 @@ describe("ListUserByIdController", () => {
   let idValidator: IdValidatorUseCase;
   let httpResponsesHelper: HttpResponsesHelper;
   let userRepository: UserRepository;
-  let validationErrors: ValidationErrors;
+  let errorsValidation: ErrorsValidation;
 
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
     return {
@@ -71,7 +71,7 @@ describe("ListUserByIdController", () => {
     idValidator = sutInstance.idValidator;
     httpResponsesHelper = sutInstance.httpResponsesHelper;
     userRepository = sutInstance.userRepository;
-    validationErrors = sutInstance.validationErrors;
+    errorsValidation = sutInstance.errorsValidation;
   });
 
   test("should return 200 if user was listed", async () => {
@@ -109,7 +109,7 @@ describe("ListUserByIdController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.missingParamError("id").message
+      errorsValidation.missingParamError("id").message
     );
   });
 
@@ -125,7 +125,7 @@ describe("ListUserByIdController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.invalidParamError("id").message
+      errorsValidation.invalidParamError("id").message
     );
   });
 
@@ -141,7 +141,7 @@ describe("ListUserByIdController", () => {
 
     expect(httpResponse.statusCode).toBe(404);
     expect(httpResponse.body.error).toBe(
-      validationErrors.unregisteredError("id").message
+      errorsValidation.unregisteredError("id").message
     );
   });
 });

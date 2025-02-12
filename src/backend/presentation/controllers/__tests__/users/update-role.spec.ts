@@ -1,47 +1,47 @@
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import {
-  UpdateRoleValidator,
   UserIdValidator,
-} from "@/backend/data/validators";
+  UserUpdateRoleValidator,
+} from "@/backend/data/use-cases";
 import { UserProps, UserRole } from "@/backend/domain/entities";
+import { ErrorsValidation } from "@/backend/data/shared/errors";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { IdValidatorStub } from "@/backend/__mocks__";
 import { IdValidatorUseCase } from "@/backend/domain/use-cases";
 import { UpdateUserRoleController } from "@/backend/presentation/controllers";
-import { UpdateUserRoleService } from "@/backend/data/services";
-import { UserRepository } from "@/backend/data/repositories";
+import { UserRepository } from "@/backend/data/repository";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
-import { ValidationErrors } from "@/backend/data/helpers";
+import { UserUpdateRoleService } from "@/backend/data/services";
 
 interface SutTypes {
   sut: UpdateUserRoleController;
   idValidator: IdValidatorUseCase;
   httpResponsesHelper: HttpResponsesHelper;
   userRepository: UserRepository;
-  validationErrors: ValidationErrors;
+  errorsValidation: ErrorsValidation;
 }
 
 const makeSut = (): SutTypes => {
   const idValidator: IdValidatorUseCase = new IdValidatorStub();
   const userRepository: UserRepository = new UserRepositoryInMemory();
-  const validationErrors = new ValidationErrors();
+  const errorsValidation = new ErrorsValidation();
   const userIdValidator = new UserIdValidator({
     idValidator,
     userRepository,
-    validationErrors,
+    errorsValidation,
   });
-  const updateRoleValidator = new UpdateRoleValidator({
-    validationErrors,
+  const updateRoleValidator = new UserUpdateRoleValidator({
+    errorsValidation,
   });
-  const updateUserRoleService: UpdateUserRoleService =
-    new UpdateUserRoleService({
+  const userUpdateRoleService: UserUpdateRoleService =
+    new UserUpdateRoleService({
       updateRoleValidator,
       userIdValidator,
       userRepository,
     });
   const httpResponsesHelper = new HttpResponsesHelper();
   const sut = new UpdateUserRoleController({
-    updateUserRoleService,
+    userUpdateRoleService,
     httpResponsesHelper,
   });
 
@@ -50,7 +50,7 @@ const makeSut = (): SutTypes => {
     idValidator,
     httpResponsesHelper,
     userRepository,
-    validationErrors,
+    errorsValidation,
   };
 };
 
@@ -59,7 +59,7 @@ describe("UpdateUserRoleController", () => {
   let idValidator: IdValidatorUseCase;
   let httpResponsesHelper: HttpResponsesHelper;
   let userRepository: UserRepository;
-  let validationErrors: ValidationErrors;
+  let errorsValidation: ErrorsValidation;
 
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
     return {
@@ -79,7 +79,7 @@ describe("UpdateUserRoleController", () => {
     idValidator = sutInstance.idValidator;
     httpResponsesHelper = sutInstance.httpResponsesHelper;
     userRepository = sutInstance.userRepository;
-    validationErrors = sutInstance.validationErrors;
+    errorsValidation = sutInstance.errorsValidation;
   });
 
   test("should return 204 if user role was updated", async () => {
@@ -107,7 +107,7 @@ describe("UpdateUserRoleController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.missingParamError("id").message
+      errorsValidation.missingParamError("id").message
     );
   });
 
@@ -123,7 +123,7 @@ describe("UpdateUserRoleController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.invalidParamError("id").message
+      errorsValidation.invalidParamError("id").message
     );
   });
 
@@ -139,7 +139,7 @@ describe("UpdateUserRoleController", () => {
 
     expect(httpResponse.statusCode).toBe(404);
     expect(httpResponse.body.error).toBe(
-      validationErrors.unregisteredError("id").message
+      errorsValidation.unregisteredError("id").message
     );
   });
 
@@ -157,7 +157,7 @@ describe("UpdateUserRoleController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toEqual(
-      validationErrors.missingParamError("função").message
+      errorsValidation.missingParamError("função").message
     );
   });
 
@@ -174,7 +174,7 @@ describe("UpdateUserRoleController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toEqual(
-      validationErrors.invalidParamError("função").message
+      errorsValidation.invalidParamError("função").message
     );
   });
 });

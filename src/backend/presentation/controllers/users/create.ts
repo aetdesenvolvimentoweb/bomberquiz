@@ -1,12 +1,12 @@
 import { HttpRequest, HttpResponse } from "../../protocols";
-import { AppError } from "@/backend/data/errors";
 import { Controller } from "../../protocols/controller";
-import { CreateUserService } from "@/backend/data/services";
-import { HttpResponsesHelper } from "../../helpers/http-responses";
+import { ErrorApp } from "@/backend/data/shared/errors";
+import { HttpResponsesHelper } from "../../helpers";
+import { UserCreateService } from "@/backend/data/services";
 import { UserProps } from "@/backend/domain/entities";
 
 interface ConstructorProps {
-  createUserService: CreateUserService;
+  userCreateService: UserCreateService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
@@ -16,16 +16,16 @@ export class CreateUserController implements Controller {
   public readonly handle = async (
     request: HttpRequest<UserProps>
   ): Promise<HttpResponse> => {
-    const { createUserService, httpResponsesHelper } = this.constructorProps;
+    const { userCreateService, httpResponsesHelper } = this.constructorProps;
 
     try {
       const userProps = request.body;
 
-      await createUserService.create(userProps);
+      await userCreateService.create(userProps);
 
       return httpResponsesHelper.created();
     } catch (error) {
-      if (error instanceof AppError) {
+      if (error instanceof ErrorApp) {
         return httpResponsesHelper.badRequest(error);
       }
 

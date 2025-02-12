@@ -2,20 +2,19 @@ import {
   MongoDBIdValidator,
   PrismaUserRepositoryAdapter,
 } from "@/backend/infra/adapters";
-import { ListUserByIdService } from "@/backend/data/services";
-import { UserIdValidator } from "@/backend/data/validators";
-import { ValidationErrors } from "@/backend/data/helpers";
+import { UserFindByIdService } from "@/backend/data/services";
+import { UserIdValidator } from "@/backend/data/use-cases";
 
-export const makeListUserByIdService = (): ListUserByIdService => {
+export const makeUserFindByIdService = (): UserFindByIdService => {
   const idValidator = new MongoDBIdValidator();
   const userRepository = new PrismaUserRepositoryAdapter();
-  const validationErrors = new ValidationErrors();
+  const ErrorsValidation = new ErrorsValidation();
   const userIdValidator = new UserIdValidator({
     idValidator,
     userRepository,
-    validationErrors,
+    ErrorsValidation,
   });
-  return new ListUserByIdService({
+  return new UserFindByIdService({
     userIdValidator,
     userRepository,
   });

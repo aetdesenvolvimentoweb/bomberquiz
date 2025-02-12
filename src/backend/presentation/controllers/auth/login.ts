@@ -1,13 +1,13 @@
 import { HttpRequest, HttpResponse } from "../../protocols";
-import { AppError } from "@/backend/data/errors";
+import { AuthLoginService } from "@/backend/data/services/auth/auth.login.service";
 import { Controller } from "../../protocols/controller";
-import { HttpResponsesHelper } from "../../helpers/http-responses";
+import { ErrorApp } from "@/backend/data/shared/errors";
+import { HttpResponsesHelper } from "../../helpers";
 import { LoginProps } from "@/backend/domain/entities";
-import { LoginService } from "@/backend/data/services/auth/login";
 
 interface ConstructorProps {
   httpResponsesHelper: HttpResponsesHelper;
-  loginService: LoginService;
+  authLoginService: AuthLoginService;
 }
 
 export class LoginController implements Controller {
@@ -16,12 +16,12 @@ export class LoginController implements Controller {
   public readonly handle = async (
     request: HttpRequest<LoginProps>
   ): Promise<HttpResponse> => {
-    const { httpResponsesHelper, loginService } = this.constructorProps;
+    const { httpResponsesHelper, authLoginService } = this.constructorProps;
 
     try {
       const loginProps: LoginProps = request.body;
 
-      const token: string = await loginService.login(loginProps);
+      const token: string = await authLoginService.login(loginProps);
 
       const httpResponse: HttpResponse = httpResponsesHelper.noContent();
       httpResponse.headers = {
@@ -30,7 +30,7 @@ export class LoginController implements Controller {
 
       return httpResponse;
     } catch (error) {
-      if (error instanceof AppError) {
+      if (error instanceof ErrorApp) {
         return httpResponsesHelper.badRequest(error);
       }
 

@@ -10,83 +10,98 @@ import {
   IdValidatorUseCase,
   UserPhoneValidatorUseCase,
 } from "@/backend/domain/use-cases";
-import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import {
-  UpdateProfilePropsValidator,
   UserIdValidator,
-} from "@/backend/data/validators";
+  UserUpdateProfilePropsValidator,
+} from "@/backend/data/use-cases";
 import { UserProfileProps, UserProps } from "@/backend/domain/entities";
-import { HttpResponsesHelper } from "@/backend/presentation/helpers";
-import { UpdateUserProfileController } from "@/backend/presentation/controllers";
-import { UpdateUserProfileService } from "@/backend/data/services";
-import { UserRepository } from "@/backend/data/repositories";
+import { ErrorsValidation } from "@/backend/data/shared";
+import { ErrorsValidationUseCase } from "@/backend/domain/errors";
+import { UserRepository } from "@/backend/data/repository";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
-import { ValidationErrors } from "@/backend/data/helpers";
+import { UserUpdateProfileService } from "@/backend/data/services";
 
+/**
+ * Define os tipos das dependências para os testes
+ */
 interface SutTypes {
-  sut: UpdateUserProfileController;
+  sut: UserUpdateProfileService;
   dateValidator: DateValidatorUseCase;
   emailValidator: EmailValidatorUseCase;
   idValidator: IdValidatorUseCase;
-  httpResponsesHelper: HttpResponsesHelper;
   phoneValidator: UserPhoneValidatorUseCase;
   userRepository: UserRepository;
-  validationErrors: ValidationErrors;
+  errorsValidation: ErrorsValidationUseCase;
 }
 
-const makeSut = (): SutTypes => {
-  const dateValidator: DateValidatorUseCase = new DateValidatorStub();
-  const emailValidator: EmailValidatorUseCase = new EmailValidatorStub();
-  const phoneValidator: UserPhoneValidatorUseCase = new PhoneValidatorStub();
-  const idValidator: IdValidatorUseCase = new IdValidatorStub();
-  const userRepository: UserRepository = new UserRepositoryInMemory();
-  const validationErrors = new ValidationErrors();
-  const userIdValidator = new UserIdValidator({
-    idValidator,
-    userRepository,
-    validationErrors,
-  });
-  const updateProfilePropsValidator = new UpdateProfilePropsValidator({
-    dateValidator,
-    emailValidator,
-    phoneValidator,
-    userRepository,
-    validationErrors,
-  });
-  const updateUserProfileService: UpdateUserProfileService =
-    new UpdateUserProfileService({
+/**
+ * Testes do serviço de atualização de perfil
+ */
+describe("UserUpdateProfileService", () => {
+  let sut: UserUpdateProfileService;
+  let dateValidator: DateValidatorUseCase;
+  let emailValidator: EmailValidatorUseCase;
+  let idValidator: IdValidatorUseCase;
+  let phoneValidator: UserPhoneValidatorUseCase;
+  let userRepository: UserRepository;
+  let errorsValidation: ErrorsValidationUseCase;
+
+  /**
+   * Cria uma instância do serviço e suas dependências para os testes
+   */
+  const makeSut = (): SutTypes => {
+    const dateValidator = new DateValidatorStub();
+    const emailValidator = new EmailValidatorStub();
+    const idValidator = new IdValidatorStub();
+    const phoneValidator = new PhoneValidatorStub();
+    const userRepository = new UserRepositoryInMemory();
+    const errorsValidation = new ErrorsValidation();
+
+    const userIdValidator = new UserIdValidator({
+      idValidator,
+      userRepository,
+      errorsValidation,
+    });
+
+    const updateProfilePropsValidator = new UserUpdateProfilePropsValidator({
+      dateValidator,
+      emailValidator,
+      phoneValidator,
+      userRepository,
+      errorsValidation,
+    });
+
+    const sut = new UserUpdateProfileService({
       updateProfilePropsValidator,
       userIdValidator,
       userRepository,
     });
-  const httpResponsesHelper = new HttpResponsesHelper();
-  const sut = new UpdateUserProfileController({
-    updateUserProfileService,
-    httpResponsesHelper,
+
+    return {
+      sut,
+      dateValidator,
+      emailValidator,
+      idValidator,
+      phoneValidator,
+      userRepository,
+      errorsValidation,
+    };
+  };
+
+  beforeEach(() => {
+    const sutInstance = makeSut();
+    sut = sutInstance.sut;
+    dateValidator = sutInstance.dateValidator;
+    emailValidator = sutInstance.emailValidator;
+    idValidator = sutInstance.idValidator;
+    phoneValidator = sutInstance.phoneValidator;
+    userRepository = sutInstance.userRepository;
+    errorsValidation = sutInstance.errorsValidation;
   });
 
-  return {
-    sut,
-    dateValidator,
-    emailValidator,
-    idValidator,
-    httpResponsesHelper,
-    phoneValidator,
-    userRepository,
-    validationErrors,
-  };
-};
-
-describe("UpdateUserProfileController", () => {
-  let sut: UpdateUserProfileController;
-  let dateValidator: DateValidatorUseCase;
-  let emailValidator: EmailValidatorUseCase;
-  let idValidator: IdValidatorUseCase;
-  let httpResponsesHelper: HttpResponsesHelper;
-  let phoneValidator: UserPhoneValidatorUseCase;
-  let userRepository: UserRepository;
-  let validationErrors: ValidationErrors;
-
+  /**
+   * Cria um objeto com as propriedades padrão de usuário para os testes
+   */
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
     return {
       name: "any_name",
@@ -99,274 +114,259 @@ describe("UpdateUserProfileController", () => {
     };
   };
 
-  beforeEach(() => {
-    const sutInstance = makeSut();
-    sut = sutInstance.sut;
-    dateValidator = sutInstance.dateValidator;
-    emailValidator = sutInstance.emailValidator;
-    idValidator = sutInstance.idValidator;
-    httpResponsesHelper = sutInstance.httpResponsesHelper;
-    phoneValidator = sutInstance.phoneValidator;
-    userRepository = sutInstance.userRepository;
-    validationErrors = sutInstance.validationErrors;
-  });
-
-  test("should return 204 if user profile was updated", async () => {
+  /**
+   * Testa a atualização bem-sucedida de perfil
+   */
+  test("should update user profile", async () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfileProps> = {
-      body: {
+    const updateProfileData = {
+      id: user!.id,
+      props: {
         name: "new_name",
         email: "new_email",
         phone: "new_phone",
         birthdate: new Date(),
       } as UserProfileProps,
-      dynamicParams: { id: user!.id },
     };
 
-    const httpResponse: HttpResponse = await sut.handle(httpRequest);
-
-    expect(httpResponse.statusCode).toBe(204);
-    expect(httpResponse).toEqual(httpResponsesHelper.noContent());
+    await expect(sut.updateProfile(updateProfileData)).resolves.not.toThrow();
   });
 
-  test("should return 400 if no id is provided", async () => {
-    const httpRequest: HttpRequest<UserProfileProps> = {
-      body: {
+  /**
+   * Testa a validação de ID obrigatório
+   */
+  test("should throw if no id is provided", async () => {
+    const updateProfileData = {
+      id: "",
+      props: {
         name: "new_name",
         email: "new_email",
         phone: "new_phone",
         birthdate: new Date(),
       } as UserProfileProps,
-      dynamicParams: {},
     };
 
-    const httpResponse = await sut.handle(httpRequest);
-
-    expect(httpResponse.statusCode).toBe(400);
-    expect(httpResponse.body.error).toBe(
-      validationErrors.missingParamError("id").message
+    await expect(sut.updateProfile(updateProfileData)).rejects.toThrow(
+      errorsValidation.missingParamError("id")
     );
   });
 
-  test("should return 400 if invalid id is provided", async () => {
+  /**
+   * Testa a validação de formato de ID
+   */
+  test("should throw if invalid id is provided", async () => {
     jest.spyOn(idValidator, "isValid").mockReturnValue(false);
 
-    const httpRequest: HttpRequest<UserProfileProps> = {
-      body: {
+    const updateProfileData = {
+      id: "invalid-id",
+      props: {
         name: "new_name",
         email: "new_email",
         phone: "new_phone",
         birthdate: new Date(),
       } as UserProfileProps,
-      dynamicParams: { id: "invalid_id" },
     };
 
-    const httpResponse = await sut.handle(httpRequest);
-
-    expect(httpResponse.statusCode).toBe(400);
-    expect(httpResponse.body.error).toBe(
-      validationErrors.invalidParamError("id").message
+    await expect(sut.updateProfile(updateProfileData)).rejects.toThrow(
+      errorsValidation.invalidParamError("id")
     );
   });
 
-  test("should return 404 if unregistered id is provided", async () => {
-    await userRepository.create(createUserProps());
-
-    const httpRequest: HttpRequest<UserProfileProps> = {
-      body: {
+  /**
+   * Testa a validação de ID não registrado
+   */
+  test("should throw if unregistered id is provided", async () => {
+    const updateProfileData = {
+      id: "unregistered-id",
+      props: {
         name: "new_name",
         email: "new_email",
         phone: "new_phone",
         birthdate: new Date(),
       } as UserProfileProps,
-      dynamicParams: { id: "unregistered_id" },
     };
 
-    const httpResponse = await sut.handle(httpRequest);
-
-    expect(httpResponse.statusCode).toBe(404);
-    expect(httpResponse.body.error).toBe(
-      validationErrors.unregisteredError("id").message
+    await expect(sut.updateProfile(updateProfileData)).rejects.toThrow(
+      errorsValidation.unregisteredError("id")
     );
   });
 
-  test("should return 400 if no name is provided", async () => {
+  /**
+   * Testa a validação de nome obrigatório
+   */
+  test("should throw if no name is provided", async () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfileProps> = {
-      body: {
+    const updateProfileData = {
+      id: user!.id,
+      props: {
         email: "new_email",
         phone: "new_phone",
         birthdate: new Date(),
       } as UserProfileProps,
-      dynamicParams: { id: user!.id },
     };
 
-    const httpResponse: HttpResponse = await sut.handle(httpRequest);
-
-    expect(httpResponse.statusCode).toBe(400);
-    expect(httpResponse.body.error).toEqual(
-      validationErrors.missingParamError("nome").message
+    await expect(sut.updateProfile(updateProfileData)).rejects.toThrow(
+      errorsValidation.missingParamError("nome")
     );
   });
 
-  test("should return 400 if no email is provided", async () => {
+  /**
+   * Testa a validação de email obrigatório
+   */
+  test("should throw if no email is provided", async () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfileProps> = {
-      body: {
+    const updateProfileData = {
+      id: user!.id,
+      props: {
         name: "new_name",
         phone: "new_phone",
         birthdate: new Date(),
       } as UserProfileProps,
-      dynamicParams: { id: user!.id },
     };
 
-    const httpResponse: HttpResponse = await sut.handle(httpRequest);
-
-    expect(httpResponse.statusCode).toBe(400);
-    expect(httpResponse.body.error).toEqual(
-      validationErrors.missingParamError("email").message
+    await expect(sut.updateProfile(updateProfileData)).rejects.toThrow(
+      errorsValidation.missingParamError("email")
     );
   });
 
-  test("should return 400 if invalid email is provided", async () => {
+  /**
+   * Testa a validação de formato de email
+   */
+  test("should throw if invalid email is provided", async () => {
     jest.spyOn(emailValidator, "isValid").mockReturnValue(false);
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfileProps> = {
-      body: {
+    const updateProfileData = {
+      id: user!.id,
+      props: {
         name: "new_name",
         email: "invalid_email",
         phone: "new_phone",
         birthdate: new Date(),
       } as UserProfileProps,
-      dynamicParams: { id: user!.id },
     };
 
-    const httpResponse: HttpResponse = await sut.handle(httpRequest);
-
-    expect(httpResponse.statusCode).toBe(400);
-    expect(httpResponse.body.error).toEqual(
-      validationErrors.invalidParamError("email").message
+    await expect(sut.updateProfile(updateProfileData)).rejects.toThrow(
+      errorsValidation.invalidParamError("email")
     );
   });
 
-  test("should return 400 if already registered email is provided", async () => {
+  /**
+   * Testa a validação de email já registrado
+   */
+  test("should throw if already registered email is provided", async () => {
     await userRepository.create(createUserProps());
     await userRepository.create(createUserProps({ email: "another_email" }));
     const user = await userRepository.findByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfileProps> = {
-      body: {
+    const updateProfileData = {
+      id: user!.id,
+      props: {
         name: "new_name",
-        // already registered email
         email: "another_email",
         phone: "new_phone",
         birthdate: new Date(),
       } as UserProfileProps,
-      dynamicParams: { id: user!.id },
     };
 
-    const httpResponse: HttpResponse = await sut.handle(httpRequest);
-
-    expect(httpResponse.statusCode).toBe(400);
-    expect(httpResponse.body.error).toEqual(
-      validationErrors.duplicatedKeyError({ entity: "usuário", key: "email" })
+    await expect(sut.updateProfile(updateProfileData)).rejects.toThrow(
+      errorsValidation.duplicatedKeyError({ entity: "usuário", key: "email" })
         .message
     );
   });
 
-  test("should return 400 if no phone is provided", async () => {
+  /**
+   * Testa a validação de telefone obrigatório
+   */
+  test("should throw if no phone is provided", async () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfileProps> = {
-      body: {
+    const updateProfileData = {
+      id: user!.id,
+      props: {
         name: "new_name",
         email: "new_email",
         birthdate: new Date(),
       } as UserProfileProps,
-      dynamicParams: { id: user!.id },
     };
 
-    const httpResponse: HttpResponse = await sut.handle(httpRequest);
-
-    expect(httpResponse.statusCode).toBe(400);
-    expect(httpResponse.body.error).toEqual(
-      validationErrors.missingParamError("telefone").message
+    await expect(sut.updateProfile(updateProfileData)).rejects.toThrow(
+      errorsValidation.missingParamError("telefone")
     );
   });
 
-  test("should return 400 if invalid phone is provided", async () => {
+  /**
+   * Testa a validação de formato de telefone
+   */
+  test("should throw if invalid phone is provided", async () => {
     jest.spyOn(phoneValidator, "isValid").mockReturnValue(false);
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfileProps> = {
-      body: {
+    const updateProfileData = {
+      id: user!.id,
+      props: {
         name: "new_name",
         email: "new_email",
         phone: "invalid_phone",
         birthdate: new Date(),
       } as UserProfileProps,
-      dynamicParams: { id: user!.id },
     };
 
-    const httpResponse: HttpResponse = await sut.handle(httpRequest);
-
-    expect(httpResponse.statusCode).toBe(400);
-    expect(httpResponse.body.error).toEqual(
-      validationErrors.invalidParamError("telefone").message
+    await expect(sut.updateProfile(updateProfileData)).rejects.toThrow(
+      errorsValidation.invalidParamError("telefone")
     );
   });
 
-  test("should return 400 if no birthdate is provided", async () => {
+  /**
+   * Testa a validação de data de nascimento obrigatória
+   */
+  test("should throw if no birthdate is provided", async () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfileProps> = {
-      body: {
+    const updateProfileData = {
+      id: user!.id,
+      props: {
         name: "new_name",
         email: "new_email",
         phone: "new_phone",
       } as UserProfileProps,
-      dynamicParams: { id: user!.id },
     };
 
-    const httpResponse: HttpResponse = await sut.handle(httpRequest);
-
-    expect(httpResponse.statusCode).toBe(400);
-    expect(httpResponse.body.error).toEqual(
-      validationErrors.missingParamError("data de nascimento").message
+    await expect(sut.updateProfile(updateProfileData)).rejects.toThrow(
+      errorsValidation.missingParamError("data de nascimento")
     );
   });
 
-  test("should return 400 if invalid birthdate is provided", async () => {
+  /**
+   * Testa a validação de maioridade
+   */
+  test("should throw if invalid birthdate is provided", async () => {
     jest.spyOn(dateValidator, "isAdult").mockReturnValue(false);
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
 
-    const httpRequest: HttpRequest<UserProfileProps> = {
-      body: {
+    const updateProfileData = {
+      id: user!.id,
+      props: {
         name: "new_name",
         email: "new_email",
         phone: "new_phone",
-        birthdate: new Date("invalid_birthdate"),
+        birthdate: new Date(),
       } as UserProfileProps,
-      dynamicParams: { id: user!.id },
     };
 
-    const httpResponse: HttpResponse = await sut.handle(httpRequest);
-
-    expect(httpResponse.statusCode).toBe(400);
-    expect(httpResponse.body.error).toEqual(
-      validationErrors.invalidParamError("data de nascimento").message
+    await expect(sut.updateProfile(updateProfileData)).rejects.toThrow(
+      errorsValidation.invalidParamError("data de nascimento")
     );
   });
 });

@@ -1,11 +1,11 @@
 import { HttpRequest, HttpResponse } from "../../protocols";
-import { AppError } from "@/backend/data/errors";
 import { Controller } from "../../protocols/controller";
-import { DeleteUserService } from "@/backend/data/services";
-import { HttpResponsesHelper } from "../../helpers/http-responses";
+import { ErrorApp } from "@/backend/data/shared/errors";
+import { HttpResponsesHelper } from "../../helpers";
+import { UserDeleteService } from "@/backend/data/services";
 
 interface ConstructorProps {
-  deleteUserService: DeleteUserService;
+  userDeleteService: UserDeleteService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
@@ -15,16 +15,16 @@ export class DeleteUserController implements Controller {
   public readonly handle = async (
     request: HttpRequest
   ): Promise<HttpResponse> => {
-    const { deleteUserService, httpResponsesHelper } = this.constructorProps;
+    const { userDeleteService, httpResponsesHelper } = this.constructorProps;
 
     try {
       const id: string = request.dynamicParams.id;
 
-      await deleteUserService.delete(id);
+      await userDeleteService.delete(id);
 
       return httpResponsesHelper.noContent();
     } catch (error) {
-      if (error instanceof AppError) {
+      if (error instanceof ErrorApp) {
         return httpResponsesHelper.badRequest(error);
       }
 

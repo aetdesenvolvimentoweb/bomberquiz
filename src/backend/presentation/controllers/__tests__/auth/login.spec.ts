@@ -3,7 +3,7 @@ import {
   EmailValidatorUseCase,
   EncrypterUseCase,
 } from "@/backend/domain/use-cases";
-import { AuthRepository, UserRepository } from "@/backend/data/repositories";
+import { AuthRepository, UserRepository } from "@/backend/data/repository";
 import {
   AuthRepositoryInMemory,
   UserRepositoryInMemory,
@@ -15,18 +15,18 @@ import {
 } from "@/backend/__mocks__";
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { LoginProps, UserLogged, UserProps } from "@/backend/domain/entities";
+import { AuthLoginService } from "@/backend/data/services";
+import { AuthLoginValidator } from "@/backend/data/use-cases";
+import { ErrorsValidation } from "@/backend/data/shared/errors";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { LoginController } from "@/backend/presentation/controllers";
-import { LoginService } from "@/backend/data/services";
-import { LoginValidator } from "@/backend/data/validators";
-import { ValidationErrors } from "@/backend/data/helpers";
 
 interface SutTypes {
   sut: LoginController;
   emailValidator: EmailValidatorUseCase;
   encrypter: EncrypterUseCase;
   userRepository: UserRepository;
-  validationErrors: ValidationErrors;
+  errorsValidation: ErrorsValidation;
 }
 
 const makeSut = (): SutTypes => {
@@ -36,25 +36,26 @@ const makeSut = (): SutTypes => {
   );
   const emailValidator: EmailValidatorUseCase = new EmailValidatorStub();
   const encrypter: EncrypterUseCase = new EncrypterStub();
-  const validationErrors = new ValidationErrors();
-  const loginValidator: AuthLoginPropsValidatorUseCase = new LoginValidator({
-    authRepository,
-    emailValidator,
-    encrypter,
-    validationErrors,
-  });
+  const errorsValidation = new ErrorsValidation();
+  const authLoginValidator: AuthLoginPropsValidatorUseCase =
+    new AuthLoginValidator({
+      authRepository,
+      emailValidator,
+      encrypter,
+      errorsValidation,
+    });
   const httpResponsesHelper = new HttpResponsesHelper();
   const authTokenHandler = new TokenHandlerStub();
-  const loginService: LoginService = new LoginService({
-    loginValidator,
+  const authLoginService: AuthLoginService = new AuthLoginService({
+    authLoginValidator,
     authTokenHandler,
   });
   const sut = new LoginController({
     httpResponsesHelper,
-    loginService,
+    authLoginService,
   });
 
-  return { sut, emailValidator, encrypter, userRepository, validationErrors };
+  return { sut, emailValidator, encrypter, userRepository, errorsValidation };
 };
 
 describe("LoginController", () => {
@@ -62,7 +63,7 @@ describe("LoginController", () => {
   let emailValidator: EmailValidatorUseCase;
   let encrypter: EncrypterUseCase;
   let userRepository: UserRepository;
-  let validationErrors: ValidationErrors;
+  let errorsValidation: ErrorsValidation;
 
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
     return {
@@ -82,7 +83,7 @@ describe("LoginController", () => {
     emailValidator = sutInstance.emailValidator;
     encrypter = sutInstance.encrypter;
     userRepository = sutInstance.userRepository;
-    validationErrors = sutInstance.validationErrors;
+    errorsValidation = sutInstance.errorsValidation;
   });
 
   test("should return 204 if user logged", async () => {
@@ -113,7 +114,7 @@ describe("LoginController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.missingParamError("email").message
+      errorsValidation.missingParamError("email").message
     );
   });
 
@@ -132,7 +133,7 @@ describe("LoginController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.invalidParamError("email").message
+      errorsValidation.invalidParamError("email").message
     );
   });
 
@@ -148,7 +149,7 @@ describe("LoginController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.missingParamError("senha").message
+      errorsValidation.missingParamError("senha").message
     );
   });
 
@@ -165,7 +166,7 @@ describe("LoginController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.invalidParamError("senha").message
+      errorsValidation.invalidParamError("senha").message
     );
   });
 
@@ -184,7 +185,7 @@ describe("LoginController", () => {
 
     expect(httpResponse.statusCode).toBe(401);
     expect(httpResponse.body.error).toBe(
-      validationErrors.unauthorizedError().message
+      errorsValidation.unauthorizedError().message
     );
   });
 
@@ -206,7 +207,7 @@ describe("LoginController", () => {
 
     expect(httpResponse.statusCode).toBe(401);
     expect(httpResponse.body.error).toBe(
-      validationErrors.unauthorizedError().message
+      errorsValidation.unauthorizedError().message
     );
   });
 });

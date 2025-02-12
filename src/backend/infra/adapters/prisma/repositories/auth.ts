@@ -1,4 +1,4 @@
-import { AuthRepository, UserRepository } from "@/backend/data/repositories";
+import { AuthRepository, UserRepository } from "@/backend/data/repository";
 import { LoginProps, UserLogged } from "@/backend/domain/entities";
 import { db } from "../prisma-client";
 import { prismaConnectionError } from "@/backend/infra/helpers";

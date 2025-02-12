@@ -10,7 +10,7 @@ import {
   prismaConnectionError,
   prismaOperationError,
 } from "@/backend/infra/helpers";
-import { UserRepository } from "@/backend/data/repositories";
+import { UserRepository } from "@/backend/data/repository";
 import { db } from "../prisma-client";
 
 export class PrismaUserRepositoryAdapter implements UserRepository {

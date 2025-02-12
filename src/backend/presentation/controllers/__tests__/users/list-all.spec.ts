@@ -2,8 +2,8 @@ import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { UserMapped, UserProps } from "@/backend/domain/entities";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { ListAllUsersController } from "@/backend/presentation/controllers";
-import { ListAllUsersService } from "@/backend/data/services";
-import { UserRepository } from "@/backend/data/repositories";
+import { UserFindAllService } from "@/backend/data/services";
+import { UserRepository } from "@/backend/data/repository";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 
 interface SutTypes {
@@ -14,12 +14,12 @@ interface SutTypes {
 
 const makeSut = (): SutTypes => {
   const userRepository: UserRepository = new UserRepositoryInMemory();
-  const listAllUsersService: ListAllUsersService = new ListAllUsersService({
+  const userFindAllService: UserFindAllService = new UserFindAllService({
     userRepository,
   });
   const httpResponsesHelper = new HttpResponsesHelper();
   const sut = new ListAllUsersController({
-    listAllUsersService,
+    userFindAllService,
     httpResponsesHelper,
   });
 

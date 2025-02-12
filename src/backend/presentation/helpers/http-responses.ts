@@ -1,8 +1,8 @@
-import { AppError } from "@/backend/data/errors";
+import { ErrorApp } from "@/backend/data/shared/errors";
 import { HttpResponse } from "../protocols";
 
 export class HttpResponsesHelper {
-  public readonly badRequest = (error: AppError): HttpResponse => {
+  public readonly badRequest = (error: ErrorApp): HttpResponse => {
     return {
       body: {
         error: error.message,

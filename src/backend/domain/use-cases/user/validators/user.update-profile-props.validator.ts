@@ -7,7 +7,7 @@ export interface UserUpdateProfilePropsValidatorUseCase {
   /**
    * Valida as propriedades necessárias para atualização de perfil
    * @param props Objeto contendo ID do usuário e dados do perfil
-   * @throws {AppError} Quando alguma validação falhar
+   * @throws {ErrorApp} Quando alguma validação falhar
    */
   validateUpdateProfileProps: (props: {
     id: string;

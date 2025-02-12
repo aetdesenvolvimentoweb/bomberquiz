@@ -6,7 +6,7 @@ export interface UserPhoneValidatorUseCase {
    * Valida um número de telefone
    * @param phone Número de telefone a ser validado
    * @returns Boolean indicando se o telefone é válido
-   * @throws {AppError} Quando alguma validação falhar
+   * @throws {ErrorApp} Quando alguma validação falhar
    */
   isValid: (phone: string) => boolean;
 }

@@ -7,7 +7,7 @@ export interface UserUpdatePasswordPropsValidatorUseCase {
   /**
    * Valida as propriedades necessárias para atualização de senha
    * @param props Objeto contendo ID do usuário e dados da nova senha
-   * @throws {AppError} Quando alguma validação falhar
+   * @throws {ErrorApp} Quando alguma validação falhar
    */
   validateUpdatePasswordProps: (props: {
     id: string;

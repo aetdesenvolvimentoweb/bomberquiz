@@ -1,13 +1,13 @@
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { UpdateUserPasswordController } from "@/backend/presentation/controllers";
-import { makeUpdateUserPasswordService } from "../../services";
+import { makeUserUpdatePasswordService } from "../../services";
 
 export const makeUpdateUserPasswordController =
   (): UpdateUserPasswordController => {
     const httpResponsesHelper = new HttpResponsesHelper();
-    const updateUserPasswordService = makeUpdateUserPasswordService();
+    const userUpdatePasswordService = makeUserUpdatePasswordService();
     return new UpdateUserPasswordController({
       httpResponsesHelper,
-      updateUserPasswordService,
+      userUpdatePasswordService,
     });
   };

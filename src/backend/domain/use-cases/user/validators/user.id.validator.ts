@@ -5,7 +5,7 @@ export interface UserIdValidatorUseCase {
   /**
    * Valida o ID de um usuário
    * @param id Identificador único do usuário
-   * @throws {AppError} Quando alguma validação falhar
+   * @throws {ErrorApp} Quando alguma validação falhar
    */
   validateUserId: (id: string) => Promise<void>;
 }

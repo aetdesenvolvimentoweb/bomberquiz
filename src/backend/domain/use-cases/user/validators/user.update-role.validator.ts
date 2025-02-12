@@ -7,7 +7,7 @@ export interface UserUpdateRoleValidatorUseCase {
   /**
    * Valida o papel a ser atualizado
    * @param role Novo papel do usuário
-   * @throws {AppError} Quando alguma validação falhar
+   * @throws {ErrorApp} Quando alguma validação falhar
    */
   validateUpdateRole: (role: UserRole) => Promise<void>;
 }

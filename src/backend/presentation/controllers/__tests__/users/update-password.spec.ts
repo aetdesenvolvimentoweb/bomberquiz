@@ -4,17 +4,17 @@ import {
   IdValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
-import {
-  UpdatePasswordPropsValidator,
-  UserIdValidator,
-} from "@/backend/data/validators";
 import { UpdateUserPasswordProps, UserProps } from "@/backend/domain/entities";
+import {
+  UserIdValidator,
+  UserUpdatePasswordPropsValidator,
+} from "@/backend/data/use-cases";
+import { ErrorsValidation } from "@/backend/data/shared/errors";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { UpdateUserPasswordController } from "@/backend/presentation/controllers";
-import { UpdateUserPasswordService } from "@/backend/data/services";
-import { UserRepository } from "@/backend/data/repositories";
+import { UserRepository } from "@/backend/data/repository";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
-import { ValidationErrors } from "@/backend/data/helpers";
+import { UserUpdatePasswordService } from "@/backend/data/services";
 
 interface SutTypes {
   sut: UpdateUserPasswordController;
@@ -22,26 +22,26 @@ interface SutTypes {
   idValidator: IdValidatorUseCase;
   httpResponsesHelper: HttpResponsesHelper;
   userRepository: UserRepository;
-  validationErrors: ValidationErrors;
+  errorsValidation: ErrorsValidation;
 }
 
 const makeSut = (): SutTypes => {
   const encrypter = new EncrypterStub();
   const idValidator: IdValidatorUseCase = new IdValidatorStub();
   const userRepository: UserRepository = new UserRepositoryInMemory();
-  const validationErrors = new ValidationErrors();
+  const errorsValidation = new ErrorsValidation();
   const userIdValidator = new UserIdValidator({
     idValidator,
     userRepository,
-    validationErrors,
+    errorsValidation,
   });
-  const updatePasswordPropsValidator = new UpdatePasswordPropsValidator({
+  const updatePasswordPropsValidator = new UserUpdatePasswordPropsValidator({
     encrypter,
     userRepository,
-    validationErrors,
+    errorsValidation,
   });
-  const updateUserPasswordService: UpdateUserPasswordService =
-    new UpdateUserPasswordService({
+  const userUpdatePasswordService: UserUpdatePasswordService =
+    new UserUpdatePasswordService({
       encrypter,
       updatePasswordPropsValidator,
       userIdValidator,
@@ -49,7 +49,7 @@ const makeSut = (): SutTypes => {
     });
   const httpResponsesHelper = new HttpResponsesHelper();
   const sut = new UpdateUserPasswordController({
-    updateUserPasswordService,
+    userUpdatePasswordService,
     httpResponsesHelper,
   });
 
@@ -59,7 +59,7 @@ const makeSut = (): SutTypes => {
     idValidator,
     httpResponsesHelper,
     userRepository,
-    validationErrors,
+    errorsValidation,
   };
 };
 
@@ -69,7 +69,7 @@ describe("UpdateUserPasswordController", () => {
   let idValidator: IdValidatorUseCase;
   let httpResponsesHelper: HttpResponsesHelper;
   let userRepository: UserRepository;
-  let validationErrors: ValidationErrors;
+  let errorsValidation: ErrorsValidation;
 
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
     return {
@@ -90,7 +90,7 @@ describe("UpdateUserPasswordController", () => {
     idValidator = sutInstance.idValidator;
     httpResponsesHelper = sutInstance.httpResponsesHelper;
     userRepository = sutInstance.userRepository;
-    validationErrors = sutInstance.validationErrors;
+    errorsValidation = sutInstance.errorsValidation;
   });
 
   test("should return 204 if user password was updated", async () => {
@@ -124,7 +124,7 @@ describe("UpdateUserPasswordController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.missingParamError("id").message
+      errorsValidation.missingParamError("id").message
     );
   });
 
@@ -143,7 +143,7 @@ describe("UpdateUserPasswordController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
-      validationErrors.invalidParamError("id").message
+      errorsValidation.invalidParamError("id").message
     );
   });
 
@@ -162,7 +162,7 @@ describe("UpdateUserPasswordController", () => {
 
     expect(httpResponse.statusCode).toBe(404);
     expect(httpResponse.body.error).toBe(
-      validationErrors.unregisteredError("id").message
+      errorsValidation.unregisteredError("id").message
     );
   });
 
@@ -179,7 +179,7 @@ describe("UpdateUserPasswordController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toEqual(
-      validationErrors.missingParamError("senha atual").message
+      errorsValidation.missingParamError("senha atual").message
     );
   });
 
@@ -199,7 +199,7 @@ describe("UpdateUserPasswordController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toEqual(
-      validationErrors.invalidParamError("senha atual").message
+      errorsValidation.invalidParamError("senha atual").message
     );
   });
 
@@ -222,7 +222,7 @@ describe("UpdateUserPasswordController", () => {
 
     expect(httpResponse.statusCode).toBe(401);
     expect(httpResponse.body.error).toEqual(
-      validationErrors.wrongPasswordError("senha atual").message
+      errorsValidation.wrongPasswordError("senha atual").message
     );
   });
 
@@ -239,7 +239,7 @@ describe("UpdateUserPasswordController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toEqual(
-      validationErrors.missingParamError("nova senha").message
+      errorsValidation.missingParamError("nova senha").message
     );
   });
 
@@ -259,7 +259,7 @@ describe("UpdateUserPasswordController", () => {
 
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toEqual(
-      validationErrors.invalidParamError("nova senha").message
+      errorsValidation.invalidParamError("nova senha").message
     );
   });
 });

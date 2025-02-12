@@ -6,7 +6,7 @@ import {
   UserProps,
   UserRole,
 } from "@/backend/domain/entities";
-import { UserRepository } from "@/backend/data/repositories";
+import { UserRepository } from "@/backend/data/repository";
 import { randomUUID } from "crypto";
 
 export class UserRepositoryInMemory implements UserRepository {
