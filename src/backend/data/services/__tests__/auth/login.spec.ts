@@ -1,13 +1,13 @@
 import {
-  AuthRepositoryInMemory,
-  UserRepositoryInMemory,
-} from "@/backend/infra/in-memory-repositories";
-import {
+  AuthLoginPropsValidatorUseCase,
   AuthTokenHandlerUseCase,
   EmailValidatorUseCase,
   EncrypterUseCase,
-  LoginValidatorUseCase,
 } from "@/backend/domain/use-cases";
+import {
+  AuthRepositoryInMemory,
+  UserRepositoryInMemory,
+} from "@/backend/infra/in-memory-repositories";
 import {
   EmailValidatorStub,
   EncrypterStub,
@@ -34,7 +34,7 @@ const makeSut = (): SutTypes => {
   const userRepository = new UserRepositoryInMemory();
   const authRepository = new AuthRepositoryInMemory(userRepository);
   const validationErrors = new ValidationErrors();
-  const loginValidator: LoginValidatorUseCase = new LoginValidator({
+  const loginValidator: AuthLoginPropsValidatorUseCase = new LoginValidator({
     authRepository,
     emailValidator,
     encrypter,

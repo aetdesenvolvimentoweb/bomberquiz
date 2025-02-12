@@ -1,7 +1,7 @@
 import {
+  AuthLoginPropsValidatorUseCase,
   EmailValidatorUseCase,
   EncrypterUseCase,
-  LoginValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { LoginProps, UserLogged } from "@/backend/domain/entities";
 import { AuthRepository } from "../../repositories";
@@ -14,7 +14,7 @@ interface LoginValidatorProps {
   validationErrors: ValidationErrors;
 }
 
-export class LoginValidator implements LoginValidatorUseCase {
+export class LoginValidator implements AuthLoginPropsValidatorUseCase {
   private authRepository: AuthRepository;
   private emailValidator: EmailValidatorUseCase;
   private encrypter: EncrypterUseCase;

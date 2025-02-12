@@ -1,7 +1,7 @@
 import {
   EncrypterUseCase,
   UserCreateUseCase,
-  UserCretionPropsValidatorUseCase,
+  UserCreationPropsValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "../../repositories";
@@ -9,7 +9,7 @@ import { UserRepository } from "../../repositories";
 interface ConstructorProps {
   encrypter: EncrypterUseCase;
   userRepository: UserRepository;
-  userCreationPropsValidator: UserCretionPropsValidatorUseCase;
+  userCreationPropsValidator: UserCreationPropsValidatorUseCase;
 }
 
 export class CreateUserService implements UserCreateUseCase {

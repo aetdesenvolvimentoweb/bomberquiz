@@ -1,8 +1,8 @@
-import { PhoneValidatorUseCase } from "@/backend/domain/use-cases";
+import { UserPhoneValidatorUseCase } from "@/backend/domain/use-cases";
 import { isValidPhoneNumber } from "libphonenumber-js/max";
 
 export class LibPhoneNumberJsPhoneValidatorAdapter
-  implements PhoneValidatorUseCase
+  implements UserPhoneValidatorUseCase
 {
   public readonly isValid = (phone: string): boolean => {
     return isValidPhoneNumber(phone);

@@ -1,7 +1,7 @@
 import {
-  UpdateRoleValidatorUseCase,
   UserIdValidatorUseCase,
   UserUpdateRoleUseCase,
+  UserUpdateRoleValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { UserRepository } from "../../repositories";
 import { UserRole } from "@prisma/client";
@@ -9,7 +9,7 @@ import { UserRole } from "@prisma/client";
 interface constructorProps {
   userRepository: UserRepository;
   userIdValidator: UserIdValidatorUseCase;
-  updateRoleValidator: UpdateRoleValidatorUseCase;
+  updateRoleValidator: UserUpdateRoleValidatorUseCase;
 }
 
 export class UpdateUserRoleService implements UserUpdateRoleUseCase {

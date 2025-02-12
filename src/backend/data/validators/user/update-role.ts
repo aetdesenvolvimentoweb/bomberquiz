@@ -1,12 +1,12 @@
-import { UpdateRoleValidatorUseCase } from "@/backend/domain/use-cases";
 import { UserRole } from "@/backend/domain/entities";
+import { UserUpdateRoleValidatorUseCase } from "@/backend/domain/use-cases";
 import { ValidationErrors } from "../../helpers";
 
 interface UpdateRoleValidatorDependencies {
   validationErrors: ValidationErrors;
 }
 
-export class UpdateRoleValidator implements UpdateRoleValidatorUseCase {
+export class UpdateRoleValidator implements UserUpdateRoleValidatorUseCase {
   private validationErrors;
 
   constructor(private props: UpdateRoleValidatorDependencies) {

@@ -6,7 +6,7 @@ export class DateFnsDateValidatorAdapter implements DateValidatorUseCase {
     return isDate(date);
   };
 
-  public readonly isBirthdateValid = (birthdate: Date): boolean => {
+  public readonly isAdult = (birthdate: Date): boolean => {
     this.isValid(birthdate);
     return differenceInYears(new Date(Date.now()), birthdate) >= 18;
   };

@@ -6,7 +6,7 @@ export class DateValidatorStub implements DateValidatorUseCase {
     return true;
   };
 
-  public readonly isBirthdateValid = (birthdate: Date): boolean => {
+  public readonly isAdult = (birthdate: Date): boolean => {
     return true;
   };
 }

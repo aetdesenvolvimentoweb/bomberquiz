@@ -1,7 +1,7 @@
 import {
   EncrypterUseCase,
-  UpdatePasswordPropsValidatorUseCase,
   UserIdValidatorUseCase,
+  UserUpdatePasswordPropsValidatorUseCase,
   UserUpdatePasswordUseCase,
 } from "@/backend/domain/use-cases";
 import { UpdateUserPasswordProps } from "@/backend/domain/entities";
@@ -11,7 +11,7 @@ interface ConstructorProps {
   encrypter: EncrypterUseCase;
   userRepository: UserRepository;
   userIdValidator: UserIdValidatorUseCase;
-  updatePasswordPropsValidator: UpdatePasswordPropsValidatorUseCase;
+  updatePasswordPropsValidator: UserUpdatePasswordPropsValidatorUseCase;
 }
 
 export class UpdateUserPasswordService implements UserUpdatePasswordUseCase {

@@ -8,7 +8,7 @@ import {
   DateValidatorUseCase,
   EmailValidatorUseCase,
   IdValidatorUseCase,
-  PhoneValidatorUseCase,
+  UserPhoneValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import {
@@ -29,7 +29,7 @@ interface SutTypes {
   emailValidator: EmailValidatorUseCase;
   idValidator: IdValidatorUseCase;
   httpResponsesHelper: HttpResponsesHelper;
-  phoneValidator: PhoneValidatorUseCase;
+  phoneValidator: UserPhoneValidatorUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
 }
@@ -37,7 +37,7 @@ interface SutTypes {
 const makeSut = (): SutTypes => {
   const dateValidator: DateValidatorUseCase = new DateValidatorStub();
   const emailValidator: EmailValidatorUseCase = new EmailValidatorStub();
-  const phoneValidator: PhoneValidatorUseCase = new PhoneValidatorStub();
+  const phoneValidator: UserPhoneValidatorUseCase = new PhoneValidatorStub();
   const idValidator: IdValidatorUseCase = new IdValidatorStub();
   const userRepository: UserRepository = new UserRepositoryInMemory();
   const validationErrors = new ValidationErrors();
@@ -83,7 +83,7 @@ describe("UpdateUserProfileController", () => {
   let emailValidator: EmailValidatorUseCase;
   let idValidator: IdValidatorUseCase;
   let httpResponsesHelper: HttpResponsesHelper;
-  let phoneValidator: PhoneValidatorUseCase;
+  let phoneValidator: UserPhoneValidatorUseCase;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
 
@@ -348,7 +348,7 @@ describe("UpdateUserProfileController", () => {
   });
 
   test("should return 400 if invalid birthdate is provided", async () => {
-    jest.spyOn(dateValidator, "isBirthdateValid").mockReturnValue(false);
+    jest.spyOn(dateValidator, "isAdult").mockReturnValue(false);
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
 

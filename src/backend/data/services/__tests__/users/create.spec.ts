@@ -8,12 +8,12 @@ import {
   DateValidatorUseCase,
   EmailValidatorUseCase,
   EncrypterUseCase,
-  PhoneValidatorUseCase,
+  UserPhoneValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { UserProps, UserRole } from "@/backend/domain/entities";
 import { CreateUserService } from "@/backend/data/services";
 import { UserCreationPropsValidator } from "@/backend/data/validators";
-import { UserCretionPropsValidatorUseCase } from "@/backend/domain/use-cases";
+import { UserCreationPropsValidatorUseCase } from "@/backend/domain/use-cases";
 import { UserRepository } from "@/backend/data/repositories";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 import { ValidationErrors } from "@/backend/data/helpers";
@@ -22,7 +22,7 @@ interface SutTypes {
   sut: CreateUserService;
   dateValidator: DateValidatorUseCase;
   emailValidator: EmailValidatorUseCase;
-  phoneValidator: PhoneValidatorUseCase;
+  phoneValidator: UserPhoneValidatorUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
 }
@@ -34,7 +34,7 @@ const makeSut = (): SutTypes => {
   const phoneValidator = new PhoneValidatorStub();
   const userRepository = new UserRepositoryInMemory();
   const validationErrors = new ValidationErrors();
-  const userCreationPropsValidator: UserCretionPropsValidatorUseCase =
+  const userCreationPropsValidator: UserCreationPropsValidatorUseCase =
     new UserCreationPropsValidator({
       userRepository,
       dateValidator,
@@ -62,7 +62,7 @@ describe("CreateUserService", () => {
   let sut: CreateUserService;
   let dateValidator: DateValidatorUseCase;
   let emailValidator: EmailValidatorUseCase;
-  let phoneValidator: PhoneValidatorUseCase;
+  let phoneValidator: UserPhoneValidatorUseCase;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
 
@@ -164,7 +164,7 @@ describe("CreateUserService", () => {
   test("should throw if invalid birthdate is provided", async () => {
     const userProps = createUserProps();
 
-    jest.spyOn(dateValidator, "isBirthdateValid").mockReturnValue(false);
+    jest.spyOn(dateValidator, "isAdult").mockReturnValue(false);
 
     await expect(sut.create(userProps)).rejects.toThrow(
       validationErrors.invalidParamError("data de nascimento")

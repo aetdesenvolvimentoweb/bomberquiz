@@ -1,8 +1,8 @@
 import {
   DateValidatorUseCase,
   EmailValidatorUseCase,
-  PhoneValidatorUseCase,
-  UpdateProfilePropsValidatorUseCase,
+  UserPhoneValidatorUseCase,
+  UserUpdateProfilePropsValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { UserProfileProps } from "@/backend/domain/entities";
 import { UserRepository } from "../../repositories";
@@ -11,13 +11,13 @@ import { ValidationErrors } from "../../helpers";
 interface UpdateProfilePropsValidatorDependencies {
   dateValidator: DateValidatorUseCase;
   emailValidator: EmailValidatorUseCase;
-  phoneValidator: PhoneValidatorUseCase;
+  phoneValidator: UserPhoneValidatorUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
 }
 
 export class UpdateProfilePropsValidator
-  implements UpdateProfilePropsValidatorUseCase
+  implements UserUpdateProfilePropsValidatorUseCase
 {
   private dateValidator;
   private emailValidator;
@@ -78,7 +78,7 @@ export class UpdateProfilePropsValidator
   };
 
   private validateBirthdate = (birthdate: Date): void => {
-    if (!this.dateValidator.isBirthdateValid(birthdate)) {
+    if (!this.dateValidator.isAdult(birthdate)) {
       throw this.validationErrors.invalidParamError("data de nascimento");
     }
   };

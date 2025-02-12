@@ -1,12 +1,12 @@
 import {
+  AuthLoginPropsValidatorUseCase,
   AuthLoginUseCase,
   AuthTokenHandlerUseCase,
-  LoginValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { LoginProps } from "@/backend/domain/entities";
 
 interface ConstructorProps {
-  loginValidator: LoginValidatorUseCase;
+  loginValidator: AuthLoginPropsValidatorUseCase;
   authTokenHandler: AuthTokenHandlerUseCase;
 }
 

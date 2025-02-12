@@ -1,3 +1,8 @@
+import {
+  AuthLoginPropsValidatorUseCase,
+  EmailValidatorUseCase,
+  EncrypterUseCase,
+} from "@/backend/domain/use-cases";
 import { AuthRepository, UserRepository } from "@/backend/data/repositories";
 import {
   AuthRepositoryInMemory,
@@ -8,11 +13,6 @@ import {
   EncrypterStub,
   TokenHandlerStub,
 } from "@/backend/__mocks__";
-import {
-  EmailValidatorUseCase,
-  EncrypterUseCase,
-  LoginValidatorUseCase,
-} from "@/backend/domain/use-cases";
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { LoginProps, UserLogged, UserProps } from "@/backend/domain/entities";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
@@ -37,7 +37,7 @@ const makeSut = (): SutTypes => {
   const emailValidator: EmailValidatorUseCase = new EmailValidatorStub();
   const encrypter: EncrypterUseCase = new EncrypterStub();
   const validationErrors = new ValidationErrors();
-  const loginValidator: LoginValidatorUseCase = new LoginValidator({
+  const loginValidator: AuthLoginPropsValidatorUseCase = new LoginValidator({
     authRepository,
     emailValidator,
     encrypter,

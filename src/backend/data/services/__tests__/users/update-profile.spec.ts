@@ -8,9 +8,9 @@ import {
   DateValidatorUseCase,
   EmailValidatorUseCase,
   IdValidatorUseCase,
-  PhoneValidatorUseCase,
-  UpdateProfilePropsValidatorUseCase,
   UserIdValidatorUseCase,
+  UserPhoneValidatorUseCase,
+  UserUpdateProfilePropsValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import {
   UpdateProfilePropsValidator,
@@ -27,7 +27,7 @@ interface SutTypes {
   dateValidator: DateValidatorUseCase;
   emailValidator: EmailValidatorUseCase;
   idValidator: IdValidatorUseCase;
-  phoneValidator: PhoneValidatorUseCase;
+  phoneValidator: UserPhoneValidatorUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
 }
@@ -44,7 +44,7 @@ const makeSut = (): SutTypes => {
     userRepository,
     validationErrors,
   });
-  const updateProfilePropsValidator: UpdateProfilePropsValidatorUseCase =
+  const updateProfilePropsValidator: UserUpdateProfilePropsValidatorUseCase =
     new UpdateProfilePropsValidator({
       dateValidator,
       emailValidator,
@@ -74,7 +74,7 @@ describe("UpdateUserProfileService", () => {
   let dateValidator: DateValidatorUseCase;
   let emailValidator: EmailValidatorUseCase;
   let idValidator: IdValidatorUseCase;
-  let phoneValidator: PhoneValidatorUseCase;
+  let phoneValidator: UserPhoneValidatorUseCase;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
 
@@ -287,7 +287,7 @@ describe("UpdateUserProfileService", () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
 
-    jest.spyOn(dateValidator, "isBirthdateValid").mockReturnValue(false);
+    jest.spyOn(dateValidator, "isAdult").mockReturnValue(false);
 
     await expect(
       sut.updateProfile({

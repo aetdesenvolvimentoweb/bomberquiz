@@ -1,6 +1,6 @@
 import {
-  UpdateProfilePropsValidatorUseCase,
   UserIdValidatorUseCase,
+  UserUpdateProfilePropsValidatorUseCase,
   UserUpdateProfileUseCase,
 } from "@/backend/domain/use-cases";
 import { UserProfileProps } from "@/backend/domain/entities";
@@ -9,7 +9,7 @@ import { UserRepository } from "../../repositories";
 interface constructorProps {
   userRepository: UserRepository;
   userIdValidator: UserIdValidatorUseCase;
-  updateProfilePropsValidator: UpdateProfilePropsValidatorUseCase;
+  updateProfilePropsValidator: UserUpdateProfilePropsValidatorUseCase;
 }
 
 export class UpdateUserProfileService implements UserUpdateProfileUseCase {

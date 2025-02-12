@@ -1,7 +1,7 @@
 import {
   IdValidatorUseCase,
-  UpdateRoleValidatorUseCase,
   UserIdValidatorUseCase,
+  UserUpdateRoleValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import {
   UpdateRoleValidator,
@@ -30,7 +30,7 @@ const makeSut = (): SutTypes => {
     userRepository,
     validationErrors,
   });
-  const updateRoleValidator: UpdateRoleValidatorUseCase =
+  const updateRoleValidator: UserUpdateRoleValidatorUseCase =
     new UpdateRoleValidator({
       validationErrors,
     });

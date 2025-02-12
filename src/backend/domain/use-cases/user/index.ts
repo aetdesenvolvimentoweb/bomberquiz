@@ -6,3 +6,4 @@ export * from "./user.find-by-id";
 export * from "./user.update-password";
 export * from "./user.update-profile";
 export * from "./user.update-role";
+export * from "./validators";

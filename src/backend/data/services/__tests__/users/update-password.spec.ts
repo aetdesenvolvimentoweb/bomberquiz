@@ -2,8 +2,8 @@ import { EncrypterStub, IdValidatorStub } from "@/backend/__mocks__";
 import {
   EncrypterUseCase,
   IdValidatorUseCase,
-  UpdatePasswordPropsValidatorUseCase,
   UserIdValidatorUseCase,
+  UserUpdatePasswordPropsValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import {
   UpdatePasswordPropsValidator,
@@ -33,7 +33,7 @@ const makeSut = (): SutTypes => {
     validationErrors,
   });
   const encrypter: EncrypterUseCase = new EncrypterStub();
-  const updatePasswordPropsValidator: UpdatePasswordPropsValidatorUseCase =
+  const updatePasswordPropsValidator: UserUpdatePasswordPropsValidatorUseCase =
     new UpdatePasswordPropsValidator({
       encrypter,
       userRepository,

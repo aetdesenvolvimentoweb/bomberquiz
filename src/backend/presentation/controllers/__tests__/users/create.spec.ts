@@ -8,7 +8,7 @@ import {
   DateValidatorUseCase,
   EmailValidatorUseCase,
   EncrypterUseCase,
-  PhoneValidatorUseCase,
+  UserPhoneValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { UserProps, UserRole } from "@/backend/domain/entities";
 import { CreateUserController } from "@/backend/presentation/controllers";
@@ -25,7 +25,7 @@ interface SutTypes {
   dateValidator: DateValidatorUseCase;
   emailValidator: EmailValidatorUseCase;
   httpResponsesHelper: HttpResponsesHelper;
-  phoneValidator: PhoneValidatorUseCase;
+  phoneValidator: UserPhoneValidatorUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
 }
@@ -34,7 +34,7 @@ const makeSut = (): SutTypes => {
   const dateValidator: DateValidatorUseCase = new DateValidatorStub();
   const emailValidator: EmailValidatorUseCase = new EmailValidatorStub();
   const encrypter: EncrypterUseCase = new EncrypterStub();
-  const phoneValidator: PhoneValidatorUseCase = new PhoneValidatorStub();
+  const phoneValidator: UserPhoneValidatorUseCase = new PhoneValidatorStub();
   const userRepository: UserRepository = new UserRepositoryInMemory();
   const validationErrors = new ValidationErrors();
   const userCreationPropsValidator = new UserCreationPropsValidator({
@@ -71,7 +71,7 @@ describe("CreateUserController", () => {
   let dateValidator: DateValidatorUseCase;
   let emailValidator: EmailValidatorUseCase;
   let httpResponsesHelper: HttpResponsesHelper;
-  let phoneValidator: PhoneValidatorUseCase;
+  let phoneValidator: UserPhoneValidatorUseCase;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
 
@@ -207,7 +207,7 @@ describe("CreateUserController", () => {
   });
 
   test("should return 400 if invalid birthdate is provided", async () => {
-    jest.spyOn(dateValidator, "isBirthdateValid").mockReturnValue(false);
+    jest.spyOn(dateValidator, "isAdult").mockReturnValue(false);
 
     const httpRequest: HttpRequest<UserProps> = {
       body: createUserProps({ birthdate: new Date("invalid_birthdate") }),
