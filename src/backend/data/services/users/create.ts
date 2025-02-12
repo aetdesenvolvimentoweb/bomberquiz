@@ -1,6 +1,6 @@
 import {
-  CreateUserUseCase,
   EncrypterUseCase,
+  UserCreateUseCase,
   UserCretionPropsValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { UserProps } from "@/backend/domain/entities";
@@ -12,7 +12,7 @@ interface ConstructorProps {
   userCreationPropsValidator: UserCretionPropsValidatorUseCase;
 }
 
-export class CreateUserService implements CreateUserUseCase {
+export class CreateUserService implements UserCreateUseCase {
   constructor(private constructorProps: ConstructorProps) {}
 
   public readonly create = async (createProps: UserProps): Promise<void> => {

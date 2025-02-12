@@ -63,7 +63,7 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
       });
   };
 
-  public readonly listAll = async (): Promise<UserMapped[]> => {
+  public readonly findAll = async (): Promise<UserMapped[]> => {
     await this.dbConnect();
     const users: User[] = await db.user
       .findMany({})
@@ -77,7 +77,7 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
     return users.map((user) => this.userMapper(user));
   };
 
-  public readonly listByEmail = async (email: string): Promise<User | null> => {
+  public readonly findByEmail = async (email: string): Promise<User | null> => {
     await this.dbConnect();
     return await db.user
       .findUnique({
@@ -93,7 +93,7 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
       });
   };
 
-  public readonly listById = async (id: string): Promise<UserMapped | null> => {
+  public readonly findById = async (id: string): Promise<UserMapped | null> => {
     await this.dbConnect();
     const user: User | null = await db.user
       .findFirst({

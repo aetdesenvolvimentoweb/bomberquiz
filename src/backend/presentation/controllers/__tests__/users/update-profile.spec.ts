@@ -113,7 +113,7 @@ describe("UpdateUserProfileController", () => {
 
   test("should return 204 if user profile was updated", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
@@ -194,7 +194,7 @@ describe("UpdateUserProfileController", () => {
 
   test("should return 400 if no name is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
@@ -215,7 +215,7 @@ describe("UpdateUserProfileController", () => {
 
   test("should return 400 if no email is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
@@ -237,7 +237,7 @@ describe("UpdateUserProfileController", () => {
   test("should return 400 if invalid email is provided", async () => {
     jest.spyOn(emailValidator, "isValid").mockReturnValue(false);
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
@@ -260,7 +260,7 @@ describe("UpdateUserProfileController", () => {
   test("should return 400 if already registered email is provided", async () => {
     await userRepository.create(createUserProps());
     await userRepository.create(createUserProps({ email: "another_email" }));
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
@@ -284,7 +284,7 @@ describe("UpdateUserProfileController", () => {
 
   test("should return 400 if no phone is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
@@ -306,7 +306,7 @@ describe("UpdateUserProfileController", () => {
   test("should return 400 if invalid phone is provided", async () => {
     jest.spyOn(phoneValidator, "isValid").mockReturnValue(false);
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
@@ -328,7 +328,7 @@ describe("UpdateUserProfileController", () => {
 
   test("should return 400 if no birthdate is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UserProfileProps> = {
       body: {
@@ -350,7 +350,7 @@ describe("UpdateUserProfileController", () => {
   test("should return 400 if invalid birthdate is provided", async () => {
     jest.spyOn(dateValidator, "isBirthdateValid").mockReturnValue(false);
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UserProfileProps> = {
       body: {

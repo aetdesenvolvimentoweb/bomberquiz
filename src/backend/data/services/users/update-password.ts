@@ -1,8 +1,8 @@
 import {
   EncrypterUseCase,
   UpdatePasswordPropsValidatorUseCase,
-  UpdateUserPasswordUseCase,
   UserIdValidatorUseCase,
+  UserUpdatePasswordUseCase,
 } from "@/backend/domain/use-cases";
 import { UpdateUserPasswordProps } from "@/backend/domain/entities";
 import { UserRepository } from "../../repositories";
@@ -14,7 +14,7 @@ interface ConstructorProps {
   updatePasswordPropsValidator: UpdatePasswordPropsValidatorUseCase;
 }
 
-export class UpdateUserPasswordService implements UpdateUserPasswordUseCase {
+export class UpdateUserPasswordService implements UserUpdatePasswordUseCase {
   constructor(private constructorProps: ConstructorProps) {}
 
   public readonly updatePassword = async (updatePasswordProps: {

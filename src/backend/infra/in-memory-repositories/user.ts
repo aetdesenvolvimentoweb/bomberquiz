@@ -44,15 +44,15 @@ export class UserRepositoryInMemory implements UserRepository {
     this.users = this.users.filter((user) => user.id !== id);
   };
 
-  public readonly listAll = async (): Promise<UserMapped[]> => {
+  public readonly findAll = async (): Promise<UserMapped[]> => {
     return this.users.map((user) => this.userMapped(user));
   };
 
-  public readonly listByEmail = async (email: string): Promise<User | null> => {
+  public readonly findByEmail = async (email: string): Promise<User | null> => {
     return this.users.find((user) => user.email === email) || null;
   };
 
-  public readonly listById = async (id: string): Promise<UserMapped | null> => {
+  public readonly findById = async (id: string): Promise<UserMapped | null> => {
     const user = this.users.find((user) => user.id === id);
     if (user) {
       return this.userMapped(user);

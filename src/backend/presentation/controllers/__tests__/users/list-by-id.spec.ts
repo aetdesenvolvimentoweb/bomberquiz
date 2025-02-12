@@ -76,7 +76,7 @@ describe("ListUserByIdController", () => {
 
   test("should return 200 if user was listed", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest = {
       body: {},

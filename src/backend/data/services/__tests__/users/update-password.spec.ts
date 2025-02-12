@@ -86,7 +86,7 @@ describe("UpdateUserPasswordService", () => {
   test("should update a user password", async () => {
     const hashedPassword = await encrypter.encrypt("any_password");
     await userRepository.create(createUserProps({ password: hashedPassword }));
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     await expect(
       sut.updatePassword({
@@ -139,7 +139,7 @@ describe("UpdateUserPasswordService", () => {
 
   test("should throw if no old password is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     await expect(
       sut.updatePassword({
@@ -154,7 +154,7 @@ describe("UpdateUserPasswordService", () => {
 
   test("should throw if invalid old password is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     await expect(
       sut.updatePassword({
@@ -170,7 +170,7 @@ describe("UpdateUserPasswordService", () => {
   test("should throw if wrong old password is provided", async () => {
     const hashedPassword = await encrypter.encrypt("any_password");
     await userRepository.create(createUserProps({ password: hashedPassword }));
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     jest
       .spyOn(encrypter, "verify")
@@ -190,7 +190,7 @@ describe("UpdateUserPasswordService", () => {
   test("should throw if no new password is provided", async () => {
     const hashedPassword = await encrypter.encrypt("any_password");
     await userRepository.create(createUserProps({ password: hashedPassword }));
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     await expect(
       sut.updatePassword({
@@ -206,7 +206,7 @@ describe("UpdateUserPasswordService", () => {
   test("should throw if invalid new password is provided", async () => {
     const hashedPassword = await encrypter.encrypt("any_password");
     await userRepository.create(createUserProps({ password: hashedPassword }));
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     await expect(
       sut.updatePassword({

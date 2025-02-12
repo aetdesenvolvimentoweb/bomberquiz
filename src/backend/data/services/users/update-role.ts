@@ -1,7 +1,7 @@
 import {
   UpdateRoleValidatorUseCase,
-  UpdateUserRoleUseCase,
   UserIdValidatorUseCase,
+  UserUpdateRoleUseCase,
 } from "@/backend/domain/use-cases";
 import { UserRepository } from "../../repositories";
 import { UserRole } from "@prisma/client";
@@ -12,7 +12,7 @@ interface constructorProps {
   updateRoleValidator: UpdateRoleValidatorUseCase;
 }
 
-export class UpdateUserRoleService implements UpdateUserRoleUseCase {
+export class UpdateUserRoleService implements UserUpdateRoleUseCase {
   constructor(private constructorProps: constructorProps) {}
 
   public readonly updateRole = async (updateRoleProps: {

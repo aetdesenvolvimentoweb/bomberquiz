@@ -7,7 +7,7 @@ export class AuthRepositoryInMemory implements AuthRepository {
   public readonly authorize = async (
     loginProps: LoginProps
   ): Promise<UserLogged | null> => {
-    const user = await this.userRepository.listByEmail(loginProps.email);
+    const user = await this.userRepository.findByEmail(loginProps.email);
 
     if (user) {
       return {

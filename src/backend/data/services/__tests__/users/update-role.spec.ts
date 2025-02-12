@@ -76,7 +76,7 @@ describe("UpdateUserRoleService", () => {
 
   test("should update a user password", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     await expect(
       sut.updateRole({
@@ -117,7 +117,7 @@ describe("UpdateUserRoleService", () => {
 
   test("should throws if no role is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     await expect(
       // @ts-expect-error teste
@@ -129,7 +129,7 @@ describe("UpdateUserRoleService", () => {
 
   test("should throws if invalid role is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     await expect(
       sut.updateRole({

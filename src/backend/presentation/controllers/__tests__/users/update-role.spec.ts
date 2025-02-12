@@ -84,7 +84,7 @@ describe("UpdateUserRoleController", () => {
 
   test("should return 204 if user role was updated", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<{ role: UserRole }> = {
       body: { role: "administrador" },
@@ -145,7 +145,7 @@ describe("UpdateUserRoleController", () => {
 
   test("should return 400 if no user role is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<{ role: UserRole }> = {
       // @ts-expect-error teste
@@ -163,7 +163,7 @@ describe("UpdateUserRoleController", () => {
 
   test("should return 400 if invalid user role is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<{ role: UserRole }> = {
       body: { role: "invalid-role" as UserRole },

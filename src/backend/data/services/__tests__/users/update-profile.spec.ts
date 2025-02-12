@@ -103,7 +103,7 @@ describe("UpdateUserProfileService", () => {
 
   test("should update a user profile", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     await expect(
       sut.updateProfile({
@@ -163,7 +163,7 @@ describe("UpdateUserProfileService", () => {
 
   test("should throws if no name is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     await expect(
       sut.updateProfile({
@@ -179,7 +179,7 @@ describe("UpdateUserProfileService", () => {
 
   test("should throws if no email is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     await expect(
       sut.updateProfile({
@@ -195,7 +195,7 @@ describe("UpdateUserProfileService", () => {
 
   test("should throws if invalid email is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
     jest.spyOn(emailValidator, "isValid").mockReturnValue(false);
 
     await expect(
@@ -214,7 +214,7 @@ describe("UpdateUserProfileService", () => {
   test("should throws if already registered email is provided", async () => {
     await userRepository.create(createUserProps());
     await userRepository.create(createUserProps({ email: "another_email" }));
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     await expect(
       sut.updateProfile({
@@ -234,7 +234,7 @@ describe("UpdateUserProfileService", () => {
 
   test("should throws if no phone is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     await expect(
       sut.updateProfile({
@@ -250,7 +250,7 @@ describe("UpdateUserProfileService", () => {
 
   test("should throws if invalid phone is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     jest.spyOn(phoneValidator, "isValid").mockReturnValue(false);
 
@@ -269,7 +269,7 @@ describe("UpdateUserProfileService", () => {
 
   test("should throws if no birthdate is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     await expect(
       sut.updateProfile({
@@ -285,7 +285,7 @@ describe("UpdateUserProfileService", () => {
 
   test("should throws if invalid birthdate is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     jest.spyOn(dateValidator, "isBirthdateValid").mockReturnValue(false);
 

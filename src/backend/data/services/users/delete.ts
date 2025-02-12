@@ -1,5 +1,5 @@
 import {
-  DeleteUserUseCase,
+  UserDeleteUseCase,
   UserIdValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { UserRepository } from "../../repositories";
@@ -9,7 +9,7 @@ interface ConstructorProps {
   userIdValidator: UserIdValidatorUseCase;
 }
 
-export class DeleteUserService implements DeleteUserUseCase {
+export class DeleteUserService implements UserDeleteUseCase {
   constructor(private constructorProps: ConstructorProps) {}
 
   public readonly delete = async (id: string): Promise<void> => {

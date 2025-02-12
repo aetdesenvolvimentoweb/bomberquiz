@@ -76,7 +76,7 @@ describe("DeleteUserController", () => {
 
   test("should return 204 if user was deleted", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest = {
       body: {},

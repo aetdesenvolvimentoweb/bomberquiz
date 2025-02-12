@@ -63,7 +63,7 @@ describe("DeleteUserService", () => {
 
   test("should delete a user", async () => {
     await userRepository.create(createUserProps);
-    const user = await userRepository.listByEmail(createUserProps.email);
+    const user = await userRepository.findByEmail(createUserProps.email);
 
     await expect(sut.delete(user!.id)).resolves.not.toThrow();
   });

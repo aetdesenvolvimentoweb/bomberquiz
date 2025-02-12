@@ -21,7 +21,7 @@ export class ListUserByIdController implements Controller {
     try {
       const id: string = request.dynamicParams.id;
 
-      const user: UserMapped | null = await listUserByIdService.listById(id);
+      const user: UserMapped | null = await listUserByIdService.findById(id);
 
       return httpResponsesHelper.ok(user);
     } catch (error) {

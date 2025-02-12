@@ -41,7 +41,7 @@ describe("PrismaUserRepositoryAdapter", () => {
 
   test("should be able to delete an user", async () => {
     await sut.create(createUserProps);
-    const user = await sut.listByEmail(createUserProps.email);
+    const user = await sut.findByEmail(createUserProps.email);
 
     await expect(sut.delete(user!.id)).resolves.not.toThrow();
   });
@@ -49,7 +49,7 @@ describe("PrismaUserRepositoryAdapter", () => {
   test("should be able to list all users", async () => {
     await sut.create(createUserProps);
 
-    const users = await sut.listAll();
+    const users = await sut.findAll();
 
     expect(users).toHaveLength(1);
     expect(users[0]).toHaveProperty("id");
@@ -64,7 +64,7 @@ describe("PrismaUserRepositoryAdapter", () => {
   test("should be able to list an user by email", async () => {
     await sut.create(createUserProps);
 
-    const user = await sut.listByEmail(createUserProps.email);
+    const user = await sut.findByEmail(createUserProps.email);
 
     expect(user).toHaveProperty("id");
     expect(user?.name).toEqual(createUserProps.name);
@@ -78,9 +78,9 @@ describe("PrismaUserRepositoryAdapter", () => {
   test("should be able to list an user by id", async () => {
     await sut.create(createUserProps);
 
-    const user = await sut.listByEmail(createUserProps.email);
+    const user = await sut.findByEmail(createUserProps.email);
 
-    const userMapped = await sut.listById(user!.id);
+    const userMapped = await sut.findById(user!.id);
 
     expect(userMapped).toHaveProperty("id");
     expect(userMapped?.name).toEqual(createUserProps.name);
@@ -93,7 +93,7 @@ describe("PrismaUserRepositoryAdapter", () => {
 
   test("should be able to update an user password", async () => {
     await sut.create(createUserProps);
-    const user = await sut.listByEmail(createUserProps.email);
+    const user = await sut.findByEmail(createUserProps.email);
 
     await expect(
       sut.updatePassword({
@@ -108,7 +108,7 @@ describe("PrismaUserRepositoryAdapter", () => {
 
   test("should be able to update an user profile", async () => {
     await sut.create(createUserProps);
-    const user = await sut.listByEmail(createUserProps.email);
+    const user = await sut.findByEmail(createUserProps.email);
 
     await expect(
       sut.updateProfile({
@@ -125,7 +125,7 @@ describe("PrismaUserRepositoryAdapter", () => {
 
   test("should be able to update an user role", async () => {
     await sut.create(createUserProps);
-    const user = await sut.listByEmail(createUserProps.email);
+    const user = await sut.findByEmail(createUserProps.email);
 
     await expect(
       sut.updateRole({

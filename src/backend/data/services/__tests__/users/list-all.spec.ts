@@ -41,13 +41,13 @@ describe("ListAllUsersService", () => {
   test("should list a user by id", async () => {
     await userRepository.create(createUserProps);
 
-    await expect(sut.listAll()).resolves.not.toThrow();
+    await expect(sut.findAll()).resolves.not.toThrow();
   });
 
   test("should list a user by id with correct data", async () => {
     await userRepository.create(createUserProps);
 
-    const usersListed = await sut.listAll();
+    const usersListed = await sut.findAll();
 
     expect(usersListed.length).not.toBeLessThan(1);
     expect(usersListed[0]).toHaveProperty("id");

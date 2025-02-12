@@ -63,16 +63,16 @@ describe("ListUserByIdService", () => {
 
   test("should list a user by id", async () => {
     await userRepository.create(createUserProps);
-    const user = await userRepository.listByEmail(createUserProps.email);
+    const user = await userRepository.findByEmail(createUserProps.email);
 
-    await expect(sut.listById(user!.id)).resolves.not.toThrow();
+    await expect(sut.findById(user!.id)).resolves.not.toThrow();
   });
 
   test("should list a user by id with correct data", async () => {
     await userRepository.create(createUserProps);
-    const user = await userRepository.listByEmail(createUserProps.email);
+    const user = await userRepository.findByEmail(createUserProps.email);
 
-    const userListed = await sut.listById(user!.id);
+    const userListed = await sut.findById(user!.id);
 
     expect(userListed).not.toBeNull();
     expect(userListed?.id).toEqual(user!.id);
@@ -85,7 +85,7 @@ describe("ListUserByIdService", () => {
   });
 
   test("should throw if no id is provided", async () => {
-    await expect(sut.listById("")).rejects.toThrow(
+    await expect(sut.findById("")).rejects.toThrow(
       validationErrors.missingParamError("id")
     );
   });
@@ -93,13 +93,13 @@ describe("ListUserByIdService", () => {
   test("should throw if invalid id is provided", async () => {
     jest.spyOn(idValidator, "isValid").mockReturnValue(false);
 
-    await expect(sut.listById("invalid-id")).rejects.toThrow(
+    await expect(sut.findById("invalid-id")).rejects.toThrow(
       validationErrors.invalidParamError("id")
     );
   });
 
   test("should throw if unregistered id is provided", async () => {
-    await expect(sut.listById("valid-id")).rejects.toThrow(
+    await expect(sut.findById("valid-id")).rejects.toThrow(
       validationErrors.unregisteredError("id")
     );
   });

@@ -20,7 +20,7 @@ export class ListAllUsersController implements Controller {
     const { listAllUsersService, httpResponsesHelper } = this.constructorProps;
 
     try {
-      const users = await listAllUsersService.listAll();
+      const users = await listAllUsersService.findAll();
 
       return httpResponsesHelper.ok(users);
     } catch (error) {

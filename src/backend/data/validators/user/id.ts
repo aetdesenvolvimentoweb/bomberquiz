@@ -29,7 +29,7 @@ export class UserIdValidator implements UserIdValidatorUseCase {
       throw this.validationErrors.invalidParamError("id");
     }
 
-    if (!(await this.userRepository.listById(id))) {
+    if (!(await this.userRepository.findById(id))) {
       throw this.validationErrors.unregisteredError("id");
     }
   };

@@ -16,7 +16,7 @@ export class PrismaAuthRepositoryAdapter implements AuthRepository {
     loginProps: LoginProps
   ): Promise<UserLogged | null> => {
     await this.dbConnect();
-    const user = await this.userRepository.listByEmail(loginProps.email);
+    const user = await this.userRepository.findByEmail(loginProps.email);
 
     if (user) {
       return {

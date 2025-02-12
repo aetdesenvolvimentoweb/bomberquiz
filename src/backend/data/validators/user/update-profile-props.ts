@@ -56,7 +56,7 @@ export class UpdateProfilePropsValidator
     id: string,
     email: string
   ): Promise<void> => {
-    const user = await this.userRepository.listByEmail(email);
+    const user = await this.userRepository.findByEmail(email);
     if (user && user.id !== id && user.email === email) {
       throw this.validationErrors.duplicatedKeyError({
         entity: "usuário",

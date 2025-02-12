@@ -1,19 +1,19 @@
 import {
-  CreateUserUseCase,
-  DeleteUserUseCase,
-  ListAllUsersUseCase,
-  ListUserByEmailUseCase,
-  ListUserByIdUseCase,
-  UpdateUserPasswordUseCase,
-  UpdateUserProfileUseCase,
-  UpdateUserRoleUseCase,
+  UserCreateUseCase,
+  UserDeleteUseCase,
+  UserFindAllUseCase,
+  UserFindByEmailUseCase,
+  UserFindByIdUseCase,
+  UserUpdatePasswordUseCase,
+  UserUpdateProfileUseCase,
+  UserUpdateRoleUseCase,
 } from "@/backend/domain/use-cases";
 
-export type UserRepository = CreateUserUseCase &
-  DeleteUserUseCase &
-  ListAllUsersUseCase &
-  ListUserByEmailUseCase &
-  ListUserByIdUseCase &
-  UpdateUserPasswordUseCase &
-  UpdateUserProfileUseCase &
-  UpdateUserRoleUseCase;
+export type UserRepository = UserCreateUseCase &
+  UserDeleteUseCase &
+  UserFindAllUseCase &
+  UserFindByEmailUseCase &
+  UserFindByIdUseCase &
+  UserUpdatePasswordUseCase &
+  UserUpdateProfileUseCase &
+  UserUpdateRoleUseCase;

@@ -1,5 +1,5 @@
 import {
-  ListUserByIdUseCase,
+  UserFindByIdUseCase,
   UserIdValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { UserMapped } from "@/backend/domain/entities";
@@ -10,13 +10,13 @@ interface ConstructorProps {
   userIdValidator: UserIdValidatorUseCase;
 }
 
-export class ListUserByIdService implements ListUserByIdUseCase {
+export class ListUserByIdService implements UserFindByIdUseCase {
   constructor(private constructorProps: ConstructorProps) {}
 
-  public readonly listById = async (id: string): Promise<UserMapped | null> => {
+  public readonly findById = async (id: string): Promise<UserMapped | null> => {
     const { userRepository, userIdValidator } = this.constructorProps;
 
     await userIdValidator.validateUserId(id);
-    return await userRepository.listById(id);
+    return await userRepository.findById(id);
   };
 }

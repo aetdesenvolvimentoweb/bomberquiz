@@ -95,7 +95,7 @@ describe("UpdateUserPasswordController", () => {
 
   test("should return 204 if user password was updated", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       body: {
@@ -168,7 +168,7 @@ describe("UpdateUserPasswordController", () => {
 
   test("should return 400 if no old password is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       body: { newPassword: "new_password" } as UpdateUserPasswordProps,
@@ -185,7 +185,7 @@ describe("UpdateUserPasswordController", () => {
 
   test("should return 400 if invalid old password is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       body: {
@@ -208,7 +208,7 @@ describe("UpdateUserPasswordController", () => {
       .spyOn(encrypter, "verify")
       .mockReturnValue(new Promise((resolve) => resolve(false)));
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       body: {
@@ -228,7 +228,7 @@ describe("UpdateUserPasswordController", () => {
 
   test("should return 400 if no new password is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       body: { oldPassword: "any_password" } as UpdateUserPasswordProps,
@@ -245,7 +245,7 @@ describe("UpdateUserPasswordController", () => {
 
   test("should return 400 if invalid new password is provided", async () => {
     await userRepository.create(createUserProps());
-    const user = await userRepository.listByEmail(createUserProps().email);
+    const user = await userRepository.findByEmail(createUserProps().email);
 
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       body: {

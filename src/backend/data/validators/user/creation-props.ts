@@ -53,7 +53,7 @@ export class UserCreationPropsValidator
   private checkAlreadyRegisteredEmail = async (
     email: string
   ): Promise<void> => {
-    if (await this.userRepository.listByEmail(email)) {
+    if (await this.userRepository.findByEmail(email)) {
       throw this.validationErrors.duplicatedKeyError({
         entity: "usuário",
         key: "email",
