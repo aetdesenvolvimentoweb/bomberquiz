@@ -1,5 +1,5 @@
 import {
-  LoginUseCase,
+  AuthLoginUseCase,
   LoginValidatorUseCase,
   TokenHandlerUseCase,
 } from "@/backend/domain/use-cases";
@@ -10,7 +10,7 @@ interface ConstructorProps {
   tokenHandler: TokenHandlerUseCase;
 }
 
-export class LoginService implements LoginUseCase {
+export class LoginService implements AuthLoginUseCase {
   constructor(private props: ConstructorProps) {}
 
   public readonly login = async (loginProps: LoginProps): Promise<string> => {
