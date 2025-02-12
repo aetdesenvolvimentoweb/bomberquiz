@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { HttpResponse } from "@/backend/presentation/protocols";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
-import { JwtTokenHandlerAdapter } from "@/backend/infra/adapters/jsonwebtoken/token-handler";
+import { JwtTokenHandlerAdapter } from "@/backend/infra/adapters/jsonwebtoken/auth.token-handler";
 
 const handle = async (request: NextRequest): Promise<NextResponse> => {
   const httpResponsesHelper = new HttpResponsesHelper();

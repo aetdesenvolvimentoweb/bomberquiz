@@ -4,7 +4,7 @@ import {
   PrismaUserRepositoryAdapter,
   ValidatorJsEmailValidatorAdapter,
 } from "@/backend/infra/adapters";
-import { JwtTokenHandlerAdapter } from "@/backend/infra/adapters/jsonwebtoken/token-handler";
+import { JwtTokenHandlerAdapter } from "@/backend/infra/adapters/jsonwebtoken/auth.token-handler";
 import { LoginService } from "@/backend/data/services";
 import { LoginValidator } from "@/backend/data/validators";
 import { ValidationErrors } from "@/backend/data/helpers";

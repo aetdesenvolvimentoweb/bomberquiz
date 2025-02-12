@@ -44,10 +44,10 @@ const makeSut = (): SutTypes => {
     validationErrors,
   });
   const httpResponsesHelper = new HttpResponsesHelper();
-  const tokenHandler = new TokenHandlerStub();
+  const authTokenHandler = new TokenHandlerStub();
   const loginService: LoginService = new LoginService({
     loginValidator,
-    tokenHandler,
+    authTokenHandler,
   });
   const sut = new LoginController({
     httpResponsesHelper,

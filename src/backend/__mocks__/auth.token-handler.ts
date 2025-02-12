@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { TokenHandlerUseCase } from "@/backend/domain/use-cases";
+import { AuthTokenHandlerUseCase } from "@/backend/domain/use-cases";
 import { UserLogged } from "@/backend/domain/entities";
 
-export class TokenHandlerStub implements TokenHandlerUseCase {
+export class TokenHandlerStub implements AuthTokenHandlerUseCase {
   public readonly generate = (userLogged: UserLogged): string => {
     return "any_token";
   };

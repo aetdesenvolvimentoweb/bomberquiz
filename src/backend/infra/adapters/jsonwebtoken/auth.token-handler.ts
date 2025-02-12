@@ -1,8 +1,8 @@
-import { TokenHandlerUseCase } from "@/backend/domain/use-cases";
+import { AuthTokenHandlerUseCase } from "@/backend/domain/use-cases";
 import { UserLogged } from "@/backend/domain/entities";
 import jwt from "jsonwebtoken";
 
-export class JwtTokenHandlerAdapter implements TokenHandlerUseCase {
+export class JwtTokenHandlerAdapter implements AuthTokenHandlerUseCase {
   public readonly generate = (userLogged: UserLogged): string => {
     return jwt.sign(userLogged, "segredo", {
       expiresIn: "1d",

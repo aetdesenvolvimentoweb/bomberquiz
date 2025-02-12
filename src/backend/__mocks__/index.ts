@@ -3,4 +3,4 @@ export * from "./email-validator";
 export * from "./encrypter";
 export * from "./id-validator";
 export * from "./phone-validator";
-export * from "./token-handler";
+export * from "./auth.token-handler";

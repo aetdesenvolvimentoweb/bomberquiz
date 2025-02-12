@@ -3,16 +3,16 @@ import {
   UserRepositoryInMemory,
 } from "@/backend/infra/in-memory-repositories";
 import {
+  AuthTokenHandlerUseCase,
+  EmailValidatorUseCase,
+  EncrypterUseCase,
+  LoginValidatorUseCase,
+} from "@/backend/domain/use-cases";
+import {
   EmailValidatorStub,
   EncrypterStub,
   TokenHandlerStub,
 } from "@/backend/__mocks__";
-import {
-  EmailValidatorUseCase,
-  EncrypterUseCase,
-  LoginValidatorUseCase,
-  TokenHandlerUseCase,
-} from "@/backend/domain/use-cases";
 import { LoginProps, UserProps } from "@/backend/domain/entities";
 import { LoginService } from "@/backend/data/services";
 import { LoginValidator } from "@/backend/data/validators";
@@ -23,7 +23,7 @@ interface SutTypes {
   sut: LoginService;
   emailValidator: EmailValidatorUseCase;
   encrypter: EncrypterUseCase;
-  tokenHandler: TokenHandlerUseCase;
+  authTokenHandler: AuthTokenHandlerUseCase;
   userRepository: UserRepository;
   validationErrors: ValidationErrors;
 }
@@ -40,17 +40,17 @@ const makeSut = (): SutTypes => {
     encrypter,
     validationErrors,
   });
-  const tokenHandler = new TokenHandlerStub();
+  const authTokenHandler = new TokenHandlerStub();
   const sut = new LoginService({
     loginValidator,
-    tokenHandler,
+    authTokenHandler,
   });
 
   return {
     sut,
     emailValidator,
     encrypter,
-    tokenHandler,
+    authTokenHandler,
     userRepository,
     validationErrors,
   };
@@ -60,7 +60,7 @@ describe("LoginService", () => {
   let sut: LoginService;
   let emailValidator: EmailValidatorUseCase;
   let encrypter: EncrypterUseCase;
-  let tokenHandler: TokenHandlerUseCase;
+  let authTokenHandler: AuthTokenHandlerUseCase;
   let userRepository: UserRepository;
   let validationErrors: ValidationErrors;
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
@@ -80,7 +80,7 @@ describe("LoginService", () => {
     sut = sutInstance.sut;
     emailValidator = sutInstance.emailValidator;
     encrypter = sutInstance.encrypter;
-    tokenHandler = sutInstance.tokenHandler;
+    authTokenHandler = sutInstance.authTokenHandler;
     userRepository = sutInstance.userRepository;
     validationErrors = sutInstance.validationErrors;
   });
@@ -107,7 +107,7 @@ describe("LoginService", () => {
     } as LoginProps);
 
     expect(token).not.toBeNull();
-    expect(tokenHandler.verify(token)).toBeTruthy();
+    expect(authTokenHandler.verify(token)).toBeTruthy();
   });
 
   test("should throws if no email is provided", async () => {

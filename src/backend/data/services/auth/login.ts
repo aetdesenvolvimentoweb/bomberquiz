@@ -1,23 +1,23 @@
 import {
   AuthLoginUseCase,
+  AuthTokenHandlerUseCase,
   LoginValidatorUseCase,
-  TokenHandlerUseCase,
 } from "@/backend/domain/use-cases";
 import { LoginProps } from "@/backend/domain/entities";
 
 interface ConstructorProps {
   loginValidator: LoginValidatorUseCase;
-  tokenHandler: TokenHandlerUseCase;
+  authTokenHandler: AuthTokenHandlerUseCase;
 }
 
 export class LoginService implements AuthLoginUseCase {
   constructor(private props: ConstructorProps) {}
 
   public readonly login = async (loginProps: LoginProps): Promise<string> => {
-    const { loginValidator, tokenHandler } = this.props;
+    const { loginValidator, authTokenHandler } = this.props;
 
     const userLogged = await loginValidator.validateLogin(loginProps);
 
-    return tokenHandler.generate(userLogged);
+    return authTokenHandler.generate(userLogged);
   };
 }
