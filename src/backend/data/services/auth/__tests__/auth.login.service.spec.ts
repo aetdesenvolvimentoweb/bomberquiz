@@ -7,7 +7,7 @@ import {
 import {
   AuthRepositoryInMemory,
   UserRepositoryInMemory,
-} from "@/backend/infra/in-memory-repositories";
+} from "@/backend/infra/repositories/in-memory";
 import {
   EmailValidatorStub,
   EncrypterStub,

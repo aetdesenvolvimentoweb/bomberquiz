@@ -17,7 +17,7 @@ import { UserCreateService } from "@/backend/data/services";
 import { UserCreationPropsValidator } from "@/backend/data/use-cases";
 import { UserCreationPropsValidatorUseCase } from "@/backend/domain/use-cases";
 import { UserRepository } from "@/backend/data/repository";
-import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
+import { UserRepositoryInMemory } from "@/backend/infra/repositories/in-memory";
 
 /**
  * Define os tipos das dependências para os testes

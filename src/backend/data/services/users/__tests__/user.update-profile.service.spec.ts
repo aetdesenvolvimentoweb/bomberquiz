@@ -19,7 +19,7 @@ import {
 import { UserProfileProps, UserProps } from "@/backend/domain/entities";
 import { ErrorsValidation } from "@/backend/data/shared/errors";
 import { UserRepository } from "@/backend/data/repository";
-import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
+import { UserRepositoryInMemory } from "@/backend/infra/repositories/in-memory";
 import { UserUpdateProfileService } from "@/backend/data/services";
 
 interface SutTypes {

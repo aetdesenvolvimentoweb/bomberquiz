@@ -1,4 +1,4 @@
-import { JwtTokenHandlerAdapter } from "@/backend/infra/adapters/jsonwebtoken/auth.token-handler";
+import { JwtTokenHandlerAdapter } from "@/backend/infra/adapters/cryptography/jsonwebtoken/auth.token-handler";
 import Link from "next/link";
 import { LogoutButton } from "../../logout";
 import { cookies } from "next/headers";

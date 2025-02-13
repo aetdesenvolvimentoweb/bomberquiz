@@ -2,7 +2,7 @@ import {
   Argon2EncrypterAdapter,
   DateFnsDateValidatorAdapter,
   LibPhoneNumberJsPhoneValidatorAdapter,
-  PrismaUserRepositoryAdapter,
+  PrismaUserRepository,
   ValidatorJsEmailValidatorAdapter,
 } from "@/backend/infra/adapters";
 import { ErrorsValidation } from "@/backend/data/shared/errors";
@@ -13,7 +13,7 @@ export const makeUserCreateService = (): UserCreateService => {
   const dateValidator = new DateFnsDateValidatorAdapter();
   const emailValidator = new ValidatorJsEmailValidatorAdapter();
   const encrypter = new Argon2EncrypterAdapter();
-  const userRepository = new PrismaUserRepositoryAdapter();
+  const userRepository = new PrismaUserRepository();
   const phoneValidator = new LibPhoneNumberJsPhoneValidatorAdapter();
   const errorsValidation = new ErrorsValidation();
   const userCreationPropsValidator = new UserCreationPropsValidator({

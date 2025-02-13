@@ -4,7 +4,7 @@ import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { UserFindAllController } from "../user.find-all.controller";
 import { UserFindAllService } from "@/backend/data/services";
 import { UserRepository } from "@/backend/data/repository";
-import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
+import { UserRepositoryInMemory } from "@/backend/infra/repositories/in-memory";
 
 /**
  * Interface que define os tipos necessários para os testes

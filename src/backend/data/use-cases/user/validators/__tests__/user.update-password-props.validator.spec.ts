@@ -4,7 +4,7 @@ import { ErrorsValidation } from "@/backend/data/shared";
 import { ErrorsValidationUseCase } from "@/backend/domain/errors";
 import { UpdateUserPasswordProps } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repository";
-import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
+import { UserRepositoryInMemory } from "@/backend/infra/repositories/in-memory";
 import { UserUpdatePasswordPropsValidator } from "@/backend/data/use-cases";
 
 /**

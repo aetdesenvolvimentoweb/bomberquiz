@@ -1,7 +1,7 @@
 import { UserFindAllService } from "@/backend/data/services";
 import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repository";
-import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
+import { UserRepositoryInMemory } from "@/backend/infra/repositories/in-memory";
 
 /**
  * Define os tipos das dependências para os testes

@@ -12,7 +12,7 @@ import { ErrorsValidation } from "@/backend/data/shared";
 import { ErrorsValidationUseCase } from "@/backend/domain/errors";
 import { IdValidatorStub } from "@/backend/__mocks__";
 import { UserRepository } from "@/backend/data/repository";
-import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
+import { UserRepositoryInMemory } from "@/backend/infra/repositories/in-memory";
 import { UserUpdateRoleService } from "@/backend/data/services";
 
 /**

@@ -13,7 +13,7 @@ import { ErrorsValidation } from "@/backend/data/shared";
 import { ErrorsValidationUseCase } from "@/backend/domain/errors";
 import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repository";
-import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
+import { UserRepositoryInMemory } from "@/backend/infra/repositories/in-memory";
 import { UserUpdatePasswordService } from "..";
 
 /**

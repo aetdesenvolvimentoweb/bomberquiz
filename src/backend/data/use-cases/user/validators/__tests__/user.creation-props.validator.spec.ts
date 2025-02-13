@@ -13,7 +13,7 @@ import { ErrorsValidation } from "@/backend/data/shared";
 import { ErrorsValidationUseCase } from "@/backend/domain/errors";
 import { UserCreationPropsValidator } from "@/backend/data/use-cases";
 import { UserRepository } from "@/backend/data/repository";
-import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
+import { UserRepositoryInMemory } from "@/backend/infra/repositories/in-memory";
 
 /**
  * Define os tipos das dependências para os testes

@@ -8,7 +8,7 @@ import { UserFindByIdController } from "@/backend/presentation/controllers";
 import { UserFindByIdService } from "@/backend/data/services";
 import { UserIdValidator } from "@/backend/data/use-cases";
 import { UserRepository } from "@/backend/data/repository";
-import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
+import { UserRepositoryInMemory } from "@/backend/infra/repositories/in-memory";
 
 /**
  * Interface que define os tipos necessários para os testes

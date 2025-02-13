@@ -12,7 +12,7 @@ import {
 import { ErrorsValidation } from "@/backend/data/shared/errors";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
 import { UserRepository } from "@/backend/data/repository";
-import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
+import { UserRepositoryInMemory } from "@/backend/infra/repositories/in-memory";
 import { UserUpdatePasswordController } from "@/backend/presentation/controllers";
 import { UserUpdatePasswordService } from "@/backend/data/services";
 

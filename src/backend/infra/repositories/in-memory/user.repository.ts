@@ -9,6 +9,9 @@ import {
 import { UserRepository } from "@/backend/data/repository";
 import { randomUUID } from "crypto";
 
+/**
+ * Implementa o repositório de usuários em memória
+ */
 export class UserRepositoryInMemory implements UserRepository {
   private users: User[];
 
@@ -16,6 +19,11 @@ export class UserRepositoryInMemory implements UserRepository {
     this.users = [];
   }
 
+  /**
+   * Mapeia um usuário para o formato sem senha
+   * @param user Usuário a ser mapeado
+   * @returns Usuário mapeado sem senha
+   */
   private userMapped = (user: User): UserMapped => {
     return {
       id: user.id,
@@ -29,6 +37,10 @@ export class UserRepositoryInMemory implements UserRepository {
     };
   };
 
+  /**
+   * Cria um novo usuário
+   * @param userProps Propriedades do usuário
+   */
   public readonly create = async (userProps: UserProps): Promise<void> => {
     const user: User = {
       ...userProps,
@@ -40,27 +52,48 @@ export class UserRepositoryInMemory implements UserRepository {
     this.users.push(user);
   };
 
+  /**
+   * Remove um usuário pelo ID
+   * @param id ID do usuário
+   */
   public readonly delete = async (id: string): Promise<void> => {
     this.users = this.users.filter((user) => user.id !== id);
   };
 
+  /**
+   * Lista todos os usuários
+   * @returns Lista de usuários mapeados
+   */
   public readonly findAll = async (): Promise<UserMapped[]> => {
     return this.users.map((user) => this.userMapped(user));
   };
 
+  /**
+   * Busca um usuário pelo email
+   * @param email Email do usuário
+   * @returns Usuário encontrado ou null
+   */
   public readonly findByEmail = async (email: string): Promise<User | null> => {
     return this.users.find((user) => user.email === email) || null;
   };
 
+  /**
+   * Busca um usuário pelo ID
+   * @param id ID do usuário
+   * @returns Usuário mapeado encontrado ou null
+   */
   public readonly findById = async (id: string): Promise<UserMapped | null> => {
     const user = this.users.find((user) => user.id === id);
     if (user) {
       return this.userMapped(user);
-    } else {
-      return null;
     }
+    return null;
   };
 
+  /**
+   * Atualiza a senha de um usuário
+   * @param updatePasswordProps Dados para atualização de senha
+   */
   public readonly updatePassword = async (updatePasswordProps: {
     id: string;
     props: UpdateUserPasswordProps;
@@ -74,11 +107,14 @@ export class UserRepositoryInMemory implements UserRepository {
           updatedAt: new Date(),
         };
       }
-
       return user;
     });
   };
 
+  /**
+   * Atualiza o perfil de um usuário
+   * @param updateProfileProps Dados para atualização de perfil
+   */
   public readonly updateProfile = async (updateProfileProps: {
     id: string;
     props: UserProfileProps;
@@ -96,11 +132,14 @@ export class UserRepositoryInMemory implements UserRepository {
           updatedAt: new Date(),
         };
       }
-
       return user;
     });
   };
 
+  /**
+   * Atualiza o papel de um usuário
+   * @param updateRoleProps Dados para atualização de papel
+   */
   public readonly updateRole = async (updateRoleProps: {
     id: string;
     role: UserRole;
@@ -115,7 +154,6 @@ export class UserRepositoryInMemory implements UserRepository {
           updatedAt: new Date(),
         };
       }
-
       return user;
     });
   };

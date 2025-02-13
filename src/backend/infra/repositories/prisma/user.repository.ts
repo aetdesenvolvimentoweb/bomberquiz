@@ -11,15 +11,27 @@ import {
   prismaOperationError,
 } from "@/backend/infra/helpers";
 import { UserRepository } from "@/backend/data/repository";
-import { db } from "../prisma-client";
+import { db } from "@/backend/infra/adapters";
 
-export class PrismaUserRepositoryAdapter implements UserRepository {
+/**
+ * Implementa o repositório de usuários usando Prisma
+ */
+export class PrismaUserRepository implements UserRepository {
+  /**
+   * Conecta ao banco de dados
+   * @throws Error se a conexão falhar
+   */
   private dbConnect = async (): Promise<void> => {
     await db.$connect().catch(async () => {
       throw prismaConnectionError();
     });
   };
 
+  /**
+   * Mapeia um usuário para o formato sem senha
+   * @param user Usuário a ser mapeado
+   * @returns Usuário mapeado sem senha
+   */
   private userMapper = (user: User): UserMapped => {
     return {
       id: user.id,
@@ -33,6 +45,11 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
     };
   };
 
+  /**
+   * Cria um novo usuário
+   * @param userProps Propriedades do usuário
+   * @throws Error se a operação falhar
+   */
   public readonly create = async (userProps: UserProps): Promise<void> => {
     await this.dbConnect();
     await db.user
@@ -47,13 +64,16 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
       });
   };
 
+  /**
+   * Remove um usuário pelo ID
+   * @param id ID do usuário
+   * @throws Error se a operação falhar
+   */
   public readonly delete = async (id: string): Promise<void> => {
     await this.dbConnect();
     await db.user
       .delete({
-        where: {
-          id,
-        },
+        where: { id },
       })
       .catch(async () => {
         throw prismaOperationError("excluir");
@@ -63,6 +83,11 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
       });
   };
 
+  /**
+   * Lista todos os usuários
+   * @returns Lista de usuários mapeados
+   * @throws Error se a operação falhar
+   */
   public readonly findAll = async (): Promise<UserMapped[]> => {
     await this.dbConnect();
     const users: User[] = await db.user
@@ -77,13 +102,17 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
     return users.map((user) => this.userMapper(user));
   };
 
+  /**
+   * Busca um usuário pelo email
+   * @param email Email do usuário
+   * @returns Usuário encontrado ou null
+   * @throws Error se a operação falhar
+   */
   public readonly findByEmail = async (email: string): Promise<User | null> => {
     await this.dbConnect();
     return await db.user
       .findUnique({
-        where: {
-          email,
-        },
+        where: { email },
       })
       .catch(async () => {
         throw prismaOperationError("consultar");
@@ -93,13 +122,17 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
       });
   };
 
+  /**
+   * Busca um usuário pelo ID
+   * @param id ID do usuário
+   * @returns Usuário mapeado encontrado ou null
+   * @throws Error se a operação falhar
+   */
   public readonly findById = async (id: string): Promise<UserMapped | null> => {
     await this.dbConnect();
     const user: User | null = await db.user
       .findFirst({
-        where: {
-          id,
-        },
+        where: { id },
       })
       .catch(async () => {
         throw prismaOperationError("consultar");
@@ -115,18 +148,21 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
     return this.userMapper(user);
   };
 
+  /**
+   * Atualiza a senha de um usuário
+   * @param updatePasswordProps Dados para atualização de senha
+   * @throws Error se a operação falhar
+   */
   public readonly updatePassword = async (updatePasswordProps: {
     id: string;
     props: UpdateUserPasswordProps;
-  }) => {
+  }): Promise<void> => {
     const { id, props } = updatePasswordProps;
 
     await this.dbConnect();
     await db.user
       .update({
-        where: {
-          id,
-        },
+        where: { id },
         data: {
           password: props.newPassword,
         },
@@ -139,6 +175,11 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
       });
   };
 
+  /**
+   * Atualiza o perfil de um usuário
+   * @param updateProfileProps Dados para atualização de perfil
+   * @throws Error se a operação falhar
+   */
   public readonly updateProfile = async (updateProfileProps: {
     id: string;
     props: UserProfileProps;
@@ -148,12 +189,8 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
     await this.dbConnect();
     await db.user
       .update({
-        where: {
-          id,
-        },
-        data: {
-          ...props,
-        },
+        where: { id },
+        data: { ...props },
       })
       .catch(async () => {
         throw prismaOperationError("atualizar");
@@ -163,21 +200,22 @@ export class PrismaUserRepositoryAdapter implements UserRepository {
       });
   };
 
+  /**
+   * Atualiza o papel de um usuário
+   * @param updateRoleProps Dados para atualização de papel
+   * @throws Error se a operação falhar
+   */
   public readonly updateRole = async (updateRoleProps: {
     id: string;
     role: UserRole;
-  }) => {
+  }): Promise<void> => {
     const { id, role } = updateRoleProps;
 
     await this.dbConnect();
     await db.user
       .update({
-        where: {
-          id,
-        },
-        data: {
-          role,
-        },
+        where: { id },
+        data: { role },
       })
       .catch(async () => {
         throw prismaOperationError("atualizar");
