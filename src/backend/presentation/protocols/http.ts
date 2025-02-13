@@ -1,10 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-export type HttpRequest<T = any> = {
+
+/**
+ * Define o contrato para requisições HTTP
+ */
+export interface HttpRequest<T = any> {
   body: T;
   dynamicParams?: any;
-};
+}
 
-export type HttpResponse<T = any> = {
+/**
+ * Define o contrato para respostas HTTP
+ */
+export interface HttpResponse<T = any> {
   body: {
     data?: T;
     error?: string;
@@ -13,4 +20,4 @@ export type HttpResponse<T = any> = {
     [key: string]: string;
   };
   statusCode: number;
-};
+}

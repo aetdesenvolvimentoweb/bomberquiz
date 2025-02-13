@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  makeCreateUserController,
-  makeListAllUsersController,
+  makeUserCreateController,
+  makeUserFindAllController,
 } from "@/backend/infra/factories";
 import { HttpResponse } from "@/backend/presentation/protocols";
 import { NextjsRouteAdapter } from "@/backend/infra/adapters";
@@ -12,18 +12,18 @@ const handler = async (
   switch (request.method) {
     case "POST":
       const routeCreateUser = new NextjsRouteAdapter();
-      const createUserController = makeCreateUserController();
+      const userCreateController = makeUserCreateController();
       return await routeCreateUser.handle({
         request,
-        controller: createUserController,
+        controller: userCreateController,
       });
 
     case "GET":
-      const listAllUserscontroller = makeListAllUsersController();
+      const userFindAllController = makeUserFindAllController();
       const routeListAllUsers = new NextjsRouteAdapter();
       return await routeListAllUsers.handle({
         request,
-        controller: listAllUserscontroller,
+        controller: userFindAllController,
       });
 
     default:

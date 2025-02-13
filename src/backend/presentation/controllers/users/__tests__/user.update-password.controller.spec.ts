@@ -11,20 +11,28 @@ import {
 } from "@/backend/data/use-cases";
 import { ErrorsValidation } from "@/backend/data/shared/errors";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
-import { UpdateUserPasswordController } from "@/backend/presentation/controllers";
 import { UserRepository } from "@/backend/data/repository";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
+import { UserUpdatePasswordController } from "@/backend/presentation/controllers";
 import { UserUpdatePasswordService } from "@/backend/data/services";
 
+/**
+ * Interface que define os tipos necessários para os testes
+ */
 interface SutTypes {
-  sut: UpdateUserPasswordController;
+  sut: UserUpdatePasswordController;
   encrypter: EncrypterUseCase;
   idValidator: IdValidatorUseCase;
   httpResponsesHelper: HttpResponsesHelper;
   userRepository: UserRepository;
   errorsValidation: ErrorsValidation;
+  userUpdatePasswordService: UserUpdatePasswordService;
 }
 
+/**
+ * Cria uma instância do sistema em teste e suas dependências
+ * @returns Objeto contendo o sistema em teste e suas dependências
+ */
 const makeSut = (): SutTypes => {
   const encrypter = new EncrypterStub();
   const idValidator: IdValidatorUseCase = new IdValidatorStub();
@@ -40,15 +48,14 @@ const makeSut = (): SutTypes => {
     userRepository,
     errorsValidation,
   });
-  const userUpdatePasswordService: UserUpdatePasswordService =
-    new UserUpdatePasswordService({
-      encrypter,
-      updatePasswordPropsValidator,
-      userIdValidator,
-      userRepository,
-    });
+  const userUpdatePasswordService = new UserUpdatePasswordService({
+    encrypter,
+    updatePasswordPropsValidator,
+    userIdValidator,
+    userRepository,
+  });
   const httpResponsesHelper = new HttpResponsesHelper();
-  const sut = new UpdateUserPasswordController({
+  const sut = new UserUpdatePasswordController({
     userUpdatePasswordService,
     httpResponsesHelper,
   });
@@ -60,17 +67,24 @@ const makeSut = (): SutTypes => {
     httpResponsesHelper,
     userRepository,
     errorsValidation,
+    userUpdatePasswordService,
   };
 };
 
-describe("UpdateUserPasswordController", () => {
-  let sut: UpdateUserPasswordController;
+describe("UserUpdatePasswordController", () => {
+  let sut: UserUpdatePasswordController;
   let encrypter: EncrypterUseCase;
   let idValidator: IdValidatorUseCase;
   let httpResponsesHelper: HttpResponsesHelper;
   let userRepository: UserRepository;
   let errorsValidation: ErrorsValidation;
+  let userUpdatePasswordService: UserUpdatePasswordService;
 
+  /**
+   * Cria propriedades padrão para um usuário
+   * @param overrides - Propriedades opcionais para sobrescrever os valores padrão
+   * @returns Propriedades do usuário
+   */
   const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
     return {
       name: "any_name",
@@ -91,8 +105,12 @@ describe("UpdateUserPasswordController", () => {
     httpResponsesHelper = sutInstance.httpResponsesHelper;
     userRepository = sutInstance.userRepository;
     errorsValidation = sutInstance.errorsValidation;
+    userUpdatePasswordService = sutInstance.userUpdatePasswordService;
   });
 
+  /**
+   * Testa o cenário de sucesso na atualização de senha
+   */
   test("should return 204 if user password was updated", async () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
@@ -111,6 +129,9 @@ describe("UpdateUserPasswordController", () => {
     expect(httpResponse).toEqual(httpResponsesHelper.noContent());
   });
 
+  /**
+   * Testa o cenário de erro quando nenhum ID é fornecido
+   */
   test("should return 400 if no id is provided", async () => {
     const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
       body: {
@@ -128,6 +149,9 @@ describe("UpdateUserPasswordController", () => {
     );
   });
 
+  /**
+   * Testa o cenário de erro quando um ID inválido é fornecido
+   */
   test("should return 400 if invalid id is provided", async () => {
     jest.spyOn(idValidator, "isValid").mockReturnValue(false);
 
@@ -147,6 +171,9 @@ describe("UpdateUserPasswordController", () => {
     );
   });
 
+  /**
+   * Testa o cenário de erro quando um ID não registrado é fornecido
+   */
   test("should return 404 if unregistered id is provided", async () => {
     await userRepository.create(createUserProps());
 
@@ -166,6 +193,9 @@ describe("UpdateUserPasswordController", () => {
     );
   });
 
+  /**
+   * Testa o cenário de erro quando a senha atual não é fornecida
+   */
   test("should return 400 if no old password is provided", async () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
@@ -183,6 +213,9 @@ describe("UpdateUserPasswordController", () => {
     );
   });
 
+  /**
+   * Testa o cenário de erro quando a senha atual é inválida
+   */
   test("should return 400 if invalid old password is provided", async () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
@@ -203,6 +236,9 @@ describe("UpdateUserPasswordController", () => {
     );
   });
 
+  /**
+   * Testa o cenário de erro quando a senha atual está incorreta
+   */
   test("should return 401 if wrong old password is provided", async () => {
     jest
       .spyOn(encrypter, "verify")
@@ -226,6 +262,9 @@ describe("UpdateUserPasswordController", () => {
     );
   });
 
+  /**
+   * Testa o cenário de erro quando a nova senha não é fornecida
+   */
   test("should return 400 if no new password is provided", async () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
@@ -243,6 +282,9 @@ describe("UpdateUserPasswordController", () => {
     );
   });
 
+  /**
+   * Testa o cenário de erro quando a nova senha é inválida
+   */
   test("should return 400 if invalid new password is provided", async () => {
     await userRepository.create(createUserProps());
     const user = await userRepository.findByEmail(createUserProps().email);
@@ -260,6 +302,30 @@ describe("UpdateUserPasswordController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toEqual(
       errorsValidation.invalidParamError("nova senha").message
+    );
+  });
+
+  /**
+   * Testa o cenário de erro interno do servidor
+   */
+  test("should return 500 when unknown error occurs", async () => {
+    jest
+      .spyOn(userUpdatePasswordService, "updatePassword")
+      .mockRejectedValueOnce(new Error("server_error"));
+
+    const httpRequest: HttpRequest<UpdateUserPasswordProps> = {
+      body: {
+        oldPassword: "any_password",
+        newPassword: "new_password",
+      } as UpdateUserPasswordProps,
+      dynamicParams: { id: "any_id" },
+    };
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(500);
+    expect(httpResponse.body.error).toEqual(
+      httpResponsesHelper.serverError().body.error
     );
   });
 });

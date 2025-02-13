@@ -1,11 +1,11 @@
-import { CreateUserController } from "@/backend/presentation/controllers";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
+import { UserCreateController } from "@/backend/presentation/controllers";
 import { makeUserCreateService } from "../../services";
 
-export const makeCreateUserController = (): CreateUserController => {
+export const makeUserCreateController = (): UserCreateController => {
   const userCreateService = makeUserCreateService();
   const httpResponsesHelper = new HttpResponsesHelper();
-  return new CreateUserController({
+  return new UserCreateController({
     userCreateService,
     httpResponsesHelper,
   });

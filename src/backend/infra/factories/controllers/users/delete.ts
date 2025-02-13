@@ -1,11 +1,11 @@
-import { DeleteUserController } from "@/backend/presentation/controllers";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
+import { UserDeleteController } from "@/backend/presentation/controllers";
 import { makeUserDeleteService } from "../../services";
 
-export const makeDeleteUserController = (): DeleteUserController => {
+export const makeUserDeleteController = (): UserDeleteController => {
   const userDeleteService = makeUserDeleteService();
   const httpResponsesHelper = new HttpResponsesHelper();
-  return new DeleteUserController({
+  return new UserDeleteController({
     userDeleteService,
     httpResponsesHelper,
   });

@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { HttpResponse } from "@/backend/presentation/protocols";
 import { NextjsRouteAdapter } from "@/backend/infra/adapters";
-import { makeUpdateUserProfileController } from "@/backend/infra/factories";
+import { makeUserUpdateProfileController } from "@/backend/infra/factories";
 
 const handler = async (request: NextRequest): Promise<NextResponse> => {
   switch (request.method) {
     case "PUT":
-      const updateUserProfileController = makeUpdateUserProfileController();
+      const userUpdateProfileController = makeUserUpdateProfileController();
       const routeUpdateUserProfile = new NextjsRouteAdapter();
       return await routeUpdateUserProfile.handle({
         request,
-        controller: updateUserProfileController,
+        controller: userUpdateProfileController,
         dynamicParams: { id: request.nextUrl.pathname.split("/").pop() },
       });
 

@@ -5,19 +5,26 @@ import { HttpResponsesHelper } from "../../helpers";
 import { UpdateUserPasswordProps } from "@/backend/domain/entities";
 import { UserUpdatePasswordService } from "@/backend/data/services";
 
-interface ConstructorProps {
+interface UserUpdatePasswordControllerProps {
   userUpdatePasswordService: UserUpdatePasswordService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
-export class UpdateUserPasswordController implements Controller {
-  constructor(private readonly constructorProps: ConstructorProps) {}
+/**
+ * Implementa o controller de atualização de senha do usuário
+ */
+export class UserUpdatePasswordController implements Controller {
+  constructor(private readonly props: UserUpdatePasswordControllerProps) {}
 
+  /**
+   * Processa uma requisição de atualização de senha do usuário
+   * @param request Dados da requisição HTTP contendo ID e nova senha
+   * @returns Promise com resposta HTTP
+   */
   public readonly handle = async (
     request: HttpRequest<UpdateUserPasswordProps>
-  ): Promise<HttpResponse> => {
-    const { userUpdatePasswordService, httpResponsesHelper } =
-      this.constructorProps;
+  ): Promise<HttpResponse<void>> => {
+    const { userUpdatePasswordService, httpResponsesHelper } = this.props;
 
     try {
       const id: string = request.dynamicParams.id;

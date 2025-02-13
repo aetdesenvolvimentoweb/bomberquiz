@@ -1,5 +1,5 @@
 import { HttpRequest, HttpResponse } from "../../protocols";
-import { AuthLoginService } from "@/backend/data/services/auth/auth.login.service";
+import { AuthLoginUseCase } from "@/backend/domain/use-cases";
 import { Controller } from "../../protocols/controller";
 import { ErrorApp } from "@/backend/data/shared/errors";
 import { HttpResponsesHelper } from "../../helpers";
@@ -7,25 +7,31 @@ import { LoginProps } from "@/backend/domain/entities";
 
 interface ConstructorProps {
   httpResponsesHelper: HttpResponsesHelper;
-  authLoginService: AuthLoginService;
+  authLoginService: AuthLoginUseCase;
 }
 
-export class LoginController implements Controller {
-  constructor(private readonly constructorProps: ConstructorProps) {}
+/**
+ * Implementa o controller de autenticação no sistema
+ */
+export class AuthLoginController implements Controller {
+  constructor(private readonly props: ConstructorProps) {}
 
+  /**
+   * Processa uma requisição de login
+   * @param request Dados da requisição HTTP
+   * @returns Promise com resposta HTTP
+   */
   public readonly handle = async (
     request: HttpRequest<LoginProps>
   ): Promise<HttpResponse> => {
-    const { httpResponsesHelper, authLoginService } = this.constructorProps;
+    const { httpResponsesHelper, authLoginService } = this.props;
 
     try {
-      const loginProps: LoginProps = request.body;
+      const tokenJwt = await authLoginService.login(request.body);
 
-      const token: string = await authLoginService.login(loginProps);
-
-      const httpResponse: HttpResponse = httpResponsesHelper.noContent();
+      const httpResponse = httpResponsesHelper.noContent();
       httpResponse.headers = {
-        tokenJwt: `Bearer_${token}`,
+        tokenJwt,
       };
 
       return httpResponse;

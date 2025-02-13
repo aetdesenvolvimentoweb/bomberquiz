@@ -5,23 +5,30 @@ import { HttpResponsesHelper } from "../../helpers";
 import { UserFindByIdService } from "@/backend/data/services";
 import { UserMapped } from "@/backend/domain/entities";
 
-interface ConstructorProps {
+interface UserFindByIdControllerProps {
   userFindByIdService: UserFindByIdService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
-export class ListUserByIdController implements Controller {
-  constructor(private readonly constructroProps: ConstructorProps) {}
+/**
+ * Implementa o controller de busca de usuário por ID
+ */
+export class UserFindByIdController implements Controller {
+  constructor(private readonly props: UserFindByIdControllerProps) {}
 
+  /**
+   * Processa uma requisição de busca de usuário por ID
+   * @param request Dados da requisição HTTP
+   * @returns Promise com resposta HTTP
+   */
   public readonly handle = async (
     request: HttpRequest
-  ): Promise<HttpResponse> => {
-    const { userFindByIdService, httpResponsesHelper } = this.constructroProps;
+  ): Promise<HttpResponse<UserMapped | null>> => {
+    const { userFindByIdService, httpResponsesHelper } = this.props;
 
     try {
       const id: string = request.dynamicParams.id;
-
-      const user: UserMapped | null = await userFindByIdService.findById(id);
+      const user = await userFindByIdService.findById(id);
 
       return httpResponsesHelper.ok(user);
     } catch (error) {

@@ -2,20 +2,28 @@ import { HttpRequest, HttpResponse } from "../../protocols";
 import { Controller } from "../../protocols/controller";
 import { ErrorApp } from "@/backend/data/shared/errors";
 import { HttpResponsesHelper } from "../../helpers";
-import { UserDeleteService } from "@/backend/data/services";
+import { UserDeleteUseCase } from "@/backend/domain/use-cases";
 
-interface ConstructorProps {
-  userDeleteService: UserDeleteService;
+interface UserDeleteControllerProps {
+  userDeleteService: UserDeleteUseCase;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
-export class DeleteUserController implements Controller {
-  constructor(private readonly constructorProps: ConstructorProps) {}
+/**
+ * Implementa o controller de remoção de usuário
+ */
+export class UserDeleteController implements Controller {
+  constructor(private readonly props: UserDeleteControllerProps) {}
 
+  /**
+   * Processa uma requisição de remoção de usuário
+   * @param request Dados da requisição HTTP
+   * @returns Promise com resposta HTTP
+   */
   public readonly handle = async (
     request: HttpRequest
   ): Promise<HttpResponse> => {
-    const { userDeleteService, httpResponsesHelper } = this.constructorProps;
+    const { userDeleteService, httpResponsesHelper } = this.props;
 
     try {
       const id: string = request.dynamicParams.id;

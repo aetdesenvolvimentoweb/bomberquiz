@@ -5,22 +5,29 @@ import { HttpResponsesHelper } from "../../helpers";
 import { UserProfileProps } from "@/backend/domain/entities";
 import { UserUpdateProfileService } from "@/backend/data/services";
 
-interface ConstructorProps {
+interface UserUpdateProfileControllerProps {
   userUpdateProfileService: UserUpdateProfileService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
-export class UpdateUserProfileController implements Controller {
-  constructor(private readonly constructorProps: ConstructorProps) {}
+/**
+ * Implementa o controller de atualização de perfil do usuário
+ */
+export class UserUpdateProfileController implements Controller {
+  constructor(private readonly props: UserUpdateProfileControllerProps) {}
 
+  /**
+   * Processa uma requisição de atualização de perfil do usuário
+   * @param request Dados da requisição HTTP contendo ID e dados do perfil
+   * @returns Promise com resposta HTTP
+   */
   public readonly handle = async (
     request: HttpRequest<UserProfileProps>
-  ): Promise<HttpResponse> => {
-    const { userUpdateProfileService, httpResponsesHelper } =
-      this.constructorProps;
+  ): Promise<HttpResponse<void>> => {
+    const { userUpdateProfileService, httpResponsesHelper } = this.props;
 
     try {
-      const id = request.dynamicParams.id;
+      const id: string = request.dynamicParams.id;
       const props = request.body;
 
       await userUpdateProfileService.updateProfile({ id, props });

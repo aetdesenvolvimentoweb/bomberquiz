@@ -14,7 +14,7 @@ import { ErrorsValidationUseCase } from "@/backend/domain/errors";
 import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repository";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
-import { UserUpdatePasswordService } from "../../users";
+import { UserUpdatePasswordService } from "..";
 
 /**
  * Define os tipos das dependências para os testes

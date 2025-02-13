@@ -1,12 +1,12 @@
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
-import { UpdateUserProfileController } from "@/backend/presentation/controllers";
+import { UserUpdateProfileController } from "@/backend/presentation/controllers";
 import { makeUserUpdateProfileService } from "../../services";
 
-export const makeUpdateUserProfileController =
-  (): UpdateUserProfileController => {
+export const makeUserUpdateProfileController =
+  (): UserUpdateProfileController => {
     const httpResponsesHelper = new HttpResponsesHelper();
     const userUpdateProfileService = makeUserUpdateProfileService();
-    return new UpdateUserProfileController({
+    return new UserUpdateProfileController({
       httpResponsesHelper,
       userUpdateProfileService,
     });

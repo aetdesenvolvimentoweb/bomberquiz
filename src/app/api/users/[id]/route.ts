@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  makeDeleteUserController,
-  makeListUserByIdController,
+  makeUserDeleteController,
+  makeUserFindByIdController,
 } from "@/backend/infra/factories";
 import { HttpResponse } from "@/backend/presentation/protocols";
 import { NextjsRouteAdapter } from "@/backend/infra/adapters";
@@ -9,22 +9,22 @@ import { NextjsRouteAdapter } from "@/backend/infra/adapters";
 const handler = async (request: NextRequest): Promise<NextResponse> => {
   switch (request.method) {
     case "DELETE":
-      const deleteUserController = makeDeleteUserController();
+      const userDeleteController = makeUserDeleteController();
       const routeDeleteUser = new NextjsRouteAdapter();
 
       return await routeDeleteUser.handle({
         request,
-        controller: deleteUserController,
+        controller: userDeleteController,
         dynamicParams: { id: request.nextUrl.pathname.split("/").pop() },
       });
 
     case "GET":
-      const listUserByIdController = makeListUserByIdController();
+      const userFindByIdController = makeUserFindByIdController();
       const routeListUserById = new NextjsRouteAdapter();
 
       return await routeListUserById.handle({
         request,
-        controller: listUserByIdController,
+        controller: userFindByIdController,
         dynamicParams: { id: request.nextUrl.pathname.split("/").pop() },
       });
 

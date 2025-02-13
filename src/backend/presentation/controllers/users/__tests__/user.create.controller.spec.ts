@@ -11,17 +11,20 @@ import {
   UserPhoneValidatorUseCase,
 } from "@/backend/domain/use-cases";
 import { UserProps, UserRole } from "@/backend/domain/entities";
-import { CreateUserController } from "@/backend/presentation/controllers";
 import { ErrorsValidation } from "@/backend/data/shared/errors";
 import { HttpRequest } from "@/backend/presentation/protocols";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
+import { UserCreateController } from "@/backend/presentation/controllers";
 import { UserCreateService } from "@/backend/data/services";
 import { UserCreationPropsValidator } from "@/backend/data/use-cases";
 import { UserRepository } from "@/backend/data/repository";
 import { UserRepositoryInMemory } from "@/backend/infra/in-memory-repositories";
 
+/**
+ * Define os tipos das dependências para os testes
+ */
 interface SutTypes {
-  sut: CreateUserController;
+  sut: UserCreateController;
   dateValidator: DateValidatorUseCase;
   emailValidator: EmailValidatorUseCase;
   httpResponsesHelper: HttpResponsesHelper;
@@ -30,44 +33,11 @@ interface SutTypes {
   errorsValidation: ErrorsValidation;
 }
 
-const makeSut = (): SutTypes => {
-  const dateValidator: DateValidatorUseCase = new DateValidatorStub();
-  const emailValidator: EmailValidatorUseCase = new EmailValidatorStub();
-  const encrypter: EncrypterUseCase = new EncrypterStub();
-  const phoneValidator: UserPhoneValidatorUseCase = new PhoneValidatorStub();
-  const userRepository: UserRepository = new UserRepositoryInMemory();
-  const errorsValidation = new ErrorsValidation();
-  const userCreationPropsValidator = new UserCreationPropsValidator({
-    dateValidator,
-    emailValidator,
-    phoneValidator,
-    userRepository,
-    errorsValidation,
-  });
-  const userCreateService: UserCreateService = new UserCreateService({
-    encrypter,
-    userRepository,
-    userCreationPropsValidator,
-  });
-  const httpResponsesHelper = new HttpResponsesHelper();
-  const sut = new CreateUserController({
-    userCreateService,
-    httpResponsesHelper,
-  });
-
-  return {
-    sut,
-    dateValidator,
-    emailValidator,
-    httpResponsesHelper,
-    phoneValidator,
-    userRepository,
-    errorsValidation,
-  };
-};
-
-describe("CreateUserController", () => {
-  let sut: CreateUserController;
+/**
+ * Testes do controller de criação de usuário
+ */
+describe("UserCreateController", () => {
+  let sut: UserCreateController;
   let dateValidator: DateValidatorUseCase;
   let emailValidator: EmailValidatorUseCase;
   let httpResponsesHelper: HttpResponsesHelper;
@@ -75,15 +45,45 @@ describe("CreateUserController", () => {
   let userRepository: UserRepository;
   let errorsValidation: ErrorsValidation;
 
-  const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => {
+  /**
+   * Cria uma instância do controller e suas dependências para os testes
+   */
+  const makeSut = (): SutTypes => {
+    const dateValidator = new DateValidatorStub();
+    const emailValidator = new EmailValidatorStub();
+    const encrypter: EncrypterUseCase = new EncrypterStub();
+    const phoneValidator = new PhoneValidatorStub();
+    const userRepository = new UserRepositoryInMemory();
+    const errorsValidation = new ErrorsValidation();
+
+    const userCreationPropsValidator = new UserCreationPropsValidator({
+      dateValidator,
+      emailValidator,
+      phoneValidator,
+      userRepository,
+      errorsValidation,
+    });
+
+    const userCreateService = new UserCreateService({
+      encrypter,
+      userRepository,
+      userCreationPropsValidator,
+    });
+
+    const httpResponsesHelper = new HttpResponsesHelper();
+    const sut = new UserCreateController({
+      userCreateService,
+      httpResponsesHelper,
+    });
+
     return {
-      name: "any_name",
-      email: "valid_email",
-      phone: "any_phone",
-      birthdate: new Date(),
-      role: "cliente",
-      password: "any_password",
-      ...overrides,
+      sut,
+      dateValidator,
+      emailValidator,
+      httpResponsesHelper,
+      phoneValidator,
+      userRepository,
+      errorsValidation,
     };
   };
 
@@ -98,6 +98,22 @@ describe("CreateUserController", () => {
     errorsValidation = sutInstance.errorsValidation;
   });
 
+  /**
+   * Cria um objeto com as propriedades padrão de usuário para os testes
+   */
+  const createUserProps = (overrides: Partial<UserProps> = {}): UserProps => ({
+    name: "any_name",
+    email: "valid_email",
+    phone: "any_phone",
+    birthdate: new Date(),
+    role: "cliente",
+    password: "any_password",
+    ...overrides,
+  });
+
+  /**
+   * Testa a criação bem-sucedida de usuário
+   */
   test("should return 201 if user was created", async () => {
     const httpRequest: HttpRequest<UserProps> = {
       body: createUserProps(),
@@ -108,6 +124,9 @@ describe("CreateUserController", () => {
     );
   });
 
+  /**
+   * Testa a validação de nome obrigatório
+   */
   test("should return 400 if no name is provided", async () => {
     const httpRequest: HttpRequest<UserProps> = {
       body: createUserProps({ name: undefined }),
@@ -121,6 +140,9 @@ describe("CreateUserController", () => {
     );
   });
 
+  /**
+   * Testa a validação de email obrigatório
+   */
   test("should return 400 if no email is provided", async () => {
     const httpRequest: HttpRequest<UserProps> = {
       body: createUserProps({ email: undefined }),
@@ -134,6 +156,9 @@ describe("CreateUserController", () => {
     );
   });
 
+  /**
+   * Testa a validação de formato de email
+   */
   test("should return 400 if invalid email is provided", async () => {
     jest.spyOn(emailValidator, "isValid").mockReturnValue(false);
 
@@ -149,6 +174,9 @@ describe("CreateUserController", () => {
     );
   });
 
+  /**
+   * Testa a validação de email já registrado
+   */
   test("should return 400 if already registered email is provided", async () => {
     await userRepository.create(createUserProps());
 
@@ -165,6 +193,9 @@ describe("CreateUserController", () => {
     );
   });
 
+  /**
+   * Testa a validação de telefone obrigatório
+   */
   test("should return 400 if no phone is provided", async () => {
     const httpRequest: HttpRequest<UserProps> = {
       body: createUserProps({ phone: undefined }),
@@ -178,6 +209,9 @@ describe("CreateUserController", () => {
     );
   });
 
+  /**
+   * Testa a validação de formato de telefone
+   */
   test("should return 400 if invalid phone is provided", async () => {
     jest.spyOn(phoneValidator, "isValid").mockReturnValue(false);
 
@@ -193,6 +227,9 @@ describe("CreateUserController", () => {
     );
   });
 
+  /**
+   * Testa a validação de data de nascimento obrigatória
+   */
   test("should return 400 if no birthdate is provided", async () => {
     const httpRequest: HttpRequest<UserProps> = {
       body: createUserProps({ birthdate: undefined }),
@@ -206,6 +243,9 @@ describe("CreateUserController", () => {
     );
   });
 
+  /**
+   * Testa a validação de data de nascimento inválida
+   */
   test("should return 400 if invalid birthdate is provided", async () => {
     jest.spyOn(dateValidator, "isAdult").mockReturnValue(false);
 
@@ -221,6 +261,9 @@ describe("CreateUserController", () => {
     );
   });
 
+  /**
+   * Testa a validação de papel obrigatório
+   */
   test("should return 400 if no role is provided", async () => {
     const httpRequest: HttpRequest<UserProps> = {
       body: createUserProps({ role: undefined }),
@@ -234,6 +277,9 @@ describe("CreateUserController", () => {
     );
   });
 
+  /**
+   * Testa a validação de papel inválido
+   */
   test("should return 400 if invalid role is provided", async () => {
     const httpRequest: HttpRequest<UserProps> = {
       body: createUserProps({ role: "invalid_role" as UserRole }),
@@ -247,6 +293,9 @@ describe("CreateUserController", () => {
     );
   });
 
+  /**
+   * Testa a validação de senha obrigatória
+   */
   test("should return 400 if no password is provided", async () => {
     const httpRequest: HttpRequest<UserProps> = {
       body: createUserProps({ password: undefined }),
@@ -260,6 +309,9 @@ describe("CreateUserController", () => {
     );
   });
 
+  /**
+   * Testa a validação de formato de senha
+   */
   test("should return 400 if invalid password is provided", async () => {
     const httpRequest: HttpRequest<UserProps> = {
       body: createUserProps({ password: "invalid" }),
@@ -270,6 +322,24 @@ describe("CreateUserController", () => {
     expect(httpResponse.statusCode).toBe(400);
     expect(httpResponse.body.error).toBe(
       errorsValidation.invalidParamError("senha").message
+    );
+  });
+
+  /**
+   * Testa o tratamento de erro inesperado
+   */
+  test("should return 500 on unexpected error", async () => {
+    const httpRequest: HttpRequest<UserProps> = {
+      body: createUserProps(),
+    };
+
+    jest.spyOn(userRepository, "create").mockRejectedValue(new Error());
+
+    const httpResponse = await sut.handle(httpRequest);
+
+    expect(httpResponse.statusCode).toBe(500);
+    expect(httpResponse.body.error).toBe(
+      httpResponsesHelper.serverError().body.error
     );
   });
 });

@@ -5,19 +5,26 @@ import { HttpResponsesHelper } from "../../helpers";
 import { UserRole } from "@/backend/domain/entities";
 import { UserUpdateRoleService } from "@/backend/data/services";
 
-interface ConstructorProps {
+interface UserUpdateRoleControllerProps {
   userUpdateRoleService: UserUpdateRoleService;
   httpResponsesHelper: HttpResponsesHelper;
 }
 
-export class UpdateUserRoleController implements Controller {
-  constructor(private readonly constructorProps: ConstructorProps) {}
+/**
+ * Implementa o controller de atualização de papel do usuário
+ */
+export class UserUpdateRoleController implements Controller {
+  constructor(private readonly props: UserUpdateRoleControllerProps) {}
 
+  /**
+   * Processa uma requisição de atualização de papel do usuário
+   * @param request Dados da requisição HTTP contendo ID e novo papel
+   * @returns Promise com resposta HTTP
+   */
   public readonly handle = async (
     request: HttpRequest<{ role: UserRole }>
-  ): Promise<HttpResponse> => {
-    const { userUpdateRoleService, httpResponsesHelper } =
-      this.constructorProps;
+  ): Promise<HttpResponse<void>> => {
+    const { userUpdateRoleService, httpResponsesHelper } = this.props;
 
     try {
       const id: string = request.dynamicParams.id;
