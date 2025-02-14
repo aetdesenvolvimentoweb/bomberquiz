@@ -26,27 +26,24 @@ describe("PrismaClientAdapter", () => {
   });
 
   /**
-   * Testa o padrão singleton
+   * Testa as operações reais no banco de dados
    */
-  describe("singleton", () => {
-    test("should return same instance when called multiple times", () => {
-      const instance1 = sut;
-      const instance2 = sut;
+  describe("database operations", () => {
+    test("should connect and query database successfully", async () => {
+      await sut.$connect();
+      const users = await sut.user.findMany();
+      expect(Array.isArray(users)).toBe(true);
+    });
 
-      expect(instance1).toBe(instance2);
+    test("should handle transaction successfully", async () => {
+      const result = await sut.$transaction(async (tx) => {
+        return await tx.user.findMany();
+      });
+      expect(Array.isArray(result)).toBe(true);
     });
   });
 
-  /**
-   * Testa a conexão com o banco
-   */
-  describe("connection", () => {
-    test("should connect successfully", async () => {
-      await expect(sut.$connect()).resolves.not.toThrow();
-    });
-
-    test("should disconnect successfully", async () => {
-      await expect(sut.$disconnect()).resolves.not.toThrow();
-    });
+  afterAll(async () => {
+    await sut.$disconnect();
   });
 });
