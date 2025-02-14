@@ -7,9 +7,9 @@ import {
   UserRole,
 } from "@/backend/domain/entities";
 import {
-  prismaConnectionError,
-  prismaOperationError,
-} from "@/backend/infra/helpers";
+  databaseConnectionError,
+  databaseOperationError,
+} from "@/backend/data/shared";
 import { PrismaClient } from "@prisma/client";
 import { UserRepository } from "@/backend/data/repository";
 
@@ -25,7 +25,7 @@ export class PrismaUserRepository implements UserRepository {
   constructor(private db: PrismaClient) {}
   private dbConnect = async (): Promise<void> => {
     await this.db.$connect().catch(async () => {
-      throw prismaConnectionError();
+      throw databaseConnectionError();
     });
   };
 
@@ -59,7 +59,7 @@ export class PrismaUserRepository implements UserRepository {
         data: userProps,
       })
       .catch(async () => {
-        throw prismaOperationError("criar");
+        throw databaseOperationError("criar");
       })
       .finally(async () => {
         await this.db.$disconnect();
@@ -78,7 +78,7 @@ export class PrismaUserRepository implements UserRepository {
         where: { id },
       })
       .catch(async () => {
-        throw prismaOperationError("excluir");
+        throw databaseOperationError("excluir");
       })
       .finally(async () => {
         await this.db.$disconnect();
@@ -95,7 +95,7 @@ export class PrismaUserRepository implements UserRepository {
     const users: User[] = await this.db.user
       .findMany({})
       .catch(async () => {
-        throw prismaOperationError("consultar");
+        throw databaseOperationError("consultar");
       })
       .finally(async () => {
         await this.db.$disconnect();
@@ -117,7 +117,7 @@ export class PrismaUserRepository implements UserRepository {
         where: { email },
       })
       .catch(async () => {
-        throw prismaOperationError("consultar");
+        throw databaseOperationError("consultar");
       })
       .finally(async () => {
         await this.db.$disconnect();
@@ -137,7 +137,7 @@ export class PrismaUserRepository implements UserRepository {
         where: { id },
       })
       .catch(async () => {
-        throw prismaOperationError("consultar");
+        throw databaseOperationError("consultar");
       })
       .finally(async () => {
         await this.db.$disconnect();
@@ -170,7 +170,7 @@ export class PrismaUserRepository implements UserRepository {
         },
       })
       .catch(async () => {
-        throw prismaOperationError("atualizar");
+        throw databaseOperationError("atualizar");
       })
       .finally(async () => {
         await this.db.$disconnect();
@@ -195,7 +195,7 @@ export class PrismaUserRepository implements UserRepository {
         data: { ...props },
       })
       .catch(async () => {
-        throw prismaOperationError("atualizar");
+        throw databaseOperationError("atualizar");
       })
       .finally(async () => {
         await this.db.$disconnect();
@@ -220,7 +220,7 @@ export class PrismaUserRepository implements UserRepository {
         data: { role },
       })
       .catch(async () => {
-        throw prismaOperationError("atualizar");
+        throw databaseOperationError("atualizar");
       })
       .finally(async () => {
         await this.db.$disconnect();

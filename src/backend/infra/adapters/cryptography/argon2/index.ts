@@ -1,1 +1,1 @@
-export * from "./encrypter";
+export * from "./argon2.encrypter.adapter";
