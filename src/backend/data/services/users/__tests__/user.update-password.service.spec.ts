@@ -50,7 +50,7 @@ describe("UserUpdatePasswordService", () => {
       errorsValidation,
     });
     const encrypter: EncrypterUseCase = new EncrypterStub();
-    const updatePasswordPropsValidator: UserUpdatePasswordPropsValidatorUseCase =
+    const userUpdatePasswordPropsValidator: UserUpdatePasswordPropsValidatorUseCase =
       new UserUpdatePasswordPropsValidator({
         encrypter,
         userRepository,
@@ -58,7 +58,7 @@ describe("UserUpdatePasswordService", () => {
       });
     const sut = new UserUpdatePasswordService({
       encrypter,
-      updatePasswordPropsValidator,
+      userUpdatePasswordPropsValidator,
       userRepository,
       userIdValidator,
     });

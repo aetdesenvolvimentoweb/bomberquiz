@@ -1,15 +1,25 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { NextRequest, NextResponse } from "next/server";
 import { Controller } from "@/backend/presentation/protocols/controller";
 
+/**
+ * Interface que define as propriedades necessárias para manipulação de rotas
+ */
 interface HandleProps {
   request: NextRequest;
   controller: Controller;
-  dynamicParams?: any;
+  dynamicParams?: unknown;
 }
 
+/**
+ * Implementa o adaptador de rotas para Next.js
+ */
 export class NextjsRouteAdapter {
+  /**
+   * Manipula uma requisição HTTP
+   * @param props Propriedades da requisição
+   * @returns Resposta HTTP formatada
+   */
   public readonly handle = async ({
     request,
     controller,

@@ -9,7 +9,7 @@ import { UserRole } from "@/backend/domain/entities";
 interface UserUpdateRoleServiceProps {
   userRepository: UserRepository;
   userIdValidator: UserIdValidatorUseCase;
-  updateRoleValidator: UserUpdateRoleValidatorUseCase;
+  userUpdateRoleValidator: UserUpdateRoleValidatorUseCase;
 }
 
 /**
@@ -18,12 +18,12 @@ interface UserUpdateRoleServiceProps {
 export class UserUpdateRoleService implements UserUpdateRoleUseCase {
   private userRepository;
   private userIdValidator;
-  private updateRoleValidator;
+  private userUpdateRoleValidator;
 
   constructor(private props: UserUpdateRoleServiceProps) {
     this.userRepository = props.userRepository;
     this.userIdValidator = props.userIdValidator;
-    this.updateRoleValidator = props.updateRoleValidator;
+    this.userUpdateRoleValidator = props.userUpdateRoleValidator;
   }
 
   /**
@@ -38,7 +38,7 @@ export class UserUpdateRoleService implements UserUpdateRoleUseCase {
     const { id, role } = updateRoleData;
 
     await this.userIdValidator.validateUserId(id);
-    await this.updateRoleValidator.validateUpdateRole(role);
+    await this.userUpdateRoleValidator.validateUpdateRole(role);
     await this.userRepository.updateRole(updateRoleData);
   };
 }

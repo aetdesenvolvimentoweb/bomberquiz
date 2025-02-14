@@ -1,12 +1,12 @@
+import { AuthLoginController } from "@/backend/presentation/controllers";
 import { HttpResponsesHelper } from "@/backend/presentation/helpers";
-import { LoginController } from "@/backend/presentation/controllers";
-import { makeLoginService } from "../../services";
+import { makeAuthLoginService } from "../../services";
 
-export const makeLoginController = (): LoginController => {
+export const makeAuthLoginController = (): AuthLoginController => {
   const httpResponsesHelper = new HttpResponsesHelper();
-  const loginService = makeLoginService();
-  return new LoginController({
+  const authLoginService = makeAuthLoginService();
+  return new AuthLoginController({
     httpResponsesHelper,
-    loginService,
+    authLoginService,
   });
 };

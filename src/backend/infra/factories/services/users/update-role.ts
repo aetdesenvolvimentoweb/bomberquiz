@@ -1,24 +1,26 @@
+import { MongoDBIdValidator, db } from "@/backend/infra/adapters";
 import {
-  MongoDBIdValidator,
-  PrismaUserRepository,
-} from "@/backend/infra/adapters";
-import { UpdateRoleValidator, UserIdValidator } from "@/backend/data/use-cases";
+  UserIdValidator,
+  UserUpdateRoleValidator,
+} from "@/backend/data/use-cases";
+import { ErrorsValidation } from "@/backend/data/shared";
+import { PrismaUserRepository } from "@/backend/infra/repositories";
 import { UserUpdateRoleService } from "@/backend/data/services";
 
 export const makeUserUpdateRoleService = (): UserUpdateRoleService => {
-  const ErrorsValidation = new ErrorsValidation();
-  const updateRoleValidator = new UpdateRoleValidator({
-    ErrorsValidation,
+  const errorsValidation = new ErrorsValidation();
+  const userUpdateRoleValidator = new UserUpdateRoleValidator({
+    errorsValidation,
   });
   const idValidator = new MongoDBIdValidator();
-  const userRepository = new PrismaUserRepository();
+  const userRepository = new PrismaUserRepository(db);
   const userIdValidator = new UserIdValidator({
     idValidator,
     userRepository,
-    ErrorsValidation,
+    errorsValidation,
   });
   return new UserUpdateRoleService({
-    updateRoleValidator,
+    userUpdateRoleValidator,
     userIdValidator,
     userRepository,
   });

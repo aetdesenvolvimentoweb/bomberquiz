@@ -11,7 +11,7 @@ interface UserUpdatePasswordServiceProps {
   encrypter: EncrypterUseCase;
   userRepository: UserRepository;
   userIdValidator: UserIdValidatorUseCase;
-  updatePasswordPropsValidator: UserUpdatePasswordPropsValidatorUseCase;
+  userUpdatePasswordPropsValidator: UserUpdatePasswordPropsValidatorUseCase;
 }
 
 /**
@@ -21,13 +21,14 @@ export class UserUpdatePasswordService implements UserUpdatePasswordUseCase {
   private encrypter;
   private userRepository;
   private userIdValidator;
-  private updatePasswordPropsValidator;
+  private userUpdatePasswordPropsValidator;
 
   constructor(private props: UserUpdatePasswordServiceProps) {
     this.encrypter = props.encrypter;
     this.userRepository = props.userRepository;
     this.userIdValidator = props.userIdValidator;
-    this.updatePasswordPropsValidator = props.updatePasswordPropsValidator;
+    this.userUpdatePasswordPropsValidator =
+      props.userUpdatePasswordPropsValidator;
   }
 
   /**
@@ -42,7 +43,7 @@ export class UserUpdatePasswordService implements UserUpdatePasswordUseCase {
     const { id, props } = updatePasswordData;
 
     await this.userIdValidator.validateUserId(id);
-    await this.updatePasswordPropsValidator.validateUpdatePasswordProps(
+    await this.userUpdatePasswordPropsValidator.validateUpdatePasswordProps(
       updatePasswordData
     );
     const hashedPassword = await this.encrypter.encrypt(props.newPassword);

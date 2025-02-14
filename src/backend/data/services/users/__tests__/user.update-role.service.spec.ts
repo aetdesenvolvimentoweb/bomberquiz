@@ -48,13 +48,13 @@ describe("UserUpdateRoleService", () => {
       errorsValidation,
     });
 
-    const updateRoleValidator: UserUpdateRoleValidatorUseCase =
+    const userUpdateRoleValidator: UserUpdateRoleValidatorUseCase =
       new UserUpdateRoleValidator({
         errorsValidation,
       });
 
     const sut = new UserUpdateRoleService({
-      updateRoleValidator,
+      userUpdateRoleValidator,
       userRepository,
       userIdValidator,
     });

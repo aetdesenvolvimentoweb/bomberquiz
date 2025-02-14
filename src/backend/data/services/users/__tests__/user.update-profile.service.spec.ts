@@ -44,7 +44,7 @@ const makeSut = (): SutTypes => {
     userRepository,
     errorsValidation,
   });
-  const updateProfilePropsValidator: UserUpdateProfilePropsValidatorUseCase =
+  const userUpdateProfilePropsValidator: UserUpdateProfilePropsValidatorUseCase =
     new UserUpdateProfilePropsValidator({
       dateValidator,
       emailValidator,
@@ -53,7 +53,7 @@ const makeSut = (): SutTypes => {
       errorsValidation,
     });
   const sut = new UserUpdateProfileService({
-    updateProfilePropsValidator,
+    userUpdateProfilePropsValidator,
     userRepository,
     userIdValidator,
   });

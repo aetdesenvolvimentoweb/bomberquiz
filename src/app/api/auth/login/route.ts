@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { HttpResponse } from "@/backend/presentation/protocols";
 import { NextjsRouteAdapter } from "@/backend/infra/adapters";
-import { makeLoginController } from "@/backend/infra/factories";
+import { makeAuthLoginController } from "@/backend/infra/factories";
 
 const handler = async (request: NextRequest): Promise<NextResponse> => {
   switch (request.method) {
     case "POST":
-      const controller = makeLoginController();
+      const controller = makeAuthLoginController();
       const nextjsRouteAdapter = new NextjsRouteAdapter();
       return await nextjsRouteAdapter.handle({
         request,

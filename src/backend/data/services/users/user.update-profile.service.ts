@@ -9,7 +9,7 @@ import { UserRepository } from "@/backend/data/repository";
 interface UserUpdateProfileServiceProps {
   userRepository: UserRepository;
   userIdValidator: UserIdValidatorUseCase;
-  updateProfilePropsValidator: UserUpdateProfilePropsValidatorUseCase;
+  userUpdateProfilePropsValidator: UserUpdateProfilePropsValidatorUseCase;
 }
 
 /**
@@ -18,12 +18,13 @@ interface UserUpdateProfileServiceProps {
 export class UserUpdateProfileService implements UserUpdateProfileUseCase {
   private userRepository;
   private userIdValidator;
-  private updateProfilePropsValidator;
+  private userUpdateProfilePropsValidator;
 
   constructor(private props: UserUpdateProfileServiceProps) {
     this.userRepository = props.userRepository;
     this.userIdValidator = props.userIdValidator;
-    this.updateProfilePropsValidator = props.updateProfilePropsValidator;
+    this.userUpdateProfilePropsValidator =
+      props.userUpdateProfilePropsValidator;
   }
 
   /**
@@ -38,7 +39,7 @@ export class UserUpdateProfileService implements UserUpdateProfileUseCase {
     const { id } = updateProfileData;
 
     await this.userIdValidator.validateUserId(id);
-    await this.updateProfilePropsValidator.validateUpdateProfileProps(
+    await this.userUpdateProfilePropsValidator.validateUpdateProfileProps(
       updateProfileData
     );
     await this.userRepository.updateProfile(updateProfileData);

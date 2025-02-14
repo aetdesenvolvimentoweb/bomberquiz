@@ -1,1 +1,1 @@
-export * from "./route";
+export * from "./nextjs.route.adapter";

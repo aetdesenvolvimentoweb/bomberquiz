@@ -2,36 +2,38 @@ import {
   DateFnsDateValidatorAdapter,
   LibPhoneNumberJsPhoneValidatorAdapter,
   MongoDBIdValidator,
-  PrismaUserRepository,
   ValidatorJsEmailValidatorAdapter,
+  db,
 } from "@/backend/infra/adapters";
 import {
-  UpdateProfilePropsValidator,
   UserIdValidator,
+  UserUpdateProfilePropsValidator,
 } from "@/backend/data/use-cases";
+import { ErrorsValidation } from "@/backend/data/shared";
+import { PrismaUserRepository } from "@/backend/infra/repositories";
 import { UserUpdateProfileService } from "@/backend/data/services";
 
 export const makeUserUpdateProfileService = (): UserUpdateProfileService => {
   const dateValidator = new DateFnsDateValidatorAdapter();
   const emailValidator = new ValidatorJsEmailValidatorAdapter();
   const phoneValidator = new LibPhoneNumberJsPhoneValidatorAdapter();
-  const userRepository = new PrismaUserRepository();
-  const ErrorsValidation = new ErrorsValidation();
-  const updateProfilePropsValidator = new UpdateProfilePropsValidator({
+  const userRepository = new PrismaUserRepository(db);
+  const errorsValidation = new ErrorsValidation();
+  const userUpdateProfilePropsValidator = new UserUpdateProfilePropsValidator({
     dateValidator,
     emailValidator,
     phoneValidator,
     userRepository,
-    ErrorsValidation,
+    errorsValidation,
   });
   const idValidator = new MongoDBIdValidator();
   const userIdValidator = new UserIdValidator({
     idValidator,
     userRepository,
-    ErrorsValidation,
+    errorsValidation,
   });
   return new UserUpdateProfileService({
-    updateProfilePropsValidator,
+    userUpdateProfilePropsValidator,
     userIdValidator,
     userRepository,
   });

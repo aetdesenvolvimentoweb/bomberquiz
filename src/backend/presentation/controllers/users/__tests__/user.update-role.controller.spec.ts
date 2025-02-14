@@ -38,11 +38,11 @@ const makeSut = (): SutTypes => {
     userRepository,
     errorsValidation,
   });
-  const updateRoleValidator = new UserUpdateRoleValidator({
+  const userUpdateRoleValidator = new UserUpdateRoleValidator({
     errorsValidation,
   });
   const userUpdateRoleService = new UserUpdateRoleService({
-    updateRoleValidator,
+    userUpdateRoleValidator,
     userIdValidator,
     userRepository,
   });

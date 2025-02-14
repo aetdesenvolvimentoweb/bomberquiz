@@ -43,14 +43,16 @@ const makeSut = (): SutTypes => {
     userRepository,
     errorsValidation,
   });
-  const updatePasswordPropsValidator = new UserUpdatePasswordPropsValidator({
-    encrypter,
-    userRepository,
-    errorsValidation,
-  });
+  const userUpdatePasswordPropsValidator = new UserUpdatePasswordPropsValidator(
+    {
+      encrypter,
+      userRepository,
+      errorsValidation,
+    }
+  );
   const userUpdatePasswordService = new UserUpdatePasswordService({
     encrypter,
-    updatePasswordPropsValidator,
+    userUpdatePasswordPropsValidator,
     userIdValidator,
     userRepository,
   });
