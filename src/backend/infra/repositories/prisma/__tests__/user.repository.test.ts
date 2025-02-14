@@ -16,7 +16,7 @@ interface SutTypes {
  * @returns Objeto contendo o sistema em teste
  */
 const makeSut = (): SutTypes => {
-  const sut = new PrismaUserRepository();
+  const sut = new PrismaUserRepository(db);
   return { sut };
 };
 
