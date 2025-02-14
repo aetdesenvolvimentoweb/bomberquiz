@@ -1,1 +1,1 @@
-export * from "./auth.token-handler";
+export * from "./jwt.token-handler.adapter";
