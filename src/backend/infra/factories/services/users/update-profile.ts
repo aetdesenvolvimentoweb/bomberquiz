@@ -3,7 +3,7 @@ import {
   LibPhoneNumberJsPhoneValidatorAdapter,
   MongoDBIdValidator,
   ValidatorJsEmailValidatorAdapter,
-  db,
+  prismaClient,
 } from "@/backend/infra/adapters";
 import {
   UserIdValidator,
@@ -17,7 +17,7 @@ export const makeUserUpdateProfileService = (): UserUpdateProfileService => {
   const dateValidator = new DateFnsDateValidatorAdapter();
   const emailValidator = new ValidatorJsEmailValidatorAdapter();
   const phoneValidator = new LibPhoneNumberJsPhoneValidatorAdapter();
-  const userRepository = new PrismaUserRepository(db);
+  const userRepository = new PrismaUserRepository(prismaClient);
   const errorsValidation = new ErrorsValidation();
   const userUpdateProfilePropsValidator = new UserUpdateProfilePropsValidator({
     dateValidator,

@@ -1,4 +1,4 @@
-import { MongoDBIdValidator, db } from "@/backend/infra/adapters";
+import { MongoDBIdValidator, prismaClient } from "@/backend/infra/adapters";
 import {
   UserIdValidator,
   UserUpdateRoleValidator,
@@ -13,7 +13,7 @@ export const makeUserUpdateRoleService = (): UserUpdateRoleService => {
     errorsValidation,
   });
   const idValidator = new MongoDBIdValidator();
-  const userRepository = new PrismaUserRepository(db);
+  const userRepository = new PrismaUserRepository(prismaClient);
   const userIdValidator = new UserIdValidator({
     idValidator,
     userRepository,

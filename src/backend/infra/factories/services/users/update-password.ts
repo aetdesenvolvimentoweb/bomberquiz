@@ -1,7 +1,7 @@
 import {
   Argon2EncrypterAdapter,
   MongoDBIdValidator,
-  db,
+  prismaClient,
 } from "@/backend/infra/adapters";
 import {
   UserIdValidator,
@@ -13,7 +13,7 @@ import { UserUpdatePasswordService } from "@/backend/data/services";
 
 export const makeUserUpdatePasswordService = (): UserUpdatePasswordService => {
   const encrypter = new Argon2EncrypterAdapter();
-  const userRepository = new PrismaUserRepository(db);
+  const userRepository = new PrismaUserRepository(prismaClient);
   const errorsValidation = new ErrorsValidation();
   const userUpdatePasswordPropsValidator = new UserUpdatePasswordPropsValidator(
     {

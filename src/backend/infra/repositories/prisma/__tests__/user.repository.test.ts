@@ -1,7 +1,7 @@
 import { PrismaUserRepository } from "../user.repository";
 import { UserProps } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/data/repository";
-import { db } from "@/backend/infra/adapters";
+import { prismaClient } from "@/backend/infra/adapters";
 import { subYears } from "date-fns";
 
 /**
@@ -16,7 +16,7 @@ interface SutTypes {
  * @returns Objeto contendo o sistema em teste
  */
 const makeSut = (): SutTypes => {
-  const sut = new PrismaUserRepository(db);
+  const sut = new PrismaUserRepository(prismaClient);
   return { sut };
 };
 
@@ -42,11 +42,11 @@ describe("PrismaUserRepository", () => {
   beforeAll(async () => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
-    await db.user.deleteMany({});
+    await prismaClient.user.deleteMany({});
   });
 
   afterEach(async () => {
-    await db.user.deleteMany({});
+    await prismaClient.user.deleteMany({});
   });
 
   /**

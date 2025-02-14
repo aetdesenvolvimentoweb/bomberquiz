@@ -1,9 +1,9 @@
 import { PrismaUserRepository } from "@/backend/infra/repositories";
 import { UserFindAllService } from "@/backend/data/services";
-import { db } from "@/backend/infra/adapters";
+import { prismaClient } from "@/backend/infra/adapters";
 
 export const makeUserFindAllService = (): UserFindAllService => {
-  const userRepository = new PrismaUserRepository(db);
+  const userRepository = new PrismaUserRepository(prismaClient);
   return new UserFindAllService({
     userRepository,
   });

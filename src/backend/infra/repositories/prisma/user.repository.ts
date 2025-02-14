@@ -22,9 +22,9 @@ export class PrismaUserRepository implements UserRepository {
    * @throws Error se a conexão falhar
    */
 
-  constructor(private db: PrismaClient) {}
+  constructor(private prismaClient: PrismaClient) {}
   private dbConnect = async (): Promise<void> => {
-    await this.db.$connect().catch(async () => {
+    await this.prismaClient.$connect().catch(async () => {
       throw databaseConnectionError();
     });
   };
@@ -54,7 +54,7 @@ export class PrismaUserRepository implements UserRepository {
    */
   public readonly create = async (userProps: UserProps): Promise<void> => {
     await this.dbConnect();
-    await this.db.user
+    await this.prismaClient.user
       .create({
         data: userProps,
       })
@@ -62,7 +62,7 @@ export class PrismaUserRepository implements UserRepository {
         throw databaseOperationError("criar");
       })
       .finally(async () => {
-        await this.db.$disconnect();
+        await this.prismaClient.$disconnect();
       });
   };
 
@@ -73,7 +73,7 @@ export class PrismaUserRepository implements UserRepository {
    */
   public readonly delete = async (id: string): Promise<void> => {
     await this.dbConnect();
-    await this.db.user
+    await this.prismaClient.user
       .delete({
         where: { id },
       })
@@ -81,7 +81,7 @@ export class PrismaUserRepository implements UserRepository {
         throw databaseOperationError("excluir");
       })
       .finally(async () => {
-        await this.db.$disconnect();
+        await this.prismaClient.$disconnect();
       });
   };
 
@@ -92,13 +92,13 @@ export class PrismaUserRepository implements UserRepository {
    */
   public readonly findAll = async (): Promise<UserMapped[]> => {
     await this.dbConnect();
-    const users: User[] = await this.db.user
+    const users: User[] = await this.prismaClient.user
       .findMany({})
       .catch(async () => {
         throw databaseOperationError("consultar");
       })
       .finally(async () => {
-        await this.db.$disconnect();
+        await this.prismaClient.$disconnect();
       });
 
     return users.map((user) => this.userMapper(user));
@@ -112,7 +112,7 @@ export class PrismaUserRepository implements UserRepository {
    */
   public readonly findByEmail = async (email: string): Promise<User | null> => {
     await this.dbConnect();
-    return await this.db.user
+    return await this.prismaClient.user
       .findUnique({
         where: { email },
       })
@@ -120,7 +120,7 @@ export class PrismaUserRepository implements UserRepository {
         throw databaseOperationError("consultar");
       })
       .finally(async () => {
-        await this.db.$disconnect();
+        await this.prismaClient.$disconnect();
       });
   };
 
@@ -132,7 +132,7 @@ export class PrismaUserRepository implements UserRepository {
    */
   public readonly findById = async (id: string): Promise<UserMapped | null> => {
     await this.dbConnect();
-    const user: User | null = await this.db.user
+    const user: User | null = await this.prismaClient.user
       .findFirst({
         where: { id },
       })
@@ -140,7 +140,7 @@ export class PrismaUserRepository implements UserRepository {
         throw databaseOperationError("consultar");
       })
       .finally(async () => {
-        await this.db.$disconnect();
+        await this.prismaClient.$disconnect();
       });
 
     if (!user) {
@@ -162,7 +162,7 @@ export class PrismaUserRepository implements UserRepository {
     const { id, props } = updatePasswordProps;
 
     await this.dbConnect();
-    await this.db.user
+    await this.prismaClient.user
       .update({
         where: { id },
         data: {
@@ -173,7 +173,7 @@ export class PrismaUserRepository implements UserRepository {
         throw databaseOperationError("atualizar");
       })
       .finally(async () => {
-        await this.db.$disconnect();
+        await this.prismaClient.$disconnect();
       });
   };
 
@@ -189,7 +189,7 @@ export class PrismaUserRepository implements UserRepository {
     const { id, props } = updateProfileProps;
 
     await this.dbConnect();
-    await this.db.user
+    await this.prismaClient.user
       .update({
         where: { id },
         data: { ...props },
@@ -198,7 +198,7 @@ export class PrismaUserRepository implements UserRepository {
         throw databaseOperationError("atualizar");
       })
       .finally(async () => {
-        await this.db.$disconnect();
+        await this.prismaClient.$disconnect();
       });
   };
 
@@ -214,7 +214,7 @@ export class PrismaUserRepository implements UserRepository {
     const { id, role } = updateRoleProps;
 
     await this.dbConnect();
-    await this.db.user
+    await this.prismaClient.user
       .update({
         where: { id },
         data: { role },
@@ -223,7 +223,7 @@ export class PrismaUserRepository implements UserRepository {
         throw databaseOperationError("atualizar");
       })
       .finally(async () => {
-        await this.db.$disconnect();
+        await this.prismaClient.$disconnect();
       });
   };
 }

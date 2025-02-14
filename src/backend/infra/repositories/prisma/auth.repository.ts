@@ -1,7 +1,7 @@
 import { AuthRepository, UserRepository } from "@/backend/data/repository";
 import { LoginProps, UserLogged } from "@/backend/domain/entities";
 import { databaseConnectionError } from "@/backend/data/shared";
-import { db } from "@/backend/infra/adapters";
+import { prismaClient } from "@/backend/infra/adapters";
 
 /**
  * Implementa o repositório de autenticação usando Prisma
@@ -18,7 +18,7 @@ export class PrismaAuthRepository implements AuthRepository {
    * @throws Error se a conexão falhar
    */
   private dbConnect = async (): Promise<void> => {
-    await db.$connect().catch(async () => {
+    await prismaClient.$connect().catch(async () => {
       throw databaseConnectionError();
     });
   };

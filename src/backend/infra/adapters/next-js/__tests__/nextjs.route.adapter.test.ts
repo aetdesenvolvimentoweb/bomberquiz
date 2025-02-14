@@ -2,8 +2,8 @@ import { Argon2EncrypterAdapter } from "../../cryptography";
 import { NextRequest } from "next/server";
 import { NextjsRouteAdapter } from "../nextjs.route.adapter";
 import { PrismaUserRepository } from "@/backend/infra/repositories";
-import { db } from "../../prisma-client";
 import { makeAuthLoginController } from "@/backend/infra/factories";
+import { prismaClient } from "../../prisma-client";
 import { subYears } from "date-fns";
 
 /**
@@ -36,7 +36,7 @@ describe("NextjsRouteAdapter", () => {
    */
   describe("request flow", () => {
     test("should process login request correctly", async () => {
-      const prismaUserRepository = new PrismaUserRepository(db);
+      const prismaUserRepository = new PrismaUserRepository(prismaClient);
       const argon2 = new Argon2EncrypterAdapter();
       const hashedPassword = await argon2.encrypt("valid_password");
       await prismaUserRepository.create({

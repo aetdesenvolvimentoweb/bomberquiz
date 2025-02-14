@@ -2,7 +2,7 @@ import {
   Argon2EncrypterAdapter,
   JwtTokenHandlerAdapter,
   ValidatorJsEmailValidatorAdapter,
-  db,
+  prismaClient,
 } from "@/backend/infra/adapters";
 import {
   PrismaAuthRepository,
@@ -13,7 +13,7 @@ import { AuthLoginValidator } from "@/backend/data/use-cases";
 import { ErrorsValidation } from "@/backend/data/shared/errors";
 
 export const makeAuthLoginService = (): AuthLoginService => {
-  const userRepository = new PrismaUserRepository(db);
+  const userRepository = new PrismaUserRepository(prismaClient);
   const authRepository = new PrismaAuthRepository(userRepository);
   const emailValidator = new ValidatorJsEmailValidatorAdapter();
   const encrypter = new Argon2EncrypterAdapter();
