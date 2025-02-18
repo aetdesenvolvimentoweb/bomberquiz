@@ -10,7 +10,7 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: "BomberQuiz",
   description:
-    "App de perguntas e respostas voltado a bombeiros militares do Estado de Goiás, que visa acelerar o aprendizado e reforçar o conhecimento de matérias cobradas no Teste de Aptidão Profissional",
+    "App de perguntas e respostas voltado a bombeiros militares do Estado de Goiás, que visa acelerar o aprendizado e reforçar o conhecimento de matérias cobradas no Teste de Avaliação Profissional (TAP) do CBMGO - Corpo de Bombeiros Militar do Estado de Goiás.",
 };
 
 export default function RootLayout({
