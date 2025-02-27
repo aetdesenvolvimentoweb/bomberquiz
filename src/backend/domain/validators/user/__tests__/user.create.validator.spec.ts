@@ -54,4 +54,17 @@ describe("UserCreateValidator", () => {
       } as UserCreateData),
     ).rejects.toThrow(new MissingParamError("telefone"));
   });
+
+  it("should throw a MissingParamError if birthdate is not provided", async () => {
+    const { sut } = makeSut();
+
+    await expect(
+      sut.validate({
+        name: "any_name",
+        email: "any_email",
+        phone: "any_phone",
+        password: "any_password",
+      } as UserCreateData),
+    ).rejects.toThrow(new MissingParamError("data de nascimento"));
+  });
 });
