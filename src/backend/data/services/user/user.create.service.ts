@@ -14,8 +14,10 @@ export class UserCreateService implements UserCreateUseCase {
   constructor(private readonly props: UserCreateServiceProps) {}
 
   public readonly create = async (data: UserCreateData): Promise<void> => {
-    const { repository } = this.props;
+    const { repository, sanitizer, validator } = this.props;
 
+    sanitizer.sanitize(data);
+    await validator.validate(data);
     await repository.create(data);
   };
 }
