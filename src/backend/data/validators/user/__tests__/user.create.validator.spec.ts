@@ -1,20 +1,28 @@
 import { InvalidParamError, MissingParamError } from "@/backend/domain/errors";
+import {
+  UserCreateValidatorUseCase,
+  UserEmailValidatorUseCase,
+} from "@/backend/domain/validators";
 import { UserCreateData } from "@/backend/domain/entities";
-import { UserCreateValidator } from "@/backend/data/validators/user/user.create.validator";
-import { UserCreateValidatorUseCase } from "@/backend/domain/validators";
+import { UserCreateValidator } from "@/backend/data/validators/user";
+import { UserEmailValidatorMock } from "@/backend/__mocks__/user";
 import { UserPasswordValidator } from "../user.password.validator";
 
 interface SutResponses {
   sut: UserCreateValidatorUseCase;
+  userEmailValidator: UserEmailValidatorUseCase;
 }
 
 const makeSut = (): SutResponses => {
+  const userEmailValidator = new UserEmailValidatorMock();
   const sut = new UserCreateValidator({
+    userEmailValidator,
     userPasswordValidator: new UserPasswordValidator(),
   });
 
   return {
     sut,
+    userEmailValidator,
   };
 };
 
@@ -69,6 +77,47 @@ describe("UserCreateValidator", () => {
 
       await expect(sut.validate(validData)).resolves.not.toThrow();
     });
+  });
+
+  describe("Validate email format", () => {
+    // Casos de teste para validação de email
+    const emailTestCases = [
+      {
+        scenario: "invalid email",
+        email: "invalid-email",
+        shouldThrow: true,
+        errorMessage: "email inválido.",
+      },
+      {
+        scenario: "valid email",
+        email: "email@example.com",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(emailTestCases)(
+      "should handle email with $scenario",
+      async ({ email, shouldThrow, errorMessage }) => {
+        const { userEmailValidator, sut } = makeSut();
+        const validData = makeValidUserData();
+        validData.email = email;
+
+        if (shouldThrow) {
+          jest
+            .spyOn(userEmailValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new InvalidParamError(errorMessage);
+            });
+
+          await expect(sut.validate(validData)).rejects.toThrow(
+            new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.validate(validData)).resolves.not.toThrow();
+        }
+      },
+    );
   });
 
   describe("Validate password format", () => {
