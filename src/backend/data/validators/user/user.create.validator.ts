@@ -13,7 +13,19 @@ export class UserCreateValidator implements UserCreateValidatorUseCase {
    * @param data Dados do usuário a serem validados
    * @throws {MissingParamError} Se algum campo obrigatório estiver faltando
    */
+
+  private checkMissingParams(data: UserCreateData) {
+    const requiredFields: { key: keyof UserCreateData; label: string }[] = [
+      { key: "name", label: "nome" },
+      { key: "email", label: "email" },
+    ];
+
+    for (const field of requiredFields) {
+      if (!data[field.key]) throw new MissingParamError(field.label);
+    }
+  }
+
   public readonly validate = async (data: UserCreateData): Promise<void> => {
-    if (!data.name) throw new MissingParamError("nome");
+    this.checkMissingParams(data);
   };
 }
