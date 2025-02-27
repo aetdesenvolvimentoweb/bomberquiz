@@ -16,82 +16,55 @@ const makeSut = (): SutResponses => {
 };
 
 describe("UserCreateValidator", () => {
-  it("should throw a MissingParamError if name is not provided", async () => {
-    const { sut } = makeSut();
-
-    await expect(
-      sut.validate({
-        email: "any_email",
-        phone: "any_phone",
-        birthdate: new Date(),
-        password: "any_password",
-      } as UserCreateData),
-    ).rejects.toThrow(new MissingParamError("nome"));
+  const makeValidUserData = (): UserCreateData => ({
+    name: "any_name",
+    email: "any_email",
+    phone: "any_phone",
+    birthdate: new Date(),
+    password: "any_password",
   });
 
-  it("should throw a MissingParamError if email is not provided", async () => {
-    const { sut } = makeSut();
+  describe("validate required fields", () => {
+    // Mapa de campos para labels
+    const fieldToLabelMap: Record<string, string> = {
+      name: "nome",
+      email: "email",
+      phone: "telefone",
+      birthdate: "data de nascimento",
+      password: "senha",
+    };
 
-    await expect(
-      sut.validate({
-        name: "any_name",
-        phone: "any_phone",
-        birthdate: new Date(),
-        password: "any_password",
-      } as UserCreateData),
-    ).rejects.toThrow(new MissingParamError("email"));
-  });
+    // Função genérica para omitir um campo
+    const omitField = (field: string, data: UserCreateData) => {
+      return Object.fromEntries(
+        Object.entries(data).filter(([key]) => key !== field),
+      ) as UserCreateData;
+    };
 
-  it("should throw a MissingParamError if phone is not provided", async () => {
-    const { sut } = makeSut();
+    // Cria os casos de teste a partir do mapa
+    const testCases = Object.entries(fieldToLabelMap).map(([field, label]) => ({
+      field,
+      label,
+    }));
 
-    await expect(
-      sut.validate({
-        name: "any_name",
-        email: "any_email",
-        birthdate: new Date(),
-        password: "any_password",
-      } as UserCreateData),
-    ).rejects.toThrow(new MissingParamError("telefone"));
-  });
+    test.each(testCases)(
+      "should throw a MissingParamError if $field is not provided",
+      async ({ field, label }) => {
+        const { sut } = makeSut();
+        const validData = makeValidUserData();
+        const invalidData = omitField(field, validData);
 
-  it("should throw a MissingParamError if birthdate is not provided", async () => {
-    const { sut } = makeSut();
+        await expect(sut.validate(invalidData)).rejects.toThrow(
+          new MissingParamError(label),
+        );
+      },
+    );
 
-    await expect(
-      sut.validate({
-        name: "any_name",
-        email: "any_email",
-        phone: "any_phone",
-        password: "any_password",
-      } as UserCreateData),
-    ).rejects.toThrow(new MissingParamError("data de nascimento"));
-  });
+    it("should not throw if all required fields are provided", async () => {
+      const { sut } = makeSut();
+      const validData = makeValidUserData();
 
-  it("should throw a MissingParamError if password is not provided", async () => {
-    const { sut } = makeSut();
-
-    await expect(
-      sut.validate({
-        name: "any_name",
-        email: "any_email",
-        phone: "any_phone",
-        birthdate: new Date(),
-      } as UserCreateData),
-    ).rejects.toThrow(new MissingParamError("senha"));
-  });
-
-  it("should not throw if all required fields are provided", async () => {
-    const { sut } = makeSut();
-
-    await expect(
-      sut.validate({
-        name: "any_name",
-        email: "any_email",
-        phone: "any_phone",
-        birthdate: new Date(),
-        password: "any_password",
-      } as UserCreateData),
-    ).resolves.not.toThrow();
+      await expect(sut.validate(validData)).resolves.not.toThrow();
+    });
   });
 });

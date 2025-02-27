@@ -15,16 +15,20 @@ export class UserCreateValidator implements UserCreateValidatorUseCase {
    */
 
   private checkMissingParams(data: UserCreateData): void {
-    const requiredFields: { key: keyof UserCreateData; label: string }[] = [
-      { key: "name", label: "nome" },
-      { key: "email", label: "email" },
-      { key: "phone", label: "telefone" },
-      { key: "birthdate", label: "data de nascimento" },
-      { key: "password", label: "senha" },
-    ];
+    // Mapa de campos para labels
+    const fieldToLabelMap: Record<keyof UserCreateData, string> = {
+      name: "nome",
+      email: "email",
+      phone: "telefone",
+      birthdate: "data de nascimento",
+      password: "senha",
+    };
 
-    for (const field of requiredFields) {
-      if (!data[field.key]) throw new MissingParamError(field.label);
+    // Verifica cada campo obrigatório
+    for (const [field, label] of Object.entries(fieldToLabelMap)) {
+      if (!data[field as keyof UserCreateData]) {
+        throw new MissingParamError(label);
+      }
     }
   }
 
