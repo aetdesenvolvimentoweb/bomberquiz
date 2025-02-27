@@ -1,11 +1,14 @@
+import { InvalidParamError, MissingParamError } from "@/backend/domain/errors";
+import {
+  UserCreateValidator,
+  UserPasswordValidator,
+} from "@/backend/data/validators";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
-import { MissingParamError } from "@/backend/domain/errors";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import { UserCreateService } from "../user.create.service";
 import { UserCreateUseCase } from "@/backend/domain/usecases";
-import { UserCreateValidator } from "@/backend/data/validators";
 import { UserCreateValidatorUseCase } from "@/backend/domain/validators";
 import { UserRepository } from "@/backend/domain/repositories/user.repository";
 
@@ -17,7 +20,10 @@ const makeSut = (): SutResponses => {
   const repository: UserRepository = new InMemoryUserRepository();
   const sanitizer: UserCreateDataSanitizerUseCase =
     new UserCreateDataSanitizer();
-  const validator: UserCreateValidatorUseCase = new UserCreateValidator();
+  const userPasswordValidator = new UserPasswordValidator();
+  const validator: UserCreateValidatorUseCase = new UserCreateValidator({
+    userPasswordValidator,
+  });
   const sut = new UserCreateService({
     repository,
     sanitizer,
@@ -77,5 +83,15 @@ describe("UserCreateService", () => {
         );
       },
     );
+
+    it("should throw a InvalidParamError if password is less than 8 characters", async () => {
+      const { sut } = makeSut();
+      const validData = makeValidUserData();
+      validData.password = "1234567";
+
+      await expect(sut.create(validData)).rejects.toThrow(
+        new InvalidParamError("senha deve ter no mínimo 8 caracteres."),
+      );
+    });
   });
 });
