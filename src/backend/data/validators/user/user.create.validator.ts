@@ -14,7 +14,7 @@ export class UserCreateValidator implements UserCreateValidatorUseCase {
    * @throws {MissingParamError} Se algum campo obrigatório estiver faltando
    */
 
-  private checkMissingParams(data: UserCreateData) {
+  private checkMissingParams(data: UserCreateData): void {
     const requiredFields: { key: keyof UserCreateData; label: string }[] = [
       { key: "name", label: "nome" },
       { key: "email", label: "email" },
