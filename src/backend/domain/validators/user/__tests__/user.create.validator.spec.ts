@@ -76,8 +76,22 @@ describe("UserCreateValidator", () => {
         name: "any_name",
         email: "any_email",
         phone: "any_phone",
+        birthdate: new Date(),
+      } as UserCreateData),
+    ).rejects.toThrow(new MissingParamError("senha"));
+  });
+
+  it("should not throw if all required fields are provided", async () => {
+    const { sut } = makeSut();
+
+    await expect(
+      sut.validate({
+        name: "any_name",
+        email: "any_email",
+        phone: "any_phone",
+        birthdate: new Date(),
         password: "any_password",
       } as UserCreateData),
-    ).rejects.toThrow(new MissingParamError("data de nascimento"));
+    ).resolves.not.toThrow();
   });
 });
