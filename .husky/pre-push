@@ -1,2 +1,2 @@
 echo "Executando Testes..."
-pnpm test:ci
+pnpm test:coverage
