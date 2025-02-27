@@ -6,19 +6,24 @@ import {
 import {
   UserCreateValidatorUseCase,
   UserEmailValidatorUseCase,
+  UserPhoneValidatorUseCase,
 } from "@/backend/domain/validators";
+import {
+  UserEmailValidatorMock,
+  UserPhoneValidatorMock,
+} from "@/backend/__mocks__/user";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import { UserCreateService } from "../user.create.service";
 import { UserCreateUseCase } from "@/backend/domain/usecases";
-import { UserEmailValidatorMock } from "@/backend/__mocks__/user";
 import { UserRepository } from "@/backend/domain/repositories";
 
 interface SutResponses {
   sut: UserCreateUseCase;
   userEmailValidator: UserEmailValidatorUseCase;
+  userPhoneValidator: UserPhoneValidatorUseCase;
 }
 
 const makeSut = (): SutResponses => {
@@ -27,9 +32,11 @@ const makeSut = (): SutResponses => {
     new UserCreateDataSanitizer();
   const userEmailValidator = new UserEmailValidatorMock();
   const userPasswordValidator = new UserPasswordValidator();
+  const userPhoneValidator = new UserPhoneValidatorMock();
   const validator: UserCreateValidatorUseCase = new UserCreateValidator({
     userEmailValidator,
     userPasswordValidator,
+    userPhoneValidator,
   });
   const sut = new UserCreateService({
     repository,
@@ -37,7 +44,7 @@ const makeSut = (): SutResponses => {
     validator,
   });
 
-  return { sut, userEmailValidator };
+  return { sut, userEmailValidator, userPhoneValidator };
 };
 
 describe("UserCreateService", () => {
@@ -135,6 +142,53 @@ describe("UserCreateService", () => {
         if (shouldThrow) {
           jest
             .spyOn(userEmailValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new InvalidParamError(errorMessage);
+            });
+
+          await expect(sut.create(validData)).rejects.toThrow(
+            new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.create(validData)).resolves.not.toThrow();
+        }
+      },
+    );
+  });
+
+  describe("Validate phone format", () => {
+    // Casos de teste para validação de phone
+    const phoneTestCases = [
+      {
+        scenario: "invalid phone",
+        phone: "invalid-phone",
+        shouldThrow: true,
+        errorMessage: "telefone inválido.",
+      },
+      {
+        scenario: "valid mobile phone",
+        phone: "(62) 99999-9999",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+      {
+        scenario: "valid phone",
+        phone: "(62) 9999-9999",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(phoneTestCases)(
+      "should handle phone with $scenario",
+      async ({ phone, shouldThrow, errorMessage }) => {
+        const { userPhoneValidator, sut } = makeSut();
+        const validData = makeValidUserData();
+        validData.phone = phone;
+
+        if (shouldThrow) {
+          jest
+            .spyOn(userPhoneValidator, "validate")
             .mockImplementationOnce(() => {
               throw new InvalidParamError(errorMessage);
             });
