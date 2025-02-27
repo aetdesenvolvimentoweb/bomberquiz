@@ -7,4 +7,10 @@ describe("MissingParamError", () => {
 
     expect(error.message).toBe(message);
   });
+
+  it("should create an error with status code 400", () => {
+    const error = new MissingParamError("any-param");
+
+    expect(error.statusCode).toBe(400);
+  });
 });
