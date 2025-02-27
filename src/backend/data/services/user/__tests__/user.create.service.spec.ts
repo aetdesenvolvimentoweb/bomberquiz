@@ -3,25 +3,32 @@ import {
   UserCreateValidator,
   UserPasswordValidator,
 } from "@/backend/data/validators";
+import {
+  UserCreateValidatorUseCase,
+  UserEmailValidatorUseCase,
+} from "@/backend/domain/validators";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import { UserCreateService } from "../user.create.service";
 import { UserCreateUseCase } from "@/backend/domain/usecases";
-import { UserCreateValidatorUseCase } from "@/backend/domain/validators";
-import { UserRepository } from "@/backend/domain/repositories/user.repository";
+import { UserEmailValidatorMock } from "@/backend/__mocks__/user";
+import { UserRepository } from "@/backend/domain/repositories";
 
 interface SutResponses {
   sut: UserCreateUseCase;
+  userEmailValidator: UserEmailValidatorUseCase;
 }
 
 const makeSut = (): SutResponses => {
   const repository: UserRepository = new InMemoryUserRepository();
   const sanitizer: UserCreateDataSanitizerUseCase =
     new UserCreateDataSanitizer();
+  const userEmailValidator = new UserEmailValidatorMock();
   const userPasswordValidator = new UserPasswordValidator();
   const validator: UserCreateValidatorUseCase = new UserCreateValidator({
+    userEmailValidator,
     userPasswordValidator,
   });
   const sut = new UserCreateService({
@@ -30,7 +37,7 @@ const makeSut = (): SutResponses => {
     validator,
   });
 
-  return { sut };
+  return { sut, userEmailValidator };
 };
 
 describe("UserCreateService", () => {
@@ -46,6 +53,22 @@ describe("UserCreateService", () => {
     const { sut } = makeSut();
     const data = makeValidUserData();
     await expect(sut.create(data)).resolves.not.toThrow();
+  });
+
+  describe("Data sanitization", () => {
+    it("should sanitize user data before validation", async () => {
+      const { sut } = makeSut();
+      const data = {
+        name: "  John Doe  ",
+        email: "  EMAIL@example.com  ",
+        phone: "(11) 98765-4321",
+        birthdate: new Date(),
+        password: "  password123  ",
+      } as UserCreateData;
+
+      // O teste passa se não houver erros, indicando que os dados foram sanitizados corretamente
+      await expect(sut.create(data)).resolves.not.toThrow();
+    });
   });
 
   describe("Validate required fields", () => {
@@ -81,6 +104,47 @@ describe("UserCreateService", () => {
         await expect(sut.create(invalidData)).rejects.toThrow(
           new MissingParamError(label),
         );
+      },
+    );
+  });
+
+  describe("Validate email format", () => {
+    // Casos de teste para validação de email
+    const emailTestCases = [
+      {
+        scenario: "invalid email",
+        email: "invalid-email",
+        shouldThrow: true,
+        errorMessage: "email inválido.",
+      },
+      {
+        scenario: "valid email",
+        email: "email@example.com",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(emailTestCases)(
+      "should handle email with $scenario",
+      async ({ email, shouldThrow, errorMessage }) => {
+        const { userEmailValidator, sut } = makeSut();
+        const validData = makeValidUserData();
+        validData.email = email;
+
+        if (shouldThrow) {
+          jest
+            .spyOn(userEmailValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new InvalidParamError(errorMessage);
+            });
+
+          await expect(sut.create(validData)).rejects.toThrow(
+            new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.create(validData)).resolves.not.toThrow();
+        }
       },
     );
   });
@@ -124,21 +188,5 @@ describe("UserCreateService", () => {
         }
       },
     );
-  });
-
-  describe("Data sanitization", () => {
-    it("should sanitize user data before validation", async () => {
-      const { sut } = makeSut();
-      const data = {
-        name: "  John Doe  ",
-        email: "  EMAIL@example.com  ",
-        phone: "(11) 98765-4321",
-        birthdate: new Date(),
-        password: "  password123  ",
-      } as UserCreateData;
-
-      // O teste passa se não houver erros, indicando que os dados foram sanitizados corretamente
-      await expect(sut.create(data)).resolves.not.toThrow();
-    });
   });
 });
