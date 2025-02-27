@@ -2,6 +2,7 @@ import {
   UserCreateValidatorUseCase,
   UserEmailValidatorUseCase,
   UserPasswordValidatorUseCase,
+  UserPhoneValidatorUseCase,
 } from "@/backend/domain/validators";
 import { MissingParamError } from "@/backend/domain/errors";
 import { UserCreateData } from "@/backend/domain/entities";
@@ -9,6 +10,7 @@ import { UserCreateData } from "@/backend/domain/entities";
 interface UserCreateValidatorProps {
   userPasswordValidator: UserPasswordValidatorUseCase;
   userEmailValidator: UserEmailValidatorUseCase;
+  userPhoneValidator: UserPhoneValidatorUseCase;
 }
 
 /**
@@ -42,10 +44,12 @@ export class UserCreateValidator implements UserCreateValidatorUseCase {
   }
 
   private checkInvalidParams(data: UserCreateData): void {
-    const { userEmailValidator, userPasswordValidator } = this.props;
+    const { userEmailValidator, userPasswordValidator, userPhoneValidator } =
+      this.props;
 
     userEmailValidator.validate(data.email);
     userPasswordValidator.validate(data.password);
+    userPhoneValidator.validate(data.phone);
   }
 
   public readonly validate = async (data: UserCreateData): Promise<void> => {
