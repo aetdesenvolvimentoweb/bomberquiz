@@ -8,4 +8,10 @@ describe("ApplicationError", () => {
     expect(error.message).toBe(message);
     expect(error.statusCode).toBe(401);
   });
+
+  it("should create an application error with status code default", () => {
+    const error = new ApplicationError("any-message");
+
+    expect(error.statusCode).toBe(400);
+  });
 });
