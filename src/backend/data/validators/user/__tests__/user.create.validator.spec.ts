@@ -1,27 +1,32 @@
 import { InvalidParamError, MissingParamError } from "@/backend/domain/errors";
 import {
+  UserBirthdateValidatorMock,
+  UserEmailValidatorMock,
+  UserPhoneValidatorMock,
+} from "@/backend/__mocks__/user";
+import {
+  UserBirthdateValidatorUseCase,
   UserCreateValidatorUseCase,
   UserEmailValidatorUseCase,
   UserPhoneValidatorUseCase,
 } from "@/backend/domain/validators";
-import {
-  UserEmailValidatorMock,
-  UserPhoneValidatorMock,
-} from "@/backend/__mocks__/user";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateValidator } from "@/backend/data/validators/user";
 import { UserPasswordValidator } from "../user.password.validator";
 
 interface SutResponses {
   sut: UserCreateValidatorUseCase;
+  userBirthdateValidator: UserBirthdateValidatorUseCase;
   userEmailValidator: UserEmailValidatorUseCase;
   userPhoneValidator: UserPhoneValidatorUseCase;
 }
 
 const makeSut = (): SutResponses => {
+  const userBirthdateValidator = new UserBirthdateValidatorMock();
   const userEmailValidator = new UserEmailValidatorMock();
   const userPhoneValidator = new UserPhoneValidatorMock();
   const sut = new UserCreateValidator({
+    userBirthdateValidator,
     userEmailValidator,
     userPasswordValidator: new UserPasswordValidator(),
     userPhoneValidator,
@@ -29,6 +34,7 @@ const makeSut = (): SutResponses => {
 
   return {
     sut,
+    userBirthdateValidator,
     userEmailValidator,
     userPhoneValidator,
   };
@@ -161,6 +167,53 @@ describe("UserCreateValidator", () => {
         if (shouldThrow) {
           jest
             .spyOn(userPhoneValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new InvalidParamError(errorMessage);
+            });
+
+          await expect(sut.validate(validData)).rejects.toThrow(
+            new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.validate(validData)).resolves.not.toThrow();
+        }
+      },
+    );
+  });
+
+  describe("Validate birthdate format", () => {
+    // Casos de teste para validação de data de nascimento
+    const birthdateTestCases = [
+      {
+        scenario: "invalid date",
+        birthdate: "invalid-date" as unknown as Date,
+        shouldThrow: true,
+        errorMessage: "data de nascimento inválida.",
+      },
+      {
+        scenario: "birthdate less then 18 years old",
+        birthdate: new Date(),
+        shouldThrow: true,
+        errorMessage: "",
+      },
+      {
+        scenario: "valid birthdate",
+        birthdate: new Date("2000-01-01"),
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(birthdateTestCases)(
+      "should handle birthdate with $scenario",
+      async ({ birthdate, shouldThrow, errorMessage }) => {
+        const { userBirthdateValidator, sut } = makeSut();
+        const validData = makeValidUserData();
+        validData.birthdate = birthdate;
+
+        if (shouldThrow) {
+          jest
+            .spyOn(userBirthdateValidator, "validate")
             .mockImplementationOnce(() => {
               throw new InvalidParamError(errorMessage);
             });
