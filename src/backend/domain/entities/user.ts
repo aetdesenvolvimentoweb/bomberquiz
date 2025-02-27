@@ -59,3 +59,7 @@ export type UserUpdateRoleData = {
   id: string;
   role: UserRole;
 };
+
+export const USER_DEFAULT_AVATAR_URL =
+  "/src/frontend/assets/images/default-avatar.png";
+export const USER_DEFAULT_ROLE = UserRole.CLIENTE;
