@@ -7,4 +7,10 @@ describe("InvalidParamError", () => {
 
     expect(error.message).toBe(message);
   });
+
+  it("should create an invalid param error with status code 400", () => {
+    const error = new InvalidParamError("any-param");
+
+    expect(error.statusCode).toBe(400);
+  });
 });
