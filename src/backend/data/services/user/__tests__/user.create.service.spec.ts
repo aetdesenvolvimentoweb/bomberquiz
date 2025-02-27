@@ -1,4 +1,5 @@
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
+import { MissingParamError } from "@/backend/domain/errors";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
@@ -39,5 +40,42 @@ describe("UserCreateService", () => {
     const { sut } = makeSut();
     const data = makeValidUserData();
     await expect(sut.create(data)).resolves.not.toThrow();
+  });
+
+  describe("Validate required fields", () => {
+    // Mapa de campos para labels
+    const fieldToLabelMap: Record<string, string> = {
+      name: "nome",
+      email: "email",
+      phone: "telefone",
+      birthdate: "data de nascimento",
+      password: "senha",
+    };
+
+    // Função genérica para omitir um campo
+    const omitField = (field: string, data: UserCreateData) => {
+      return Object.fromEntries(
+        Object.entries(data).filter(([key]) => key !== field),
+      ) as UserCreateData;
+    };
+
+    // Cria os casos de teste a partir do mapa
+    const testCases = Object.entries(fieldToLabelMap).map(([field, label]) => ({
+      field,
+      label,
+    }));
+
+    test.each(testCases)(
+      "should throw a MissingParamError if $field is not provided",
+      async ({ field, label }) => {
+        const { sut } = makeSut();
+        const validData = makeValidUserData();
+        const invalidData = omitField(field, validData);
+
+        await expect(sut.create(invalidData)).rejects.toThrow(
+          new MissingParamError(label),
+        );
+      },
+    );
   });
 });
