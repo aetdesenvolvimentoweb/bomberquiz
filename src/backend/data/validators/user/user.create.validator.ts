@@ -19,6 +19,7 @@ export class UserCreateValidator implements UserCreateValidatorUseCase {
       { key: "name", label: "nome" },
       { key: "email", label: "email" },
       { key: "phone", label: "telefone" },
+      { key: "birthdate", label: "data de nascimento" },
     ];
 
     for (const field of requiredFields) {
