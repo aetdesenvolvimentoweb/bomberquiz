@@ -1,14 +1,17 @@
 import { MissingParamError } from "@/backend/domain/errors";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateValidator } from "@/backend/data/validators/user/user.create.validator";
-import { UserCreateValidatorUseCase } from "../user.create.validator";
+import { UserCreateValidatorUseCase } from "@/backend/domain/validators";
+import { UserPasswordValidator } from "../user.password.validator";
 
 interface SutResponses {
   sut: UserCreateValidatorUseCase;
 }
 
 const makeSut = (): SutResponses => {
-  const sut = new UserCreateValidator();
+  const sut = new UserCreateValidator({
+    userPasswordValidator: new UserPasswordValidator(),
+  });
 
   return {
     sut,

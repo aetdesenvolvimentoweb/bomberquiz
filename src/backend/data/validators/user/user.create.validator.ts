@@ -1,13 +1,20 @@
+import {
+  UserCreateValidatorUseCase,
+  UserPasswordValidatorUseCase,
+} from "@/backend/domain/validators";
 import { MissingParamError } from "@/backend/domain/errors";
 import { UserCreateData } from "@/backend/domain/entities";
-import { UserCreateValidatorUseCase } from "@/backend/domain/validators";
+
+interface UserCreateValidatorProps {
+  userPasswordValidator: UserPasswordValidatorUseCase;
+}
 
 /**
  * Implementação do validador para criação de usuário
  * @implements {UserCreateValidatorUseCase}
  */
 export class UserCreateValidator implements UserCreateValidatorUseCase {
-  constructor() {}
+  constructor(private readonly props: UserCreateValidatorProps) {}
   /**
    * Valida os dados para criação de usuário
    * @param data Dados do usuário a serem validados
@@ -32,7 +39,14 @@ export class UserCreateValidator implements UserCreateValidatorUseCase {
     }
   }
 
+  private checkInvalidParams(data: UserCreateData): void {
+    const { userPasswordValidator } = this.props;
+
+    userPasswordValidator.validate(data.password);
+  }
+
   public readonly validate = async (data: UserCreateData): Promise<void> => {
     this.checkMissingParams(data);
+    this.checkInvalidParams(data);
   };
 }
