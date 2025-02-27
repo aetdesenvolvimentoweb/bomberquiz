@@ -7,4 +7,10 @@ describe("DuplicateResourceError", () => {
 
     expect(error.message).toBe(message);
   });
+
+  it("should create a duplicate resource error with status code 409", () => {
+    const error = new DuplicateResourceError("Any Resource");
+
+    expect(error.statusCode).toBe(409);
+  });
 });
