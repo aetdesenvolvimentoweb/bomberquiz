@@ -1,4 +1,4 @@
-import { MissingParamError } from "@/backend/domain/errors";
+import { InvalidParamError, MissingParamError } from "@/backend/domain/errors";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateValidator } from "@/backend/data/validators/user/user.create.validator";
 import { UserCreateValidatorUseCase } from "@/backend/domain/validators";
@@ -69,5 +69,46 @@ describe("UserCreateValidator", () => {
 
       await expect(sut.validate(validData)).resolves.not.toThrow();
     });
+  });
+
+  describe("Validate password format", () => {
+    // Casos de teste para validação de senha
+    const passwordTestCases = [
+      {
+        scenario: "less than 8 characters",
+        password: "1234567",
+        shouldThrow: true,
+        errorMessage: "senha deve ter no mínimo 8 caracteres.",
+      },
+      {
+        scenario: "exactly 8 characters",
+        password: "12345678",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+      {
+        scenario: "more than 8 characters",
+        password: "123456789",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(passwordTestCases)(
+      "should handle password with $scenario",
+      async ({ password, shouldThrow, errorMessage }) => {
+        const { sut } = makeSut();
+        const validData = makeValidUserData();
+        validData.password = password;
+
+        if (shouldThrow) {
+          await expect(sut.validate(validData)).rejects.toThrow(
+            new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.validate(validData)).resolves.not.toThrow();
+        }
+      },
+    );
   });
 });
