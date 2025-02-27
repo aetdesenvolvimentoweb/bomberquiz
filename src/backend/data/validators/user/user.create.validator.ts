@@ -1,5 +1,6 @@
 import {
   UserCreateValidatorUseCase,
+  UserEmailValidatorUseCase,
   UserPasswordValidatorUseCase,
 } from "@/backend/domain/validators";
 import { MissingParamError } from "@/backend/domain/errors";
@@ -7,6 +8,7 @@ import { UserCreateData } from "@/backend/domain/entities";
 
 interface UserCreateValidatorProps {
   userPasswordValidator: UserPasswordValidatorUseCase;
+  userEmailValidator: UserEmailValidatorUseCase;
 }
 
 /**
@@ -40,8 +42,9 @@ export class UserCreateValidator implements UserCreateValidatorUseCase {
   }
 
   private checkInvalidParams(data: UserCreateData): void {
-    const { userPasswordValidator } = this.props;
+    const { userEmailValidator, userPasswordValidator } = this.props;
 
+    userEmailValidator.validate(data.email);
     userPasswordValidator.validate(data.password);
   }
 
