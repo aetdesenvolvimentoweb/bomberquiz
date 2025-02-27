@@ -7,4 +7,10 @@ describe("DatabaseError", () => {
 
     expect(error.message).toBe(message);
   });
+
+  it("should create a database error with status code 500", () => {
+    const error = new DatabaseError("Database connection failed");
+
+    expect(error.statusCode).toBe(500);
+  });
 });
