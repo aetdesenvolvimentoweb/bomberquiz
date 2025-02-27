@@ -3,6 +3,7 @@ import type { Config } from "jest";
 const config: Config = {
   collectCoverage: false,
   roots: ["<rootDir>/src"],
+  collectCoverageFrom: ["<rootDir>/src/backend/**/*.ts"],
   coverageDirectory: "coverage",
   coverageProvider: "v8",
   preset: "ts-jest",
