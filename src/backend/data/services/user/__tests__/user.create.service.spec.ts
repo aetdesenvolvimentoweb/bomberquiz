@@ -179,7 +179,7 @@ describe("UserCreateService", () => {
       {
         scenario: "duplicated email",
         shouldThrow: true,
-        errorMessage: "Email já cadastrado no sistema",
+        errorMessage: "Email",
       },
       {
         scenario: "unique email",

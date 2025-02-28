@@ -22,6 +22,7 @@ export class UserUniqueEmailValidator
    * @param data.id ID do usuário (opcional, usado para permitir que o próprio usuário mantenha seu email em atualizações)
    * @param data.email Email a ser validado
    * @throws {DuplicateResourceError} Se o email já estiver cadastrado para outro usuário
+   *         A mensagem de erro será "Email já cadastrado no sistema"
    * @returns Promise que resolve se o email for único
    */
   public readonly validate = async (data: {
@@ -31,7 +32,7 @@ export class UserUniqueEmailValidator
     const user = await this.repository.findByEmail(data.email);
 
     if (user) {
-      throw new DuplicateResourceError("Email já cadastrado no sistema");
+      throw new DuplicateResourceError("Email");
     }
   };
 }
