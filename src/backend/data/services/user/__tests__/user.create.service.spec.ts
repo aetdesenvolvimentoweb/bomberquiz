@@ -273,7 +273,7 @@ describe("UserCreateService", () => {
         scenario: "birthdate less then 18 years old",
         birthdate: new Date(),
         shouldThrow: true,
-        errorMessage: "",
+        errorMessage: "data de nascimento inválida.",
       },
       {
         scenario: "valid birthdate",

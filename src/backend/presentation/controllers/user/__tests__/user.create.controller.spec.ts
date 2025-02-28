@@ -1,61 +1,81 @@
 import {
+  Controller,
+  HttpRequest,
+  HttpResponse,
+} from "@/backend/presentation/protocols";
+import { InvalidParamError, MissingParamError } from "@/backend/domain/errors";
+import {
   UserBirthdateValidatorMock,
   UserEmailValidatorMock,
   UserPhoneValidatorMock,
 } from "@/backend/__mocks__/user";
 import {
+  UserBirthdateValidatorUseCase,
+  UserEmailValidatorUseCase,
+  UserPhoneValidatorUseCase,
+} from "@/backend/domain/validators";
+import {
   UserCreateValidator,
   UserPasswordValidator,
   UserUniqueEmailValidator,
 } from "@/backend/data/validators";
+import { ConsoleLoggerProvider } from "@/backend/infra/providers";
 import { HashProviderMock } from "@/backend/__mocks__/hash.provider.mock";
-import { HttpRequest } from "@/backend/presentation/protocols";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
-import { LoggerProviderMock } from "@/backend/__mocks__/logger.provider.mock";
 import { UserCreateController } from "../user.create.controller";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
+import { UserCreateRequestValidator } from "@/backend/presentation/validators";
 import { UserCreateService } from "@/backend/data/services";
 
 interface SutResponses {
-  sut: UserCreateController;
-  userCreateService: UserCreateService;
-  loggerMock: LoggerProviderMock;
+  sut: Controller;
+  userEmailValidator: UserEmailValidatorUseCase;
+  userPhoneValidator: UserPhoneValidatorUseCase;
+  userBirthdateValidator: UserBirthdateValidatorUseCase;
 }
 
 const makeSut = (): SutResponses => {
+  const userRepository = new InMemoryUserRepository();
+  const userCreateDataSanitizer = new UserCreateDataSanitizer();
   const hashProvider = new HashProviderMock();
-  const loggerMock = new LoggerProviderMock();
-  const sanitizer = new UserCreateDataSanitizer();
+  const loggerProvider = new ConsoleLoggerProvider();
+  // inicializa o userCreateDataValidator com as dependências necessárias
   const userBirthdateValidator = new UserBirthdateValidatorMock();
   const userEmailValidator = new UserEmailValidatorMock();
   const userPasswordValidator = new UserPasswordValidator();
   const userPhoneValidator = new UserPhoneValidatorMock();
-  const repository = new InMemoryUserRepository();
-  const userUniqueEmailValidator = new UserUniqueEmailValidator(repository);
-  const validator = new UserCreateValidator({
+  const userUniqueEmailValidator = new UserUniqueEmailValidator(userRepository);
+  const userCreateDataValidator = new UserCreateValidator({
     userBirthdateValidator,
     userEmailValidator,
     userPasswordValidator,
     userPhoneValidator,
     userUniqueEmailValidator,
   });
+  // inicializa o userCreateService com as dependências necessárias
   const userCreateService = new UserCreateService({
-    repository,
+    repository: userRepository,
+    sanitizer: userCreateDataSanitizer,
     hashProvider,
-    logger: loggerMock,
-    sanitizer,
-    validator,
+    logger: loggerProvider,
+    validator: userCreateDataValidator,
   });
+  // inicializa o userCreateRequestvalidator com as dependências necessárias
+  const userCreateRequestValidator = new UserCreateRequestValidator(
+    loggerProvider,
+  );
   const sut = new UserCreateController({
     userCreateService,
-    logger: loggerMock,
+    userCreateRequestValidator,
+    logger: loggerProvider,
   });
 
   return {
     sut,
-    userCreateService,
-    loggerMock,
+    userEmailValidator,
+    userPhoneValidator,
+    userBirthdateValidator,
   };
 };
 
@@ -68,302 +88,291 @@ const makeValidUserData = (): UserCreateData => ({
 });
 
 describe("UserCreateController", () => {
-  describe("Input validation", () => {
-    it("should return badRequest if no body is provided", async () => {
-      const { sut, userCreateService, loggerMock } = makeSut();
-      const createServiceSpy = jest.spyOn(userCreateService, "create");
-      const request: HttpRequest = {};
+  describe("validate required fields", () => {
+    // Mapa de campos para labels
+    const fieldToLabelMap: Record<string, string> = {
+      name: "nome",
+      email: "email",
+      phone: "telefone",
+      birthdate: "data de nascimento",
+      password: "senha",
+    };
 
-      const response = await sut.handle(request);
+    // Função genérica para omitir um campo
+    const omitField = (field: string, data: UserCreateData) => {
+      return Object.fromEntries(
+        Object.entries(data).filter(([key]) => key !== field),
+      ) as UserCreateData;
+    };
 
-      expect(response.statusCode).toBe(400);
-      expect(response.body.errorMessage).toBe("Dados não fornecidos");
-      expect(createServiceSpy).not.toHaveBeenCalled();
-      expect(loggerMock.logs).toContainEqual(
-        expect.objectContaining({
-          level: "warn",
-          message: "Requisição sem corpo ou com corpo vazio",
-        }),
-      );
-    });
+    // Cria os casos de teste a partir do mapa
+    const testCases = Object.entries(fieldToLabelMap).map(([field, label]) => ({
+      field,
+      label,
+    }));
 
-    it("should return badRequest if body is empty object", async () => {
-      const { sut, userCreateService, loggerMock } = makeSut();
-      const createServiceSpy = jest.spyOn(userCreateService, "create");
-      const request: HttpRequest<UserCreateData> = {
-        body: {} as UserCreateData,
-      };
+    test.each(testCases)(
+      "should throw a MissingParamError if $field is not provided",
+      async ({ field, label }) => {
+        const { sut } = makeSut();
+        const validData = makeValidUserData();
+        const invalidData = omitField(field, validData);
 
-      const response = await sut.handle(request);
-
-      expect(response.statusCode).toBe(400);
-      expect(response.body.errorMessage).toBe("Dados não fornecidos");
-      expect(createServiceSpy).not.toHaveBeenCalled();
-      expect(loggerMock.logs).toContainEqual(
-        expect.objectContaining({
-          level: "warn",
-          message: "Requisição sem corpo ou com corpo vazio",
-        }),
-      );
-    });
-
-    it("should return badRequest if data types are invalid", async () => {
-      const { sut, userCreateService, loggerMock } = makeSut();
-      const createServiceSpy = jest.spyOn(userCreateService, "create");
-      const request: HttpRequest<UserCreateData> = {
-        body: {
-          name: 123 as unknown as string,
-          email: "valid@email.com",
-          phone: "(62)99999-9999",
-          birthdate: new Date(),
-          password: "valid-password",
-        } as unknown as UserCreateData,
-      };
-
-      const response = await sut.handle(request);
-
-      expect(response.statusCode).toBe(400);
-      expect(response.body.errorMessage).toBe("Dados com formato inválido");
-      expect(createServiceSpy).not.toHaveBeenCalled();
-      expect(loggerMock.logs).toContainEqual(
-        expect.objectContaining({
-          level: "warn",
-          message: "Dados com tipos inválidos",
-        }),
-      );
-    });
-
-    it("should return badRequest if birthdate is not a Date object", async () => {
-      const { sut, userCreateService, loggerMock } = makeSut();
-      const createServiceSpy = jest.spyOn(userCreateService, "create");
-      const request: HttpRequest<UserCreateData> = {
-        body: {
-          name: "Valid Name",
-          email: "valid@email.com",
-          phone: "(62)99999-9999",
-          birthdate: "2000-01-01" as unknown as Date,
-          password: "valid-password",
-        } as UserCreateData,
-      };
-
-      const response = await sut.handle(request);
-
-      expect(response.statusCode).toBe(400);
-      expect(response.body.errorMessage).toBe("Dados com formato inválido");
-      expect(createServiceSpy).not.toHaveBeenCalled();
-      expect(loggerMock.logs).toContainEqual(
-        expect.objectContaining({
-          level: "warn",
-          message: "Dados com tipos inválidos",
-        }),
-      );
-    });
-  });
-
-  describe("Success case", () => {
-    it("should call userCreateService with correct values", async () => {
-      const { sut, userCreateService } = makeSut();
-      const createServiceSpy = jest.spyOn(userCreateService, "create");
-      const request: HttpRequest<UserCreateData> = {
-        body: makeValidUserData(),
-      };
-
-      await sut.handle(request);
-
-      expect(createServiceSpy).toHaveBeenCalledWith(makeValidUserData());
-    });
-
-    it("should return created on success", async () => {
-      const { sut, loggerMock } = makeSut();
-      const request: HttpRequest<UserCreateData> = {
-        body: makeValidUserData(),
-      };
-
-      const response = await sut.handle(request);
-
-      expect(response.statusCode).toBe(201);
-      expect(response.body.success).toBeTruthy();
-      expect(loggerMock.logs).toContainEqual(
-        expect.objectContaining({
-          level: "info",
-          message: "Usuário criado com sucesso via controller",
-        }),
-      );
-    });
-  });
-
-  describe("Error handling", () => {
-    it("should return badRequest with correct message when MissingParamError is thrown", async () => {
-      const { sut } = makeSut();
-
-      const request: HttpRequest<UserCreateData> = {
-        body: {
-          email: "any-email@mail.com",
-          phone: "(62)99999-9999",
-          birthdate: new Date("2000-01-01"),
-          password: "any-password",
-        } as UserCreateData,
-      };
-
-      const response = await sut.handle(request);
-
-      expect(response.statusCode).toBe(400);
-      expect(response.body.success).toBe(false);
-      expect(response.body.errorMessage).toBe(
-        "Parâmetro obrigatório não informado: nome",
-      );
-      expect(response.body.metadata).toBeDefined();
-    });
-
-    it("should return badRequest with correct message when InvalidParamError is thrown", async () => {
-      const { sut } = makeSut();
-      const validUserData = makeValidUserData();
-      const request: HttpRequest<UserCreateData> = {
-        body: { ...validUserData, password: "less" },
-      };
-
-      const response = await sut.handle(request);
-
-      expect(response.statusCode).toBe(400);
-      expect(response.body.success).toBe(false);
-      expect(response.body.errorMessage).toBe(
-        "Parâmetro inválido: senha deve ter no mínimo 8 caracteres",
-      );
-      expect(response.body.metadata).toBeDefined();
-    });
-
-    it("should return conflict (409) with correct message when DuplicateResourceError is thrown", async () => {
-      const { sut, userCreateService } = makeSut();
-
-      await userCreateService.create(makeValidUserData());
-
-      const request: HttpRequest<UserCreateData> = {
-        body: makeValidUserData(),
-      };
-
-      const response = await sut.handle(request);
-
-      expect(response.statusCode).toBe(409);
-      expect(response.body.success).toBe(false);
-      expect(response.body.errorMessage).toBe("Email já cadastrado no sistema");
-      expect(response.body.metadata).toBeDefined();
-    });
-
-    it("should return serverError when an unknown error is thrown", async () => {
-      const { sut, userCreateService, loggerMock } = makeSut();
-      jest
-        .spyOn(userCreateService, "create")
-        .mockRejectedValueOnce(new Error("Erro desconhecido"));
-
-      const request: HttpRequest<UserCreateData> = {
-        body: makeValidUserData(),
-      };
-
-      const response = await sut.handle(request);
-
-      expect(response.statusCode).toBe(500);
-      expect(response.body.success).toBe(false);
-      expect(response.body.errorMessage).toBe("Erro interno do servidor");
-      expect(response.body.metadata).toBeDefined();
-      expect(loggerMock.logs).toContainEqual(
-        expect.objectContaining({
-          level: "error",
-          message: "Erro no controller de criação de usuário",
-        }),
-      );
-    });
-
-    describe("Edge cases", () => {
-      it("should handle null values in request body", async () => {
-        const { sut, loggerMock } = makeSut();
-        const request: HttpRequest<UserCreateData> = {
-          body: {
-            name: null as unknown as string,
-            email: "valid@email.com",
-            phone: "(62)99999-9999",
-            birthdate: new Date(),
-            password: "valid-password",
-          },
+        const httpRequest: HttpRequest<UserCreateData> = {
+          body: invalidData,
         };
 
-        const response = await sut.handle(request);
+        const httpResponse: HttpResponse = await sut.handle(httpRequest);
 
-        expect(response.statusCode).toBe(400);
-        expect(response.body.errorMessage).toBe("Dados com formato inválido");
-        expect(loggerMock.logs).toContainEqual(
-          expect.objectContaining({
-            level: "warn",
-            message: "Dados com tipos inválidos",
-          }),
+        expect(httpResponse.body.errorMessage).toEqual(
+          new MissingParamError(label).message,
         );
-      });
-
-      it("should handle error when request body is null in error handler", async () => {
-        const { sut, userCreateService, loggerMock } = makeSut();
-        const error = new Error("Test error");
-        jest.spyOn(userCreateService, "create").mockRejectedValueOnce(error);
-
-        const request: HttpRequest<UserCreateData> = {
-          body: null as unknown as UserCreateData,
-        };
-
-        const response = await sut.handle(request);
-
-        expect(response.statusCode).toBe(500);
-        expect(loggerMock.logs).toContainEqual(
-          expect.objectContaining({
-            level: "error",
-            message: "Erro no controller de criação de usuário",
-            payload: expect.objectContaining({
-              error,
-              metadata: undefined,
-            }),
-          }),
-        );
-      });
-    });
+      },
+    );
   });
 
-  describe("Logger behavior", () => {
-    it("should log info when starting user creation", async () => {
-      const { sut, loggerMock } = makeSut();
-      const userData = makeValidUserData();
-      const request: HttpRequest<UserCreateData> = { body: userData };
+  describe("Validate email format", () => {
+    // Casos de teste para validação de email
+    const emailTestCases = [
+      {
+        scenario: "invalid email",
+        email: "invalid-email",
+        shouldThrow: true,
+        errorMessage: "Parâmetro inválido: email",
+      },
+      {
+        scenario: "valid email",
+        email: "email@example.com",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
 
-      await sut.handle(request);
+    test.each(emailTestCases)(
+      "should handle email with $scenario",
+      async ({ email, shouldThrow, errorMessage }) => {
+        const { userEmailValidator, sut } = makeSut();
+        const validData = makeValidUserData();
+        validData.email = email;
 
-      expect(loggerMock.logs).toContainEqual(
-        expect.objectContaining({
-          level: "info",
-          message: "Iniciando criação de usuário via controller",
-          payload: expect.objectContaining({
-            action: "user_create_controller_start",
-            metadata: { email: userData.email },
-          }),
-        }),
-      );
-    });
+        if (shouldThrow) {
+          jest
+            .spyOn(userEmailValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new InvalidParamError("email");
+            });
 
-    it("should log error when an exception occurs", async () => {
-      const { sut, userCreateService, loggerMock } = makeSut();
-      const error = new Error("Test error");
-      jest.spyOn(userCreateService, "create").mockRejectedValueOnce(error);
+          const httpRequest: HttpRequest<UserCreateData> = {
+            body: validData,
+          };
 
-      const userData = makeValidUserData();
-      const request: HttpRequest<UserCreateData> = { body: userData };
+          const httpResponse: HttpResponse = await sut.handle(httpRequest);
 
-      await sut.handle(request);
+          expect(httpResponse.body.errorMessage).toEqual(errorMessage);
+        } else {
+          const httpRequest: HttpRequest<UserCreateData> = {
+            body: validData,
+          };
 
-      expect(loggerMock.logs).toContainEqual(
-        expect.objectContaining({
-          level: "error",
-          message: "Erro no controller de criação de usuário",
-          payload: expect.objectContaining({
-            action: "user_create_controller_error",
-            error,
-          }),
-        }),
-      );
-    });
+          const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+          expect(httpResponse.body.success).toBeTruthy();
+        }
+      },
+    );
+  });
+
+  describe("Validate unique email", () => {
+    // Casos de teste para validação de email duplicado
+    const emailTestCases = [
+      {
+        scenario: "duplicated email",
+        shouldThrow: true,
+        errorMessage: "Email já cadastrado no sistema",
+      },
+      {
+        scenario: "unique email",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(emailTestCases)(
+      "should handle email with $scenario",
+      async ({ shouldThrow, errorMessage }) => {
+        const { sut } = makeSut();
+        const validData = makeValidUserData();
+
+        const httpRequest: HttpRequest<UserCreateData> = {
+          body: validData,
+        };
+
+        if (shouldThrow) {
+          await sut.handle(httpRequest);
+
+          const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+          expect(httpResponse.body.errorMessage).toEqual(errorMessage);
+        } else {
+          const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+          expect(httpResponse.body.success).toBeTruthy();
+        }
+      },
+    );
+  });
+
+  describe("Validate phone format", () => {
+    // Casos de teste para validação de phone
+    const phoneTestCases = [
+      {
+        scenario: "invalid phone",
+        phone: "invalid-phone 3212211",
+        shouldThrow: true,
+        errorMessage: "Parâmetro inválido: telefone",
+      },
+      {
+        scenario: "valid mobile phone",
+        phone: "(62) 99999-9999",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+      {
+        scenario: "valid phone",
+        phone: "(62) 9999-9999",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(phoneTestCases)(
+      "should handle phone with $scenario",
+      async ({ phone, shouldThrow, errorMessage }) => {
+        const { userPhoneValidator, sut } = makeSut();
+        const validData = makeValidUserData();
+        validData.phone = phone;
+
+        const httpRequest: HttpRequest<UserCreateData> = {
+          body: validData,
+        };
+
+        if (shouldThrow) {
+          jest
+            .spyOn(userPhoneValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new InvalidParamError("telefone");
+            });
+
+          const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+          expect(httpResponse.body.errorMessage).toEqual(errorMessage);
+        } else {
+          const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+          expect(httpResponse.body.success).toBeTruthy();
+        }
+      },
+    );
+  });
+
+  describe("Validate birthdate format", () => {
+    // Casos de teste para validação de data de nascimento
+    const birthdateTestCases = [
+      {
+        scenario: "invalid date",
+        birthdate: "invalid-date" as unknown as Date,
+        shouldThrow: true,
+        errorMessage: "Parâmetro inválido: data de nascimento",
+      },
+      {
+        scenario: "birthdate less then 18 years old",
+        birthdate: new Date(),
+        shouldThrow: true,
+        errorMessage: "Parâmetro inválido: data de nascimento",
+      },
+      {
+        scenario: "valid birthdate",
+        birthdate: new Date("2000-01-01"),
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(birthdateTestCases)(
+      "should handle birthdate with $scenario",
+      async ({ birthdate, shouldThrow, errorMessage }) => {
+        const { userBirthdateValidator, sut } = makeSut();
+        const validData = makeValidUserData();
+        validData.birthdate = birthdate;
+
+        const httpRequest: HttpRequest<UserCreateData> = {
+          body: validData,
+        };
+
+        if (shouldThrow) {
+          jest
+            .spyOn(userBirthdateValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new InvalidParamError("data de nascimento");
+            });
+
+          const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+          expect(httpResponse.body.errorMessage).toEqual(errorMessage);
+        } else {
+          const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+          expect(httpResponse.body.success).toBeTruthy();
+        }
+      },
+    );
+  });
+
+  describe("Validate password format", () => {
+    // Casos de teste para validação de senha
+    const passwordTestCases = [
+      {
+        scenario: "less than 8 characters",
+        password: "1234567",
+        shouldThrow: true,
+        errorMessage:
+          "Parâmetro inválido: senha deve ter no mínimo 8 caracteres",
+      },
+      {
+        scenario: "exactly 8 characters",
+        password: "12345678",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+      {
+        scenario: "more than 8 characters",
+        password: "123456789",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(passwordTestCases)(
+      "should handle password with $scenario",
+      async ({ password, shouldThrow, errorMessage }) => {
+        const { sut } = makeSut();
+        const validData = makeValidUserData();
+        validData.password = password;
+
+        const httpRequest: HttpRequest<UserCreateData> = {
+          body: validData,
+        };
+
+        if (shouldThrow) {
+          const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+          expect(httpResponse.body.errorMessage).toEqual(errorMessage);
+        } else {
+          const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+          expect(httpResponse.body.success).toBeTruthy();
+        }
+      },
+    );
   });
 });

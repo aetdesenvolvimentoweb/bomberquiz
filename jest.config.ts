@@ -21,7 +21,6 @@ const config: Config = {
   passWithNoTests: true,
   noStackTrace: true,
   maxWorkers: 1,
-  verbose: true,
 };
 
 export default config;

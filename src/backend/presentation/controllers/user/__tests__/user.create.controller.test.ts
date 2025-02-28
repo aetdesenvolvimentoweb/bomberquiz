@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import {
   UserBirthdateValidatorMock,
   UserEmailValidatorMock,
@@ -7,13 +6,14 @@ import {
 } from "@/backend/__mocks__/user";
 import { ConsoleLoggerProvider } from "@/backend/infra/providers/console.logger.provider";
 import { HashProviderMock } from "@/backend/__mocks__/hash.provider.mock";
+import { HttpRequest } from "@/backend/presentation/protocols";
 import { InMemoryUserRepository } from "@/backend/infra/repositories/inmemory.user.repository";
-import { LoggerProvider } from "@/backend/domain/providers";
+import { InvalidParamError } from "@/backend/domain/errors";
 import { UserCreateController } from "../user.create.controller";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizer } from "@/backend/data/sanitizers/user/user.create.data.sanitizer";
+import { UserCreateRequestValidator } from "@/backend/presentation/validators";
 import { UserCreateService } from "@/backend/data/services/user/user.create.service";
-import { UserCreateUseCase } from "@/backend/domain/usecases";
 import { UserCreateValidator } from "@/backend/data/validators/user/user.create.validator";
 import { UserPasswordValidator } from "@/backend/data/validators/user/user.password.validator";
 import { UserUniqueEmailValidator } from "@/backend/data/validators/user/user.unique.email.validator";
@@ -21,24 +21,9 @@ import { UserUniqueEmailValidator } from "@/backend/data/validators/user/user.un
 interface SutResponses {
   controller: UserCreateController;
   repository: InMemoryUserRepository;
-  logger: LoggerProvider;
-  validator: UserCreateValidator;
-  sanitizer: UserCreateDataSanitizer;
-  hashProvider: HashProviderMock;
   userCreateService: UserCreateService;
 }
 
-/**
- * Teste de integração para o controller de criação de usuário
- *
- * Este teste verifica a integração entre:
- * - UserCreateController (controller)
- * - UserCreateService (serviço)
- * - UserCreateValidator (validador)
- * - UserCreateDataSanitizer (sanitizador)
- * - InMemoryUserRepository (repositório)
- * - ConsoleLoggerProvider (logger)
- */
 describe("UserCreateController Integration", () => {
   const makeSut = (): SutResponses => {
     // Repositório em memória
@@ -61,7 +46,7 @@ describe("UserCreateController Integration", () => {
     const userUniqueEmailValidator = new UserUniqueEmailValidator(repository);
 
     // Validador composto
-    const validator = new UserCreateValidator({
+    const userCreateServiceValidator = new UserCreateValidator({
       userBirthdateValidator,
       userEmailValidator,
       userPasswordValidator,
@@ -75,22 +60,22 @@ describe("UserCreateController Integration", () => {
       hashProvider,
       logger,
       sanitizer,
-      validator,
+      validator: userCreateServiceValidator,
     });
 
+    const userCreateControllerValidator = new UserCreateRequestValidator(
+      logger,
+    );
     // Controller
     const controller = new UserCreateController({
       userCreateService,
       logger,
+      userCreateRequestValidator: userCreateControllerValidator,
     });
 
     return {
       controller,
       repository,
-      logger,
-      validator,
-      sanitizer,
-      hashProvider,
       userCreateService,
     };
   };
@@ -164,13 +149,15 @@ describe("UserCreateController Integration", () => {
         scenario: "no body provided",
         request: {},
         expectedStatus: 400,
-        expectedMessage: "Dados não fornecidos",
+        expectedMessage:
+          "Parâmetro obrigatório não informado: Dados não fornecidos",
       },
       {
         scenario: "empty body object",
         request: { body: {} as UserCreateData },
         expectedStatus: 400,
-        expectedMessage: "Dados não fornecidos",
+        expectedMessage:
+          "Parâmetro obrigatório não informado: Dados não fornecidos",
       },
       {
         scenario: "invalid data types",
@@ -184,7 +171,7 @@ describe("UserCreateController Integration", () => {
           } as unknown as UserCreateData,
         },
         expectedStatus: 400,
-        expectedMessage: "Dados com formato inválido",
+        expectedMessage: new InvalidParamError("nome").message,
       },
     ];
 
@@ -278,59 +265,6 @@ describe("UserCreateController Integration", () => {
       expect(response.statusCode).toBe(500);
       expect(response.body.success).toBe(false);
       expect(response.body.errorMessage).toBe("Erro interno do servidor");
-    });
-  });
-
-  describe("Complete flow", () => {
-    it("should process the complete user creation flow", async () => {
-      const { controller, repository, userCreateService } = makeSut();
-
-      // Espionar os métodos para verificar se são chamados
-      // Definimos um tipo para acessar os métodos privados do controller
-      type PrivateController = UserCreateController & {
-        validateRequest: (
-          request: HttpRequest<UserCreateData>,
-          logger: LoggerProvider,
-        ) => HttpResponse | null;
-        processValidRequest: (
-          request: HttpRequest<UserCreateData>,
-          service: UserCreateUseCase,
-          logger: LoggerProvider,
-        ) => Promise<HttpResponse>;
-      };
-
-      const validateSpy = jest.spyOn(
-        controller as PrivateController,
-        "validateRequest",
-      );
-      const processValidRequestSpy = jest.spyOn(
-        controller as PrivateController,
-        "processValidRequest",
-      );
-      const createServiceSpy = jest.spyOn(userCreateService, "create");
-
-      const userData = makeValidUserData();
-      const request: HttpRequest<UserCreateData> = {
-        body: userData,
-      };
-
-      const response = await controller.handle(request);
-
-      // Verifica se os métodos foram chamados na ordem correta
-      expect(validateSpy).toHaveBeenCalledWith(request, expect.anything());
-      expect(processValidRequestSpy).toHaveBeenCalledWith(
-        request,
-        userCreateService,
-        expect.anything(),
-      );
-      expect(createServiceSpy).toHaveBeenCalledWith(userData);
-
-      // Verifica a resposta
-      expect(response.statusCode).toBe(201);
-
-      // Verifica se o usuário foi persistido
-      const createdUser = await repository.findByEmail(userData.email);
-      expect(createdUser).not.toBeNull();
     });
   });
 });
