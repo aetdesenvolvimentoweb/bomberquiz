@@ -282,7 +282,7 @@ describe("UserCreateValidator", () => {
         scenario: "less than 8 characters",
         password: "1234567",
         shouldThrow: true,
-        errorMessage: "senha deve ter no mínimo 8 caracteres.",
+        errorMessage: "senha deve ter no mínimo 8 caracteres",
       },
       {
         scenario: "exactly 8 characters",

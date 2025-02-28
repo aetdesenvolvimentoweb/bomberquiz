@@ -7,18 +7,14 @@ export interface HttpRequest<T = any> {
 }
 
 export interface HttpResponse<T = any> {
-  statusCode: number;
   body: {
     success: boolean;
     data?: T;
-    error?: {
-      code: string;
-      message: string;
-      details?: unknown;
-    };
+    errorMessage?: string;
     metadata: {
       timestamp: string;
       requestId?: string;
     };
   };
+  statusCode: number;
 }
