@@ -29,7 +29,8 @@ export class UserUniqueEmailValidator
     id?: string;
     email: string;
   }): Promise<void> => {
-    const user = await this.repository.findByEmail(data.email);
+    const email = data.email.trim().toLowerCase();
+    const user = await this.repository.findByEmail(email);
 
     if (user) {
       throw new DuplicateResourceError("Email");
