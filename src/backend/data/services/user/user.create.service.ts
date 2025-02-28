@@ -1,3 +1,4 @@
+import { HashUseCase } from "@/backend/domain/usecases/hash";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import { UserCreateUseCase } from "@/backend/domain/usecases";
@@ -14,6 +15,8 @@ interface UserCreateServiceProps {
   sanitizer: UserCreateDataSanitizerUseCase;
   /** Validador para garantir que os dados atendem aos requisitos */
   validator: UserCreateValidatorUseCase;
+  /** Hash para criptografar a senha do usuário */
+  hashProvider: HashUseCase;
 }
 
 /**
@@ -33,7 +36,8 @@ export class UserCreateService implements UserCreateUseCase {
    * O processo segue a ordem:
    * 1. Sanitização dos dados de entrada
    * 2. Validação dos dados sanitizados
-   * 3. Persistência dos dados no repositório
+   * 3. Criptografia da senha
+   * 4. Persistência dos dados no repositório
    *
    * @param data Dados do usuário a ser criado
    * @throws {MissingParamError} Se algum campo obrigatório estiver faltando
@@ -41,10 +45,14 @@ export class UserCreateService implements UserCreateUseCase {
    * @throws {DuplicateResourceError} Se o email já estiver cadastrado
    */
   public readonly create = async (data: UserCreateData): Promise<void> => {
-    const { repository, sanitizer, validator } = this.props;
+    const { hashProvider, repository, sanitizer, validator } = this.props;
 
     sanitizer.sanitize(data);
     await validator.validate(data);
-    await repository.create(data);
+    const hashPassword = await hashProvider.hash(data.password);
+    await repository.create({
+      ...data,
+      password: hashPassword,
+    });
   };
 }

@@ -18,6 +18,7 @@ import {
   UserCreateValidator,
   UserPasswordValidator,
 } from "@/backend/data/validators";
+import { HashProviderMock } from "@/backend/__mocks__/hash.provider.mock";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
@@ -50,10 +51,12 @@ const makeSut = (): SutResponses => {
     userPhoneValidator,
     userUniqueEmailValidator,
   });
+  const hashProvider = new HashProviderMock();
   const sut = new UserCreateService({
     repository,
     sanitizer,
     validator,
+    hashProvider,
   });
 
   return {
