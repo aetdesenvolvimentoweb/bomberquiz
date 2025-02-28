@@ -4,6 +4,14 @@ const config: Config = {
   collectCoverage: false,
   roots: ["<rootDir>/src"],
   collectCoverageFrom: ["<rootDir>/src/backend/**/*.ts"],
+  coveragePathIgnorePatterns: [
+    "/node_modules/",
+    "/domain/repositories/",
+    "/domain/usecases/",
+    "/domain/validators/",
+    "/domain/sanitizers/",
+    "/presentation/protocols/",
+  ],
   coverageDirectory: "coverage",
   coverageProvider: "v8",
   preset: "ts-jest",
@@ -13,6 +21,7 @@ const config: Config = {
   passWithNoTests: true,
   noStackTrace: true,
   maxWorkers: 1,
+  verbose: true,
 };
 
 export default config;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   LogLevel,
   LogPayload,
@@ -10,28 +11,41 @@ export class ConsoleLoggerProvider implements LoggerProvider {
     message: string,
     payload?: LogPayload,
   ): string {
-    const timestamp = new Date().toISOString();
-    let logObject: Record<string, unknown> = {
-      timestamp,
+    const logObject = {
       level,
       message,
-      ...payload,
+      timestamp: new Date().toISOString(),
+      payload: payload || {},
     };
 
-    // Para error, incluímos o stack trace se disponível
-    if (level === LogLevel.ERROR && payload?.error instanceof Error) {
-      logObject = {
-        ...logObject,
-        stack: payload.error.stack,
+    // Handle circular references
+    const getCircularReplacer = () => {
+      const seen = new WeakSet();
+      return (key: string, value: any) => {
+        if (typeof value === "object" && value !== null) {
+          if (seen.has(value)) {
+            return "[Circular Reference]";
+          }
+          seen.add(value);
+        }
+        // Include error stack for Error objects
+        if (value instanceof Error) {
+          return {
+            ...value,
+            stack: value.stack, // Only add the stack, no need to repeat message
+          };
+        }
+        return value;
       };
-    }
+    };
 
-    return JSON.stringify(logObject, null, 2);
+    return JSON.stringify(logObject, getCircularReplacer(), 2);
   }
 
   log(level: LogLevel, message: string, payload?: LogPayload): void {
     const formattedLog = this.formatLog(level, message, payload);
 
+    // Use appropriate console method based on log level
     switch (level) {
       case LogLevel.ERROR:
         console.error(formattedLog);
@@ -50,16 +64,16 @@ export class ConsoleLoggerProvider implements LoggerProvider {
     }
   }
 
+  info(message: string, payload?: LogPayload): void {
+    this.log(LogLevel.INFO, message, payload);
+  }
+
   error(message: string, payload?: LogPayload): void {
     this.log(LogLevel.ERROR, message, payload);
   }
 
   warn(message: string, payload?: LogPayload): void {
     this.log(LogLevel.WARN, message, payload);
-  }
-
-  info(message: string, payload?: LogPayload): void {
-    this.log(LogLevel.INFO, message, payload);
   }
 
   debug(message: string, payload?: LogPayload): void {

@@ -272,6 +272,56 @@ describe("UserCreateController", () => {
         }),
       );
     });
+
+    describe("Edge cases", () => {
+      it("should handle null values in request body", async () => {
+        const { sut, loggerMock } = makeSut();
+        const request: HttpRequest<UserCreateData> = {
+          body: {
+            name: null as unknown as string,
+            email: "valid@email.com",
+            phone: "(62)99999-9999",
+            birthdate: new Date(),
+            password: "valid-password",
+          },
+        };
+
+        const response = await sut.handle(request);
+
+        expect(response.statusCode).toBe(400);
+        expect(response.body.errorMessage).toBe("Dados com formato inválido");
+        expect(loggerMock.logs).toContainEqual(
+          expect.objectContaining({
+            level: "warn",
+            message: "Dados com tipos inválidos",
+          }),
+        );
+      });
+
+      it("should handle error when request body is null in error handler", async () => {
+        const { sut, userCreateService, loggerMock } = makeSut();
+        const error = new Error("Test error");
+        jest.spyOn(userCreateService, "create").mockRejectedValueOnce(error);
+
+        const request: HttpRequest<UserCreateData> = {
+          body: null as unknown as UserCreateData,
+        };
+
+        const response = await sut.handle(request);
+
+        expect(response.statusCode).toBe(500);
+        expect(loggerMock.logs).toContainEqual(
+          expect.objectContaining({
+            level: "error",
+            message: "Erro no controller de criação de usuário",
+            payload: expect.objectContaining({
+              error,
+              metadata: undefined,
+            }),
+          }),
+        );
+      });
+    });
   });
 
   describe("Logger behavior", () => {

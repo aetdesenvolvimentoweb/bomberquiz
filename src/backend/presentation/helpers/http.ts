@@ -29,11 +29,24 @@ export const badRequest = (
   };
 };
 
-export const serverError = (): HttpResponse => {
+export const conflict = (errorMessage: string): HttpResponse => {
   return {
     body: {
       success: false,
-      errorMessage: "Erro interno do servidor",
+      errorMessage,
+      metadata: {
+        timestamp: new Date().toISOString(),
+      },
+    },
+    statusCode: 409,
+  };
+};
+
+export const serverError = (errorMessage?: string): HttpResponse => {
+  return {
+    body: {
+      success: false,
+      errorMessage: errorMessage || "Erro interno do servidor",
       metadata: {
         timestamp: new Date().toISOString(),
       },
