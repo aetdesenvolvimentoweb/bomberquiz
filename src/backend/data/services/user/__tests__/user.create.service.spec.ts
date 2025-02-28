@@ -18,7 +18,7 @@ import {
   UserCreateValidator,
   UserPasswordValidator,
 } from "@/backend/data/validators";
-import { ConsoleLoggerProvider } from "@/backend/infra/providers/console.logger.provider";
+import { ConsoleLoggerProvider } from "@/backend/infra/providers";
 import { HashProviderMock } from "@/backend/__mocks__/hash.provider.mock";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { UserCreateData } from "@/backend/domain/entities";
@@ -27,7 +27,7 @@ import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import { UserCreateService } from "../user.create.service";
 import { UserCreateUseCase } from "@/backend/domain/usecases";
 import { UserRepository } from "@/backend/domain/repositories";
-import { UserUniqueEmailValidator } from "@/backend/data/validators/user/user.unique.email.validator";
+import { UserUniqueEmailValidator } from "@/backend/data/validators";
 
 interface SutResponses {
   sut: UserCreateUseCase;
