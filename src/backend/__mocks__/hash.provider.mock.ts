@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { HashUseCase } from "../domain/usecases/hash";
+import { HashProvider } from "../domain/providers/hash.provider";
 
-export class HashProviderMock implements HashUseCase {
+export class HashProviderMock implements HashProvider {
   public readonly hash = async (value: string): Promise<string> => {
     return "value_hash";
   };

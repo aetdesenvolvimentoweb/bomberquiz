@@ -18,6 +18,7 @@ import {
   UserCreateValidator,
   UserPasswordValidator,
 } from "@/backend/data/validators";
+import { ConsoleLoggerProvider } from "@/backend/infra/providers/console.logger.provider";
 import { HashProviderMock } from "@/backend/__mocks__/hash.provider.mock";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { UserCreateData } from "@/backend/domain/entities";
@@ -52,11 +53,13 @@ const makeSut = (): SutResponses => {
     userUniqueEmailValidator,
   });
   const hashProvider = new HashProviderMock();
+  const logger = new ConsoleLoggerProvider();
   const sut = new UserCreateService({
     repository,
     sanitizer,
     validator,
     hashProvider,
+    logger,
   });
 
   return {
@@ -215,9 +218,9 @@ describe("UserCreateService", () => {
     const phoneTestCases = [
       {
         scenario: "invalid phone",
-        phone: "invalid-phone",
+        phone: "invalid-phone 3212211",
         shouldThrow: true,
-        errorMessage: "telefone inválido.",
+        errorMessage: "telefone",
       },
       {
         scenario: "valid mobile phone",

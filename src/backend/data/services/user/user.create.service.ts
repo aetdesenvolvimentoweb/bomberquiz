@@ -1,4 +1,4 @@
-import { HashUseCase } from "@/backend/domain/usecases/hash";
+import { HashProvider, LoggerProvider } from "@/backend/domain/providers";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import { UserCreateUseCase } from "@/backend/domain/usecases";
@@ -16,7 +16,9 @@ interface UserCreateServiceProps {
   /** Validador para garantir que os dados atendem aos requisitos */
   validator: UserCreateValidatorUseCase;
   /** Hash para criptografar a senha do usuário */
-  hashProvider: HashUseCase;
+  hashProvider: HashProvider;
+  /** Logger para registrar eventos e erros */
+  logger: LoggerProvider;
 }
 
 /**
@@ -30,7 +32,6 @@ export class UserCreateService implements UserCreateUseCase {
    * @param props Dependências necessárias para o serviço
    */
   constructor(private readonly props: UserCreateServiceProps) {}
-
   /**
    * Cria um novo usuário no sistema
    * O processo segue a ordem:
@@ -38,6 +39,7 @@ export class UserCreateService implements UserCreateUseCase {
    * 2. Validação dos dados sanitizados
    * 3. Criptografia da senha
    * 4. Persistência dos dados no repositório
+   * 5. Registro de eventos e erros
    *
    * @param data Dados do usuário a ser criado
    * @throws {MissingParamError} Se algum campo obrigatório estiver faltando
@@ -45,14 +47,48 @@ export class UserCreateService implements UserCreateUseCase {
    * @throws {DuplicateResourceError} Se o email já estiver cadastrado
    */
   public readonly create = async (data: UserCreateData): Promise<void> => {
-    const { hashProvider, repository, sanitizer, validator } = this.props;
+    const { hashProvider, logger, repository, sanitizer, validator } =
+      this.props;
 
-    sanitizer.sanitize(data);
-    await validator.validate(data);
-    const hashPassword = await hashProvider.hash(data.password);
-    await repository.create({
-      ...data,
-      password: hashPassword,
-    });
+    try {
+      logger.info("Iniciando criação de usuário", {
+        action: "user_create_started",
+        metadata: { email: data.email },
+      });
+
+      const sanitizedData = sanitizer.sanitize(data);
+      logger.debug("Dados de usuário sanitizados", {
+        action: "user_data_sanitized",
+      });
+
+      await validator.validate(sanitizedData);
+      logger.debug("Dados de usuário validados com sucesso", {
+        action: "user_data_validated",
+      });
+
+      const hashedPassword = await hashProvider.hash(sanitizedData.password);
+      logger.debug("Senha do usuário criptografada", {
+        action: "user_password_hashed",
+      });
+
+      // Preparar dados para persistência
+      const userCreateData: UserCreateData = {
+        ...sanitizedData,
+        password: hashedPassword,
+      };
+
+      await repository.create(userCreateData);
+      logger.info("Usuário criado com sucesso", {
+        action: "user_created",
+      });
+    } catch (error) {
+      logger.error("Erro ao criar usuário", {
+        action: "user_creation_failed",
+        metadata: { email: data.email },
+        error,
+      });
+
+      throw error;
+    }
   };
 }
