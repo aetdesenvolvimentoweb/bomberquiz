@@ -1,4 +1,8 @@
-import { InvalidParamError, MissingParamError } from "@/backend/domain/errors";
+import {
+  DuplicateResourceError,
+  InvalidParamError,
+  MissingParamError,
+} from "@/backend/domain/errors";
 import {
   UserBirthdateValidatorMock,
   UserEmailValidatorMock,
@@ -21,6 +25,7 @@ import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import { UserCreateService } from "../user.create.service";
 import { UserCreateUseCase } from "@/backend/domain/usecases";
 import { UserRepository } from "@/backend/domain/repositories";
+import { UserUniqueEmailValidator } from "@/backend/data/validators/user/user.unique.email.validator";
 
 interface SutResponses {
   sut: UserCreateUseCase;
@@ -37,11 +42,13 @@ const makeSut = (): SutResponses => {
   const userEmailValidator = new UserEmailValidatorMock();
   const userPasswordValidator = new UserPasswordValidator();
   const userPhoneValidator = new UserPhoneValidatorMock();
+  const userUniqueEmailValidator = new UserUniqueEmailValidator(repository);
   const validator: UserCreateValidatorUseCase = new UserCreateValidator({
     userBirthdateValidator,
     userEmailValidator,
     userPasswordValidator,
     userPhoneValidator,
+    userUniqueEmailValidator,
   });
   const sut = new UserCreateService({
     repository,
@@ -158,6 +165,40 @@ describe("UserCreateService", () => {
 
           await expect(sut.create(validData)).rejects.toThrow(
             new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.create(validData)).resolves.not.toThrow();
+        }
+      },
+    );
+  });
+
+  describe("Validate unique email", () => {
+    // Casos de teste para validação de email duplicado
+    const emailTestCases = [
+      {
+        scenario: "duplicated email",
+        shouldThrow: true,
+        errorMessage: "Email",
+      },
+      {
+        scenario: "unique email",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(emailTestCases)(
+      "should handle email with $scenario",
+      async ({ shouldThrow, errorMessage }) => {
+        const { sut } = makeSut();
+        const validData = makeValidUserData();
+
+        if (shouldThrow) {
+          await sut.create(validData);
+
+          await expect(sut.create(validData)).rejects.toThrow(
+            new DuplicateResourceError(errorMessage),
           );
         } else {
           await expect(sut.create(validData)).resolves.not.toThrow();
