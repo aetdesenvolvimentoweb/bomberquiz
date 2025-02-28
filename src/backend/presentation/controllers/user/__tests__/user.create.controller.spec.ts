@@ -1,8 +1,5 @@
-import {
-  Controller,
-  HttpRequest,
-  HttpResponse,
-} from "@/backend/presentation/protocols";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { InvalidParamError, MissingParamError } from "@/backend/domain/errors";
 import {
   UserBirthdateValidatorMock,
@@ -29,7 +26,7 @@ import { UserCreateRequestValidator } from "@/backend/presentation/validators";
 import { UserCreateService } from "@/backend/data/services";
 
 interface SutResponses {
-  sut: Controller;
+  sut: UserCreateController;
   userEmailValidator: UserEmailValidatorUseCase;
   userPhoneValidator: UserPhoneValidatorUseCase;
   userBirthdateValidator: UserBirthdateValidatorUseCase;
@@ -374,5 +371,136 @@ describe("UserCreateController", () => {
         }
       },
     );
+  });
+
+  describe("Handle server errors", () => {
+    test("should return 500 if an unexpected error occurs", async () => {
+      const { sut, userEmailValidator } = makeSut();
+      const validData = makeValidUserData();
+
+      // Simulate an unexpected error (not an ApplicationError)
+      jest.spyOn(userEmailValidator, "validate").mockImplementationOnce(() => {
+        throw new Error("Unexpected error");
+      });
+
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: validData,
+      };
+
+      const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+      expect(httpResponse.statusCode).toBe(500);
+      expect(httpResponse.body.success).toBe(false);
+      expect(httpResponse.body.errorMessage).toBe("Erro interno do servidor");
+    });
+  });
+
+  describe("Handle null or undefined request body", () => {
+    test("should throw a MissingParamError if request body is null", async () => {
+      const { sut } = makeSut();
+
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: {} as UserCreateData,
+      };
+
+      const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+      expect(httpResponse.body.errorMessage).toEqual(
+        "Parâmetro obrigatório não informado: Dados não fornecidos",
+      );
+    });
+
+    test("should throw a MissingParamError if request body is undefined", async () => {
+      const { sut } = makeSut();
+
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: undefined,
+      };
+
+      const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+      expect(httpResponse.body.errorMessage).toEqual(
+        "Parâmetro obrigatório não informado: Dados não fornecidos",
+      );
+    });
+  });
+
+  describe("Successful user creation", () => {
+    test("should return 201 on successful user creation", async () => {
+      const { sut } = makeSut();
+      const validData = makeValidUserData();
+
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: validData,
+      };
+
+      const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+      expect(httpResponse.statusCode).toBe(201);
+      expect(httpResponse.body.success).toBe(true);
+    });
+
+    test("should call userCreateService.create with correct values", async () => {
+      const { sut } = makeSut();
+      const validData = makeValidUserData();
+
+      // Get access to the userCreateService
+      const userCreateService = (sut as any).props.userCreateService;
+
+      // Spy on the create method
+      const createSpy = jest.spyOn(userCreateService, "create");
+
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: validData,
+      };
+
+      await sut.handle(httpRequest);
+
+      expect(createSpy).toHaveBeenCalledWith(validData);
+    });
+  });
+
+  describe("Logging behavior", () => {
+    test("should log start, success, and error events", async () => {
+      const { sut } = makeSut();
+      const validData = makeValidUserData();
+
+      // Get access to the logger
+      const logger = (sut as any).props.logger;
+
+      // Spy on the logger methods
+      const infoSpy = jest.spyOn(logger, "info");
+      const errorSpy = jest.spyOn(logger, "error");
+
+      // Test successful case
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: validData,
+      };
+
+      await sut.handle(httpRequest);
+
+      expect(infoSpy).toHaveBeenCalledWith(
+        "Iniciando criação de usuário via controller",
+        expect.any(Object),
+      );
+
+      expect(infoSpy).toHaveBeenCalledWith(
+        "Usuário criado com sucesso via controller",
+        expect.any(Object),
+      );
+
+      // Test error case
+      const userCreateService = (sut as any).props.userCreateService;
+      jest.spyOn(userCreateService, "create").mockImplementationOnce(() => {
+        throw new Error("Service error");
+      });
+
+      await sut.handle(httpRequest);
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        "Erro no controller de criação de usuário",
+        expect.any(Object),
+      );
+    });
   });
 });
