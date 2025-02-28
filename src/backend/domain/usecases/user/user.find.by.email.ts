@@ -1,14 +1,14 @@
 import { User } from "../../entities";
 
 /**
- * Interface que define o caso de uso para criação de usuário
+ * Interface que define o caso de uso para busca de usuário por email
  * @interface
  */
 export interface UserFindByEmailUseCase {
   /**
-   * Cria um novo usuário no sistema
-   * @param id Id do usuário a ser consultado
-   * @returns Promise que resolve quando o usuário é encontrado ou null
+   * Busca um usuário pelo email
+   * @param email Email do usuário a ser consultado
+   * @returns Promise que resolve com o usuário encontrado ou null se não existir
    */
-  findByEmail: (id: string) => Promise<User | null>;
+  findByEmail: (email: string) => Promise<User | null>;
 }

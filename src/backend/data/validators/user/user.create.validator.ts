@@ -29,6 +29,11 @@ export class UserCreateValidator implements UserCreateValidatorUseCase {
    * @throws {MissingParamError} Se algum campo obrigatório estiver faltando
    */
 
+  /**
+   * Verifica se todos os campos obrigatórios estão presentes
+   * @param data Dados do usuário a serem validados
+   * @throws {MissingParamError} Se algum campo obrigatório estiver faltando
+   */
   private checkMissingParams(data: UserCreateData): void {
     // Mapa de campos para labels
     const fieldToLabelMap: Record<keyof UserCreateData, string> = {
@@ -47,6 +52,12 @@ export class UserCreateValidator implements UserCreateValidatorUseCase {
     }
   }
 
+  /**
+   * Verifica se os campos têm formatos válidos
+   * Delega a validação para validadores específicos de cada tipo de dado
+   * @param data Dados do usuário a serem validados
+   * @throws {InvalidParamError} Se algum campo tiver formato inválido
+   */
   private checkInvalidParams(data: UserCreateData): void {
     const {
       userBirthdateValidator,
@@ -61,10 +72,27 @@ export class UserCreateValidator implements UserCreateValidatorUseCase {
     userPhoneValidator.validate(data.phone);
   }
 
+  /**
+   * Verifica se o email já está cadastrado no sistema
+   * @param email Email a ser verificado
+   * @throws {DuplicateResourceError} Se o email já estiver cadastrado
+   */
   private checkDuplicatedResource = async (email: string): Promise<void> => {
     await this.props.userUniqueEmailValidator.validate({ email });
   };
 
+  /**
+   * Valida os dados para criação de usuário
+   * Executa todas as validações na seguinte ordem:
+   * 1. Verifica campos obrigatórios
+   * 2. Valida o formato dos campos
+   * 3. Verifica se o email é único
+   *
+   * @param data Dados do usuário a serem validados
+   * @throws {MissingParamError} Se algum campo obrigatório estiver faltando
+   * @throws {InvalidParamError} Se algum campo for inválido
+   * @throws {DuplicateResourceError} Se o email já estiver cadastrado
+   */
   public readonly validate = async (data: UserCreateData): Promise<void> => {
     this.checkMissingParams(data);
     this.checkInvalidParams(data);

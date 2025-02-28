@@ -182,7 +182,7 @@ describe("UserCreateValidator", () => {
   });
 
   describe("Validate phone format", () => {
-    // Casos de teste para validação de phone
+    // Casos de teste para validação de telefone
     const phoneTestCases = [
       {
         scenario: "invalid phone",
