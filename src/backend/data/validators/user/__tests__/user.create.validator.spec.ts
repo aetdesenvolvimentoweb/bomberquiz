@@ -1,4 +1,8 @@
-import { InvalidParamError, MissingParamError } from "@/backend/domain/errors";
+import {
+  DuplicateResourceError,
+  InvalidParamError,
+  MissingParamError,
+} from "@/backend/domain/errors";
 import {
   UserBirthdateValidatorMock,
   UserEmailValidatorMock,
@@ -10,26 +14,34 @@ import {
   UserEmailValidatorUseCase,
   UserPhoneValidatorUseCase,
 } from "@/backend/domain/validators";
+import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateValidator } from "@/backend/data/validators/user";
 import { UserPasswordValidator } from "../user.password.validator";
+import { UserRepository } from "@/backend/domain/repositories";
+import { UserUniqueEmailValidator } from "../user.unique.email.validator";
 
 interface SutResponses {
   sut: UserCreateValidatorUseCase;
   userBirthdateValidator: UserBirthdateValidatorUseCase;
   userEmailValidator: UserEmailValidatorUseCase;
   userPhoneValidator: UserPhoneValidatorUseCase;
+  repository: UserRepository;
 }
 
 const makeSut = (): SutResponses => {
+  const repository = new InMemoryUserRepository();
   const userBirthdateValidator = new UserBirthdateValidatorMock();
   const userEmailValidator = new UserEmailValidatorMock();
+  const userPasswordValidator = new UserPasswordValidator();
   const userPhoneValidator = new UserPhoneValidatorMock();
+  const userUniqueEmailValidator = new UserUniqueEmailValidator(repository);
   const sut = new UserCreateValidator({
     userBirthdateValidator,
     userEmailValidator,
-    userPasswordValidator: new UserPasswordValidator(),
+    userPasswordValidator,
     userPhoneValidator,
+    userUniqueEmailValidator,
   });
 
   return {
@@ -37,6 +49,7 @@ const makeSut = (): SutResponses => {
     userBirthdateValidator,
     userEmailValidator,
     userPhoneValidator,
+    repository,
   };
 };
 
@@ -126,6 +139,40 @@ describe("UserCreateValidator", () => {
 
           await expect(sut.validate(validData)).rejects.toThrow(
             new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.validate(validData)).resolves.not.toThrow();
+        }
+      },
+    );
+  });
+
+  describe("Validate unique email", () => {
+    // Casos de teste para validação de email duplicado
+    const emailTestCases = [
+      {
+        scenario: "duplicated email",
+        shouldThrow: true,
+        errorMessage: "Email",
+      },
+      {
+        scenario: "unique email",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(emailTestCases)(
+      "should handle email with $scenario",
+      async ({ shouldThrow, errorMessage }) => {
+        const { sut, repository } = makeSut();
+        const validData = makeValidUserData();
+
+        if (shouldThrow) {
+          await repository.create(validData);
+
+          await expect(sut.validate(validData)).rejects.toThrow(
+            new DuplicateResourceError(errorMessage),
           );
         } else {
           await expect(sut.validate(validData)).resolves.not.toThrow();
