@@ -7,12 +7,14 @@ import {
 } from "@/backend/domain/validators";
 import { MissingParamError } from "@/backend/domain/errors";
 import { UserCreateData } from "@/backend/domain/entities";
+import { UserUniqueEmailValidator } from "./user.unique.email.validator";
 
 interface UserCreateValidatorProps {
   userBirthdateValidator: UserBirthdateValidatorUseCase;
   userPasswordValidator: UserPasswordValidatorUseCase;
   userEmailValidator: UserEmailValidatorUseCase;
   userPhoneValidator: UserPhoneValidatorUseCase;
+  userUniqueEmailValidator: UserUniqueEmailValidator;
 }
 
 /**
@@ -59,8 +61,13 @@ export class UserCreateValidator implements UserCreateValidatorUseCase {
     userPhoneValidator.validate(data.phone);
   }
 
+  private checkDuplicatedResource = async (email: string): Promise<void> => {
+    await this.props.userUniqueEmailValidator.validate({ email });
+  };
+
   public readonly validate = async (data: UserCreateData): Promise<void> => {
     this.checkMissingParams(data);
     this.checkInvalidParams(data);
+    await this.checkDuplicatedResource(data.email);
   };
 }

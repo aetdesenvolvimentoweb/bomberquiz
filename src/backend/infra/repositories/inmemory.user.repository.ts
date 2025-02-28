@@ -23,4 +23,10 @@ export class InMemoryUserRepository implements UserRepository {
       updatedAt,
     });
   };
+
+  public readonly findByEmail = async (email: string): Promise<User | null> => {
+    const user = this.users.find((user) => user.email === email);
+
+    return user || null;
+  };
 }
