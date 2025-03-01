@@ -9,5 +9,5 @@ export interface UserBirthdateValidatorUseCase {
    * @param birthdate Data de nascimento a ser validada
    * @throws {InvalidParamError} Se a data de nascimento for inválida
    */
-  validate: (birthdate: Date) => void;
+  validate: (birthdate: Date) => Promise<void>;
 }

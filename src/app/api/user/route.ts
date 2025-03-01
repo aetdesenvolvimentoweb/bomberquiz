@@ -5,10 +5,11 @@ import {
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { NextRequest, NextResponse } from "next/server";
 import {
-  UserCreateValidator,
+  UserCreateDataValidator,
   UserPasswordValidator,
   UserUniqueEmailValidator,
 } from "@/backend/data/validators";
+import { DateFnsUserBirthdateValidatorAdapter } from "@/backend/infra/adapters";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { UserCreateController } from "@/backend/presentation/controllers";
 import { UserCreateData } from "@/backend/domain/entities";
@@ -19,8 +20,10 @@ import { UserCreateService } from "@/backend/data/services";
 const handler = async (request: NextRequest): Promise<NextResponse> => {
   switch (request.method) {
     case "POST":
-      const logger = new ConsoleLoggerProvider();
-      const userCreateRequestValidator = new UserCreateRequestValidator(logger);
+      const loggerProvider = new ConsoleLoggerProvider();
+      const userCreateRequestValidator = new UserCreateRequestValidator(
+        loggerProvider,
+      );
       const hashProvider = new BcryptHashProvider();
       const repository = new InMemoryUserRepository();
       const sanitizer = new UserCreateDataSanitizer();
@@ -29,7 +32,7 @@ const handler = async (request: NextRequest): Promise<NextResponse> => {
       const userPasswordValidator = new UserPasswordValidator();
       const userPhoneValidator = new LibPhoneNumberUserPhoneValidatorAdapter();
       const userUniqueEmailValidator = new UserUniqueEmailValidator(repository);
-      const validator = new UserCreateValidator({
+      const validator = new UserCreateDataValidator({
         userBirthdateValidator,
         userEmailValidator,
         userPasswordValidator,
@@ -37,14 +40,14 @@ const handler = async (request: NextRequest): Promise<NextResponse> => {
         userUniqueEmailValidator,
       });
       const userCreateService = new UserCreateService({
-        logger,
+        loggerProvider,
         hashProvider,
         repository,
         sanitizer,
         validator,
       });
       const controller = new UserCreateController({
-        logger,
+        loggerProvider,
         userCreateRequestValidator,
         userCreateService,
       });
