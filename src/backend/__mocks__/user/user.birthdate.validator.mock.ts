@@ -4,7 +4,7 @@ import { UserBirthdateValidatorUseCase } from "../../domain/validators";
 export class UserBirthdateValidatorMock
   implements UserBirthdateValidatorUseCase
 {
-  public readonly validate = (birthdate: Date): void => {
-    return undefined;
+  public readonly validate = (birthdate: Date): Promise<void> => {
+    return new Promise((resolve) => undefined);
   };
 }
