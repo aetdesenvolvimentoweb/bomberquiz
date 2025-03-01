@@ -12,12 +12,14 @@ import { UserUniqueEmailValidator } from "../user.unique.email.validator";
  */
 describe("UserUniqueEmailValidator Integration", () => {
   const makeSut = () => {
-    const repository = new InMemoryUserRepository();
-    const validator = new UserUniqueEmailValidator(repository);
+    const userRepository = new InMemoryUserRepository();
+    const userUniqueEmailValidator = new UserUniqueEmailValidator(
+      userRepository,
+    );
 
     return {
-      validator,
-      repository,
+      userUniqueEmailValidator,
+      userRepository,
     };
   };
 
@@ -30,51 +32,53 @@ describe("UserUniqueEmailValidator Integration", () => {
   });
 
   it("deve validar um email que não existe no repositório", async () => {
-    const { validator } = makeSut();
+    const { userUniqueEmailValidator } = makeSut();
 
     await expect(
-      validator.validate({ email: "new.user@example.com" }),
+      userUniqueEmailValidator.validate({ email: "new.user@example.com" }),
     ).resolves.not.toThrow();
   });
 
   it("deve lançar DuplicateResourceError quando o email já existe no repositório", async () => {
-    const { validator, repository } = makeSut();
+    const { userUniqueEmailValidator, userRepository } = makeSut();
     const userData = makeValidUserData();
 
     // Criar um usuário com o email
-    await repository.create(userData);
+    await userRepository.create(userData);
 
-    await expect(validator.validate({ email: userData.email })).rejects.toThrow(
-      DuplicateResourceError,
-    );
-    await expect(validator.validate({ email: userData.email })).rejects.toThrow(
-      "Email já cadastrado no sistema",
-    );
+    await expect(
+      userUniqueEmailValidator.validate({ email: userData.email }),
+    ).rejects.toThrow(DuplicateResourceError);
+    await expect(
+      userUniqueEmailValidator.validate({ email: userData.email }),
+    ).rejects.toThrow("Email já cadastrado no sistema");
   });
 
   it("deve ser case-insensitive na verificação de email", async () => {
-    const { validator, repository } = makeSut();
+    const { userUniqueEmailValidator, userRepository } = makeSut();
     const userData = makeValidUserData();
 
     // Criar um usuário com o email em minúsculas
-    await repository.create(userData);
+    await userRepository.create(userData);
 
     // Verificar com o mesmo email em maiúsculas
     await expect(
-      validator.validate({ email: userData.email.toUpperCase() }),
+      userUniqueEmailValidator.validate({
+        email: userData.email.toUpperCase(),
+      }),
     ).rejects.toThrow(DuplicateResourceError);
   });
 
   it("deve ignorar espaços extras na verificação de email", async () => {
-    const { validator, repository } = makeSut();
+    const { userUniqueEmailValidator, userRepository } = makeSut();
     const userData = makeValidUserData();
 
     // Criar um usuário com o email
-    await repository.create(userData);
+    await userRepository.create(userData);
 
     // Verificar com o mesmo email com espaços extras
     await expect(
-      validator.validate({ email: ` ${userData.email} ` }),
+      userUniqueEmailValidator.validate({ email: ` ${userData.email} ` }),
     ).rejects.toThrow(DuplicateResourceError);
   });
 });

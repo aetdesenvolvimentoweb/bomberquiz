@@ -1,6 +1,6 @@
 import {
   UserBirthdateValidatorUseCase,
-  UserCreateValidatorUseCase,
+  UserCreateDataValidatorUseCase,
   UserEmailValidatorUseCase,
   UserPasswordValidatorUseCase,
   UserPhoneValidatorUseCase,
@@ -21,7 +21,7 @@ interface UserCreateValidatorProps {
  * Implementação do validador para criação de usuário
  * @implements {UserCreateValidatorUseCase}
  */
-export class UserCreateValidator implements UserCreateValidatorUseCase {
+export class UserCreateDataValidator implements UserCreateDataValidatorUseCase {
   constructor(private readonly props: UserCreateValidatorProps) {}
   /**
    * Valida os dados para criação de usuário

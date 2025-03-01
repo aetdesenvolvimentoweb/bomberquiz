@@ -7,13 +7,13 @@ import { UserUniqueEmailValidatorUseCase } from "@/backend/domain/validators";
 
 interface SutResponses {
   sut: UserUniqueEmailValidatorUseCase;
-  repository: UserRepository;
+  userRepository: UserRepository;
 }
 
 const makeSut = (): SutResponses => {
-  const repository = new InMemoryUserRepository();
-  const sut = new UserUniqueEmailValidator(repository);
-  return { sut, repository };
+  const userRepository = new InMemoryUserRepository();
+  const sut = new UserUniqueEmailValidator(userRepository);
+  return { sut, userRepository };
 };
 
 describe("UserUniqueEmailValidator", () => {
@@ -43,11 +43,11 @@ describe("UserUniqueEmailValidator", () => {
     test.each(emailTestCases)(
       "should handle email with $scenario",
       async ({ shouldThrow, errorMessage }) => {
-        const { sut, repository } = makeSut();
+        const { sut, userRepository } = makeSut();
         const validData = makeValidUserData();
 
         if (shouldThrow) {
-          await repository.create(validData);
+          await userRepository.create(validData);
 
           await expect(sut.validate(validData)).rejects.toThrow(
             new DuplicateResourceError(errorMessage),

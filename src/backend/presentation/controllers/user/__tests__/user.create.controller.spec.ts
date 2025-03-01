@@ -55,27 +55,27 @@ interface SutResponses {
   sut: UserCreateController;
   userCreateService: UserCreateServiceMock;
   userCreateRequestValidator: RequestValidatorMock<UserCreateData>;
-  logger: LoggerProviderMock;
+  loggerProvider: LoggerProviderMock;
 }
 
 const makeSut = (): SutResponses => {
   // Cria mocks para todas as dependências
   const userCreateService = new UserCreateServiceMock();
   const userCreateRequestValidator = new RequestValidatorMock<UserCreateData>();
-  const logger = new LoggerProviderMock();
+  const loggerProvider = new LoggerProviderMock();
 
   // Inicializa o controller com os mocks
   const sut = new UserCreateController({
     userCreateService,
     userCreateRequestValidator,
-    logger,
+    loggerProvider,
   });
 
   return {
     sut,
     userCreateService,
     userCreateRequestValidator,
-    logger,
+    loggerProvider,
   };
 };
 

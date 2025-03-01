@@ -16,9 +16,9 @@ import { errorHandler } from "../http";
  * Controller de teste que usa o errorHandler para tratar diferentes tipos de erros
  */
 class TestController implements Controller {
-  async handle(request: HttpRequest): Promise<HttpResponse> {
+  async handle(httpRequest: HttpRequest): Promise<HttpResponse> {
     try {
-      const { errorType } = request.body || {};
+      const { errorType } = httpRequest.body || {};
 
       switch (errorType) {
         case "missing":
@@ -115,17 +115,17 @@ describe("HTTP Helpers Integration", () => {
       async ({ errorType, expectedStatus, expectedMessage }) => {
         const { controller } = makeSut();
 
-        const request: HttpRequest = {
+        const httpRequest: HttpRequest = {
           body: { errorType },
         };
 
-        const response = await controller.handle(request);
+        const httpResponse = await controller.handle(httpRequest);
 
-        expect(response.statusCode).toBe(expectedStatus);
-        expect(response.body.success).toBe(false);
-        expect(response.body.errorMessage).toBe(expectedMessage);
-        expect(response.body.metadata).toBeDefined();
-        expect(response.body.metadata.timestamp).toBeDefined();
+        expect(httpResponse.statusCode).toBe(expectedStatus);
+        expect(httpResponse.body.success).toBe(false);
+        expect(httpResponse.body.errorMessage).toBe(expectedMessage);
+        expect(httpResponse.body.metadata).toBeDefined();
+        expect(httpResponse.body.metadata.timestamp).toBeDefined();
       },
     );
   });
@@ -134,14 +134,14 @@ describe("HTTP Helpers Integration", () => {
     it("should allow controller to return a success response", async () => {
       const { controller } = makeSut();
 
-      const request: HttpRequest = {
+      const httpRequest: HttpRequest = {
         body: { errorType: "none" },
       };
 
-      const response = await controller.handle(request);
+      const httpResponse = await controller.handle(httpRequest);
 
-      expect(response.statusCode).toBe(200);
-      expect(response.body.success).toBe(true);
+      expect(httpResponse.statusCode).toBe(200);
+      expect(httpResponse.body.success).toBe(true);
     });
   });
 });

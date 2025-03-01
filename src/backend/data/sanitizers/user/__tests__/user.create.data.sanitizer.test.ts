@@ -9,17 +9,17 @@ import { LoggerProviderMock } from "@/backend/__mocks__/logger.provider.mock";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizer } from "../user.create.data.sanitizer";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
+import { UserCreateDataValidator } from "@/backend/data/validators/user/user.create.data.validator";
 import { UserCreateService } from "@/backend/data/services/user/user.create.service";
-import { UserCreateValidator } from "@/backend/data/validators/user/user.create.validator";
 import { UserPasswordValidator } from "@/backend/data/validators/user/user.password.validator";
 import { UserRepository } from "@/backend/domain/repositories";
 import { UserUniqueEmailValidator } from "@/backend/data/validators/user/user.unique.email.validator";
 
 interface SutResponses {
-  sanitizer: UserCreateDataSanitizerUseCase;
+  userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
   userCreateService: UserCreateService;
-  repository: UserRepository;
-  logger: LoggerProviderMock;
+  userRepository: UserRepository;
+  loggerProvider: LoggerProviderMock;
 }
 
 /**
@@ -32,20 +32,22 @@ interface SutResponses {
  */
 describe("UserCreateDataSanitizer Integration", () => {
   const makeSut = (): SutResponses => {
-    const repository = new InMemoryUserRepository();
-    const sanitizer = new UserCreateDataSanitizer();
+    const userRepository = new InMemoryUserRepository();
+    const userCreateDataSanitizer = new UserCreateDataSanitizer();
     const hashProvider = new HashProviderMock();
-    const logger = new LoggerProviderMock();
+    const loggerProvider = new LoggerProviderMock();
 
     // Validadores
     const userBirthdateValidator = new UserBirthdateValidatorMock();
     const userEmailValidator = new UserEmailValidatorMock();
     const userPasswordValidator = new UserPasswordValidator();
     const userPhoneValidator = new UserPhoneValidatorMock();
-    const userUniqueEmailValidator = new UserUniqueEmailValidator(repository);
+    const userUniqueEmailValidator = new UserUniqueEmailValidator(
+      userRepository,
+    );
 
     // Validador composto
-    const validator = new UserCreateValidator({
+    const userCreateDataValidator = new UserCreateDataValidator({
       userBirthdateValidator,
       userEmailValidator,
       userPasswordValidator,
@@ -55,25 +57,26 @@ describe("UserCreateDataSanitizer Integration", () => {
 
     // Serviço que usa o sanitizador
     const userCreateService = new UserCreateService({
-      repository,
+      userRepository,
       hashProvider,
-      logger,
-      sanitizer,
-      validator,
+      loggerProvider,
+      userCreateDataSanitizer,
+      userCreateDataValidator,
     });
 
     return {
-      sanitizer,
+      userCreateDataSanitizer,
       userCreateService,
-      repository,
-      logger,
+      userRepository,
+      loggerProvider,
     };
   };
 
   describe("Integration with UserCreateService", () => {
     it("should sanitize data before saving to repository", async () => {
-      const { sanitizer, userCreateService, repository } = makeSut();
-      const sanitizeSpy = jest.spyOn(sanitizer, "sanitize");
+      const { userCreateDataSanitizer, userCreateService, userRepository } =
+        makeSut();
+      const sanitizeSpy = jest.spyOn(userCreateDataSanitizer, "sanitize");
 
       const userData: UserCreateData = {
         name: "  John Doe  ", // Com espaços extras
@@ -89,14 +92,16 @@ describe("UserCreateDataSanitizer Integration", () => {
       expect(sanitizeSpy).toHaveBeenCalledWith(userData);
 
       // Verifica se os dados sanitizados foram salvos no repositório
-      const createdUser = await repository.findByEmail("john.doe@example.com");
+      const createdUser = await userRepository.findByEmail(
+        "john.doe@example.com",
+      );
       expect(createdUser).not.toBeNull();
       expect(createdUser?.name).toBe("John Doe"); // Sem espaços extras
       expect(createdUser?.email).toBe("john.doe@example.com"); // Em minúsculas
     });
 
     it("should sanitize data with extreme values", async () => {
-      const { userCreateService, repository } = makeSut();
+      const { userCreateService, userRepository } = makeSut();
 
       const userData: UserCreateData = {
         name: "   JOHN   DOE   ", // Múltiplos espaços
@@ -109,7 +114,9 @@ describe("UserCreateDataSanitizer Integration", () => {
       await userCreateService.create(userData);
 
       // Verifica se os dados sanitizados foram salvos no repositório
-      const createdUser = await repository.findByEmail("john.doe@example.com");
+      const createdUser = await userRepository.findByEmail(
+        "john.doe@example.com",
+      );
       expect(createdUser).not.toBeNull();
       expect(createdUser?.name).toBe("JOHN   DOE"); // Mantém maiúsculas e espaços internos
       expect(createdUser?.email).toBe("john.doe@example.com"); // Em minúsculas, sem espaços
@@ -119,7 +126,7 @@ describe("UserCreateDataSanitizer Integration", () => {
 
   describe("Sanitizer behavior", () => {
     it("should sanitize data with special characters", async () => {
-      const { sanitizer } = makeSut();
+      const { userCreateDataSanitizer } = makeSut();
 
       const userData: UserCreateData = {
         name: "<script>alert('XSS')</script> John Doe", // Tentativa de XSS
@@ -129,7 +136,7 @@ describe("UserCreateDataSanitizer Integration", () => {
         password: "Password123!",
       };
 
-      const sanitizedData = sanitizer.sanitize(userData);
+      const sanitizedData = userCreateDataSanitizer.sanitize(userData);
 
       // Verifica se os dados foram sanitizados corretamente
       expect(sanitizedData.name).toBe("<script>alert('XSS')</script> John Doe"); // O sanitizador atual não remove scripts
@@ -137,7 +144,7 @@ describe("UserCreateDataSanitizer Integration", () => {
     });
 
     it("should keep birthdate unchanged", async () => {
-      const { sanitizer } = makeSut();
+      const { userCreateDataSanitizer } = makeSut();
       const birthdate = new Date("1990-01-01");
 
       const userData: UserCreateData = {
@@ -148,14 +155,14 @@ describe("UserCreateDataSanitizer Integration", () => {
         password: "Password123!",
       };
 
-      const sanitizedData = sanitizer.sanitize(userData);
+      const sanitizedData = userCreateDataSanitizer.sanitize(userData);
 
       // Verifica se a data de nascimento não foi alterada
       expect(sanitizedData.birthdate).toBe(birthdate);
     });
 
     it("should keep password unchanged", async () => {
-      const { sanitizer } = makeSut();
+      const { userCreateDataSanitizer } = makeSut();
       const password = "Password123!";
 
       const userData: UserCreateData = {
@@ -166,7 +173,7 @@ describe("UserCreateDataSanitizer Integration", () => {
         password,
       };
 
-      const sanitizedData = sanitizer.sanitize(userData);
+      const sanitizedData = userCreateDataSanitizer.sanitize(userData);
 
       // Verifica se a senha não foi alterada
       expect(sanitizedData.password).toBe(password);

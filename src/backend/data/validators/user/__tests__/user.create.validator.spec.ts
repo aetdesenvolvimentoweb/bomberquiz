@@ -10,33 +10,33 @@ import {
 } from "@/backend/__mocks__/user";
 import {
   UserBirthdateValidatorUseCase,
-  UserCreateValidatorUseCase,
+  UserCreateDataValidatorUseCase,
   UserEmailValidatorUseCase,
   UserPhoneValidatorUseCase,
 } from "@/backend/domain/validators";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { UserCreateData } from "@/backend/domain/entities";
-import { UserCreateValidator } from "@/backend/data/validators";
+import { UserCreateDataValidator } from "@/backend/data/validators";
 import { UserPasswordValidator } from "../user.password.validator";
 import { UserRepository } from "@/backend/domain/repositories";
 import { UserUniqueEmailValidator } from "../user.unique.email.validator";
 
 interface SutResponses {
-  sut: UserCreateValidatorUseCase;
+  sut: UserCreateDataValidatorUseCase;
   userBirthdateValidator: UserBirthdateValidatorUseCase;
   userEmailValidator: UserEmailValidatorUseCase;
   userPhoneValidator: UserPhoneValidatorUseCase;
-  repository: UserRepository;
+  userRepository: UserRepository;
 }
 
 const makeSut = (): SutResponses => {
-  const repository = new InMemoryUserRepository();
+  const userRepository = new InMemoryUserRepository();
   const userBirthdateValidator = new UserBirthdateValidatorMock();
   const userEmailValidator = new UserEmailValidatorMock();
   const userPasswordValidator = new UserPasswordValidator();
   const userPhoneValidator = new UserPhoneValidatorMock();
-  const userUniqueEmailValidator = new UserUniqueEmailValidator(repository);
-  const sut = new UserCreateValidator({
+  const userUniqueEmailValidator = new UserUniqueEmailValidator(userRepository);
+  const sut = new UserCreateDataValidator({
     userBirthdateValidator,
     userEmailValidator,
     userPasswordValidator,
@@ -49,11 +49,11 @@ const makeSut = (): SutResponses => {
     userBirthdateValidator,
     userEmailValidator,
     userPhoneValidator,
-    repository,
+    userRepository,
   };
 };
 
-describe("UserCreateValidator", () => {
+describe("UserCreateDataValidator", () => {
   const makeValidUserData = (): UserCreateData => ({
     name: "any_name",
     email: "any_email",
@@ -165,11 +165,11 @@ describe("UserCreateValidator", () => {
     test.each(emailTestCases)(
       "should handle email with $scenario",
       async ({ shouldThrow, errorMessage }) => {
-        const { sut, repository } = makeSut();
+        const { sut, userRepository } = makeSut();
         const validData = makeValidUserData();
 
         if (shouldThrow) {
-          await repository.create(validData);
+          await userRepository.create(validData);
 
           await expect(sut.validate(validData)).rejects.toThrow(
             new DuplicateResourceError(errorMessage),

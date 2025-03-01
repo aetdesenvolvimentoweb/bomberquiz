@@ -5,7 +5,7 @@ import {
   UserPhoneValidatorMock,
 } from "@/backend/__mocks__/user";
 import {
-  UserCreateValidator,
+  UserCreateDataValidator,
   UserPasswordValidator,
   UserUniqueEmailValidator,
 } from "@/backend/data/validators";
@@ -19,23 +19,24 @@ import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import { UserCreateRequestValidator } from "@/backend/presentation/validators";
 import { UserCreateService } from "@/backend/data/services";
+import { UserRepository } from "@/backend/domain/repositories";
 
 interface SutResponses {
-  controller: UserCreateController;
-  repository: InMemoryUserRepository;
+  userCreateController: UserCreateController;
+  userRepository: UserRepository;
   userCreateService: UserCreateService;
 }
 
 describe("UserCreateController Integration", () => {
   const makeSut = (): SutResponses => {
     // Repositório em memória
-    const repository = new InMemoryUserRepository();
+    const userRepository = new InMemoryUserRepository();
 
     // Logger real
-    const logger = new ConsoleLoggerProvider();
+    const loggerProvider = new ConsoleLoggerProvider();
 
     // Sanitizador real
-    const sanitizer = new UserCreateDataSanitizer();
+    const userCreateDataSanitizer = new UserCreateDataSanitizer();
 
     // Hash provider mock
     const hashProvider = new HashProviderMock();
@@ -45,10 +46,12 @@ describe("UserCreateController Integration", () => {
     const userEmailValidator = new UserEmailValidatorMock();
     const userPasswordValidator = new UserPasswordValidator();
     const userPhoneValidator = new UserPhoneValidatorMock();
-    const userUniqueEmailValidator = new UserUniqueEmailValidator(repository);
+    const userUniqueEmailValidator = new UserUniqueEmailValidator(
+      userRepository,
+    );
 
     // Validador composto
-    const userCreateServiceValidator = new UserCreateValidator({
+    const userCreateDataValidator = new UserCreateDataValidator({
       userBirthdateValidator,
       userEmailValidator,
       userPasswordValidator,
@@ -58,26 +61,26 @@ describe("UserCreateController Integration", () => {
 
     // Serviço de criação de usuário
     const userCreateService = new UserCreateService({
-      repository,
+      userRepository,
       hashProvider,
-      logger,
-      sanitizer,
-      validator: userCreateServiceValidator,
+      loggerProvider,
+      userCreateDataSanitizer,
+      userCreateDataValidator: userCreateDataValidator,
     });
 
-    const userCreateControllerValidator = new UserCreateRequestValidator(
-      logger,
+    const userCreateRequestValidator = new UserCreateRequestValidator(
+      loggerProvider,
     );
     // Controller
-    const controller = new UserCreateController({
+    const userCreateController = new UserCreateController({
       userCreateService,
-      logger,
-      userCreateRequestValidator: userCreateControllerValidator,
+      loggerProvider,
+      userCreateRequestValidator,
     });
 
     return {
-      controller,
-      repository,
+      userCreateController,
+      userRepository,
       userCreateService,
     };
   };
@@ -92,36 +95,38 @@ describe("UserCreateController Integration", () => {
 
   describe("Success flow", () => {
     it("should create a user and return 201 when request is valid", async () => {
-      const { controller, repository } = makeSut();
-      const userData = makeValidUserData();
+      const { userCreateController, userRepository } = makeSut();
+      const userCreateData = makeValidUserData();
 
-      const request: HttpRequest<UserCreateData> = {
-        body: userData,
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: userCreateData,
       };
 
-      const response = await controller.handle(request);
+      const httpResponse = await userCreateController.handle(httpRequest);
 
       // Verifica a resposta HTTP
-      expect(response.statusCode).toBe(201);
-      expect(response.body.success).toBe(true);
-      expect(response.body.metadata).toBeDefined();
-      expect(response.body.metadata.timestamp).toBeDefined();
+      expect(httpResponse.statusCode).toBe(201);
+      expect(httpResponse.body.success).toBe(true);
+      expect(httpResponse.body.metadata).toBeDefined();
+      expect(httpResponse.body.metadata.timestamp).toBeDefined();
 
       // Verifica se o usuário foi persistido no repositório
-      const createdUser = await repository.findByEmail(userData.email);
+      const createdUser = await userRepository.findByEmail(
+        userCreateData.email,
+      );
       expect(createdUser).not.toBeNull();
-      expect(createdUser?.name).toBe(userData.name);
-      expect(createdUser?.email).toBe(userData.email);
+      expect(createdUser?.name).toBe(userCreateData.name);
+      expect(createdUser?.email).toBe(userCreateData.email);
       expect(createdUser?.phone).toBe("11999999999"); // Sanitizado
-      expect(createdUser?.birthdate).toEqual(userData.birthdate);
+      expect(createdUser?.birthdate).toEqual(userCreateData.birthdate);
       // A senha deve estar hasheada
-      expect(createdUser?.password).not.toBe(userData.password);
+      expect(createdUser?.password).not.toBe(userCreateData.password);
     });
 
     it("should sanitize data before creating the user", async () => {
-      const { controller, repository } = makeSut();
+      const { userCreateController, userRepository } = makeSut();
 
-      const userData: UserCreateData = {
+      const userCreateData: UserCreateData = {
         name: "  John Doe  ", // Com espaços extras
         email: "JOHN.DOE@EXAMPLE.COM", // Em maiúsculas
         phone: "(11) 99999-9999",
@@ -129,14 +134,16 @@ describe("UserCreateController Integration", () => {
         password: "Password123!",
       };
 
-      const request: HttpRequest<UserCreateData> = {
-        body: userData,
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: userCreateData,
       };
 
-      await controller.handle(request);
+      await userCreateController.handle(httpRequest);
 
       // Verifica se os dados sanitizados foram salvos no repositório
-      const createdUser = await repository.findByEmail("john.doe@example.com");
+      const createdUser = await userRepository.findByEmail(
+        "john.doe@example.com",
+      );
       expect(createdUser).not.toBeNull();
       expect(createdUser?.name).toBe("John Doe"); // Sem espaços extras
       expect(createdUser?.email).toBe("john.doe@example.com"); // Em minúsculas
@@ -149,21 +156,21 @@ describe("UserCreateController Integration", () => {
     const inputValidationCases = [
       {
         scenario: "no body provided",
-        request: {},
+        httpRequest: {},
         expectedStatus: 400,
         expectedMessage:
           "Parâmetro obrigatório não informado: Dados não fornecidos",
       },
       {
         scenario: "empty body object",
-        request: { body: {} as UserCreateData },
+        httpRequest: { body: {} as UserCreateData },
         expectedStatus: 400,
         expectedMessage:
           "Parâmetro obrigatório não informado: Dados não fornecidos",
       },
       {
         scenario: "invalid data types",
-        request: {
+        httpRequest: {
           body: {
             name: 123 as unknown as string,
             email: "valid@email.com",
@@ -179,159 +186,163 @@ describe("UserCreateController Integration", () => {
 
     test.each(inputValidationCases)(
       "should return $expectedStatus when $scenario",
-      async ({ request, expectedStatus, expectedMessage }) => {
-        const { controller } = makeSut();
+      async ({ httpRequest, expectedStatus, expectedMessage }) => {
+        const { userCreateController } = makeSut();
 
-        const response = await controller.handle(request);
+        const httpResponse = await userCreateController.handle(httpRequest);
 
-        expect(response.statusCode).toBe(expectedStatus);
-        expect(response.body.success).toBe(false);
-        expect(response.body.errorMessage).toBe(expectedMessage);
+        expect(httpResponse.statusCode).toBe(expectedStatus);
+        expect(httpResponse.body.success).toBe(false);
+        expect(httpResponse.body.errorMessage).toBe(expectedMessage);
       },
     );
   });
 
   describe("Domain error handling", () => {
     it("should return 400 when a required field is missing", async () => {
-      const { controller } = makeSut();
+      const { userCreateController } = makeSut();
 
-      const userData = { ...makeValidUserData() };
-      delete (userData as any).name;
+      const userCreateData = { ...makeValidUserData() };
+      delete (userCreateData as any).name;
 
-      const request: HttpRequest<UserCreateData> = {
-        body: userData as UserCreateData,
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: userCreateData as UserCreateData,
       };
 
-      const response = await controller.handle(request);
+      const httpResponse = await userCreateController.handle(httpRequest);
 
-      expect(response.statusCode).toBe(400);
-      expect(response.body.success).toBe(false);
-      expect(response.body.errorMessage).toBe(
+      expect(httpResponse.statusCode).toBe(400);
+      expect(httpResponse.body.success).toBe(false);
+      expect(httpResponse.body.errorMessage).toBe(
         "Parâmetro obrigatório não informado: nome",
       );
     });
 
     it("should return 400 when password is too short", async () => {
-      const { controller } = makeSut();
+      const { userCreateController } = makeSut();
 
-      const userData = makeValidUserData();
-      userData.password = "123"; // Senha muito curta
+      const userCreateData = makeValidUserData();
+      userCreateData.password = "123"; // Senha muito curta
 
-      const request: HttpRequest<UserCreateData> = {
-        body: userData,
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: userCreateData,
       };
 
-      const response = await controller.handle(request);
+      const httpResponse = await userCreateController.handle(httpRequest);
 
-      expect(response.statusCode).toBe(400);
-      expect(response.body.success).toBe(false);
-      expect(response.body.errorMessage).toBe(
+      expect(httpResponse.statusCode).toBe(400);
+      expect(httpResponse.body.success).toBe(false);
+      expect(httpResponse.body.errorMessage).toBe(
         "Parâmetro inválido: senha deve ter no mínimo 8 caracteres",
       );
     });
 
     it("should return 400 when email format is invalid", async () => {
-      const { controller, userCreateService } = makeSut();
+      const { userCreateController, userCreateService } = makeSut();
 
       // Forçar erro de validação de email no serviço
       jest
         .spyOn(userCreateService, "create")
         .mockRejectedValueOnce(new InvalidParamError("email"));
 
-      const userData = makeValidUserData();
-      userData.email = "invalid-email"; // Email inválido
+      const userCreateData = makeValidUserData();
+      userCreateData.email = "invalid-email"; // Email inválido
 
-      const request: HttpRequest<UserCreateData> = {
-        body: userData,
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: userCreateData,
       };
 
-      const response = await controller.handle(request);
+      const httpResponse = await userCreateController.handle(httpRequest);
 
-      expect(response.statusCode).toBe(400);
-      expect(response.body.success).toBe(false);
-      expect(response.body.errorMessage).toBe("Parâmetro inválido: email");
+      expect(httpResponse.statusCode).toBe(400);
+      expect(httpResponse.body.success).toBe(false);
+      expect(httpResponse.body.errorMessage).toBe("Parâmetro inválido: email");
     });
 
     it("should return 400 when phone format is invalid", async () => {
-      const { controller, userCreateService } = makeSut();
+      const { userCreateController, userCreateService } = makeSut();
 
       // Forçar erro de validação de telefone no serviço
       jest
         .spyOn(userCreateService, "create")
         .mockRejectedValueOnce(new InvalidParamError("telefone"));
 
-      const userData = makeValidUserData();
-      userData.phone = "invalid-phone"; // Telefone inválido
+      const userCreateData = makeValidUserData();
+      userCreateData.phone = "invalid-phone"; // Telefone inválido
 
-      const request: HttpRequest<UserCreateData> = {
-        body: userData,
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: userCreateData,
       };
 
-      const response = await controller.handle(request);
+      const httpResponse = await userCreateController.handle(httpRequest);
 
-      expect(response.statusCode).toBe(400);
-      expect(response.body.success).toBe(false);
-      expect(response.body.errorMessage).toBe("Parâmetro inválido: telefone");
+      expect(httpResponse.statusCode).toBe(400);
+      expect(httpResponse.body.success).toBe(false);
+      expect(httpResponse.body.errorMessage).toBe(
+        "Parâmetro inválido: telefone",
+      );
     });
 
     it("should return 409 when email is already registered", async () => {
-      const { controller, repository } = makeSut();
-      const userData = makeValidUserData();
+      const { userCreateController, userRepository } = makeSut();
+      const userCreateData = makeValidUserData();
 
       // Criar um usuário com o mesmo email
-      await repository.create(userData);
+      await userRepository.create(userCreateData);
 
-      const request: HttpRequest<UserCreateData> = {
-        body: userData,
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: userCreateData,
       };
 
-      const response = await controller.handle(request);
+      const httpResponse = await userCreateController.handle(httpRequest);
 
-      expect(response.statusCode).toBe(409);
-      expect(response.body.success).toBe(false);
-      expect(response.body.errorMessage).toBe("Email já cadastrado no sistema");
+      expect(httpResponse.statusCode).toBe(409);
+      expect(httpResponse.body.success).toBe(false);
+      expect(httpResponse.body.errorMessage).toBe(
+        "Email já cadastrado no sistema",
+      );
     });
   });
 
   describe("Unexpected error handling", () => {
     it("should return 500 when an unexpected error occurs", async () => {
-      const { controller, userCreateService } = makeSut();
+      const { userCreateController, userCreateService } = makeSut();
 
       // Forçar um erro no serviço
       jest
         .spyOn(userCreateService, "create")
         .mockRejectedValueOnce(new Error("Erro inesperado"));
 
-      const request: HttpRequest<UserCreateData> = {
+      const httpRequest: HttpRequest<UserCreateData> = {
         body: makeValidUserData(),
       };
 
-      const response = await controller.handle(request);
+      const httpResponse = await userCreateController.handle(httpRequest);
 
-      expect(response.statusCode).toBe(500);
-      expect(response.body.success).toBe(false);
-      expect(response.body.errorMessage).toBe("Erro interno do servidor");
+      expect(httpResponse.statusCode).toBe(500);
+      expect(httpResponse.body.success).toBe(false);
+      expect(httpResponse.body.errorMessage).toBe("Erro interno do servidor");
     });
   });
 
   describe("Logging behavior", () => {
     it("should log start, success, and error events", async () => {
-      const { controller, userCreateService } = makeSut();
-      const userData = makeValidUserData();
+      const { userCreateController, userCreateService } = makeSut();
+      const userCreateData = makeValidUserData();
 
-      // Acessar o logger
-      const logger = (controller as any).props.logger;
+      // Acessar o loggerProvider
+      const loggerProvider = (userCreateController as any).props.loggerProvider;
 
-      // Espionar os métodos do logger
-      const infoSpy = jest.spyOn(logger, "info");
-      const errorSpy = jest.spyOn(logger, "error");
+      // Espionar os métodos do loggerProvider
+      const infoSpy = jest.spyOn(loggerProvider, "info");
+      const errorSpy = jest.spyOn(loggerProvider, "error");
 
       // Testar caso de sucesso
-      const request: HttpRequest<UserCreateData> = {
-        body: userData,
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: userCreateData,
       };
 
-      await controller.handle(request);
+      await userCreateController.handle(httpRequest);
 
       expect(infoSpy).toHaveBeenCalledWith(
         "Iniciando criação de usuário via controller",
@@ -348,7 +359,7 @@ describe("UserCreateController Integration", () => {
         .spyOn(userCreateService, "create")
         .mockRejectedValueOnce(new Error("Erro de serviço"));
 
-      await controller.handle(request);
+      await userCreateController.handle(httpRequest);
 
       expect(errorSpy).toHaveBeenCalledWith(
         "Erro no controller de criação de usuário",
@@ -357,27 +368,27 @@ describe("UserCreateController Integration", () => {
     });
 
     it("should include email in log metadata", async () => {
-      const { controller } = makeSut();
-      const userData = makeValidUserData();
+      const { userCreateController } = makeSut();
+      const userCreateData = makeValidUserData();
 
-      // Acessar o logger
-      const logger = (controller as any).props.logger;
+      // Acessar o loggerProvider
+      const loggerProvider = (userCreateController as any).props.loggerProvider;
 
-      // Espionar os métodos do logger
-      const infoSpy = jest.spyOn(logger, "info");
+      // Espionar os métodos do loggerProvider
+      const infoSpy = jest.spyOn(loggerProvider, "info");
 
-      const request: HttpRequest<UserCreateData> = {
-        body: userData,
+      const httpRequest: HttpRequest<UserCreateData> = {
+        body: userCreateData,
       };
 
-      await controller.handle(request);
+      await userCreateController.handle(httpRequest);
 
       // Verificar se o email está nos metadados do log
       expect(infoSpy).toHaveBeenCalledWith(
         "Iniciando criação de usuário via controller",
         expect.objectContaining({
           metadata: expect.objectContaining({
-            email: userData.email,
+            email: userCreateData.email,
           }),
         }),
       );

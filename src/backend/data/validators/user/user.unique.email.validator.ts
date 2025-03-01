@@ -12,9 +12,9 @@ export class UserUniqueEmailValidator
 {
   /**
    * Cria uma instância do validador de email único
-   * @param repository Repositório de usuários para consulta
+   * @param userRepository Repositório de usuários para consulta
    */
-  constructor(private readonly repository: UserRepository) {}
+  constructor(private readonly userRepository: UserRepository) {}
 
   /**
    * Valida se um email é único no sistema
@@ -30,7 +30,7 @@ export class UserUniqueEmailValidator
     email: string;
   }): Promise<void> => {
     const email = data.email.trim().toLowerCase();
-    const user = await this.repository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email);
 
     if (user) {
       throw new DuplicateResourceError("Email");

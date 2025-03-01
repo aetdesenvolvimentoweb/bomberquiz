@@ -4,7 +4,7 @@ import { UserCreateData } from "../../entities";
  * Interface que define o validador para criação de usuário
  * @interface
  */
-export interface UserCreateValidatorUseCase {
+export interface UserCreateDataValidatorUseCase {
   /**
    * Valida os dados para criação de usuário
    * @param data Dados do usuário a serem validados

@@ -10,7 +10,6 @@ import {
 } from "@/backend/__mocks__/user";
 import {
   UserBirthdateValidatorUseCase,
-  UserCreateValidatorUseCase,
   UserEmailValidatorUseCase,
   UserPhoneValidatorUseCase,
 } from "@/backend/domain/validators";
@@ -37,15 +36,15 @@ interface SutResponses {
 }
 
 const makeSut = (): SutResponses => {
-  const repository: UserRepository = new InMemoryUserRepository();
-  const sanitizer: UserCreateDataSanitizerUseCase =
+  const userRepository: UserRepository = new InMemoryUserRepository();
+  const userCreateDataSanitizer: UserCreateDataSanitizerUseCase =
     new UserCreateDataSanitizer();
   const userBirthdateValidator = new UserBirthdateValidatorMock();
   const userEmailValidator = new UserEmailValidatorMock();
   const userPasswordValidator = new UserPasswordValidator();
   const userPhoneValidator = new UserPhoneValidatorMock();
-  const userUniqueEmailValidator = new UserUniqueEmailValidator(repository);
-  const validator: UserCreateValidatorUseCase = new UserCreateValidator({
+  const userUniqueEmailValidator = new UserUniqueEmailValidator(userRepository);
+  const userCreateDataValidator = new UserCreateValidator({
     userBirthdateValidator,
     userEmailValidator,
     userPasswordValidator,
@@ -53,13 +52,13 @@ const makeSut = (): SutResponses => {
     userUniqueEmailValidator,
   });
   const hashProvider = new HashProviderMock();
-  const logger = new ConsoleLoggerProvider();
+  const loggerProvider = new ConsoleLoggerProvider();
   const sut = new UserCreateService({
-    repository,
-    sanitizer,
-    validator,
+    userRepository,
+    userCreateDataSanitizer,
+    userCreateDataValidator,
     hashProvider,
-    logger,
+    loggerProvider,
   });
 
   return {

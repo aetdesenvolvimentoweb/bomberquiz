@@ -1,8 +1,8 @@
 import { HashProvider, LoggerProvider } from "@/backend/domain/providers";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
+import { UserCreateDataValidatorUseCase } from "@/backend/domain/validators";
 import { UserCreateUseCase } from "@/backend/domain/usecases";
-import { UserCreateValidatorUseCase } from "@/backend/domain/validators";
 import { UserRepository } from "@/backend/domain/repositories";
 
 /**
@@ -10,15 +10,15 @@ import { UserRepository } from "@/backend/domain/repositories";
  */
 interface UserCreateServiceProps {
   /** Repositório para persistência de dados do usuário */
-  repository: UserRepository;
+  userRepository: UserRepository;
   /** Sanitizador para limpar e formatar os dados de entrada */
-  sanitizer: UserCreateDataSanitizerUseCase;
+  userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
   /** Validador para garantir que os dados atendem aos requisitos */
-  validator: UserCreateValidatorUseCase;
+  userCreateDataValidator: UserCreateDataValidatorUseCase;
   /** Hash para criptografar a senha do usuário */
   hashProvider: HashProvider;
   /** Logger para registrar eventos e erros */
-  logger: LoggerProvider;
+  loggerProvider: LoggerProvider;
 }
 
 /**
@@ -47,27 +47,32 @@ export class UserCreateService implements UserCreateUseCase {
    * @throws {DuplicateResourceError} Se o email já estiver cadastrado
    */
   public readonly create = async (data: UserCreateData): Promise<void> => {
-    const { hashProvider, logger, repository, sanitizer, validator } =
-      this.props;
+    const {
+      hashProvider,
+      loggerProvider,
+      userRepository,
+      userCreateDataSanitizer,
+      userCreateDataValidator,
+    } = this.props;
 
     try {
-      logger.info("Iniciando criação de usuário", {
+      loggerProvider.info("Iniciando criação de usuário", {
         action: "user_create_started",
         metadata: { email: data.email },
       });
 
-      const sanitizedData = sanitizer.sanitize(data);
-      logger.debug("Dados de usuário sanitizados", {
+      const sanitizedData = userCreateDataSanitizer.sanitize(data);
+      loggerProvider.debug("Dados de usuário sanitizados", {
         action: "user_data_sanitized",
       });
 
-      await validator.validate(sanitizedData);
-      logger.debug("Dados de usuário validados com sucesso", {
+      await userCreateDataValidator.validate(sanitizedData);
+      loggerProvider.debug("Dados de usuário validados com sucesso", {
         action: "user_data_validated",
       });
 
       const hashedPassword = await hashProvider.hash(sanitizedData.password);
-      logger.debug("Senha do usuário criptografada", {
+      loggerProvider.debug("Senha do usuário criptografada", {
         action: "user_password_hashed",
       });
 
@@ -77,12 +82,12 @@ export class UserCreateService implements UserCreateUseCase {
         password: hashedPassword,
       };
 
-      await repository.create(userCreateData);
-      logger.info("Usuário criado com sucesso", {
+      await userRepository.create(userCreateData);
+      loggerProvider.info("Usuário criado com sucesso", {
         action: "user_created",
       });
     } catch (error) {
-      logger.error("Erro ao criar usuário", {
+      loggerProvider.error("Erro ao criar usuário", {
         action: "user_creation_failed",
         metadata: { email: data.email },
         error,

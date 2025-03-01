@@ -2,10 +2,10 @@ import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizer } from "../user.create.data.sanitizer";
 
 describe("UserCreateDataSanitizer", () => {
-  let sanitizer: UserCreateDataSanitizer;
+  let userCreateDataSanitizer: UserCreateDataSanitizer;
 
   beforeEach(() => {
-    sanitizer = new UserCreateDataSanitizer();
+    userCreateDataSanitizer = new UserCreateDataSanitizer();
   });
 
   it("should sanitize all user data correctly", () => {
@@ -17,7 +17,7 @@ describe("UserCreateDataSanitizer", () => {
       password: "  password123  ",
     } as UserCreateData;
 
-    const sanitized = sanitizer.sanitize(userData);
+    const sanitized = userCreateDataSanitizer.sanitize(userData);
 
     expect(sanitized.name).toBe("John Doe");
     expect(sanitized.email).toBe("email@example.com");
@@ -62,7 +62,7 @@ describe("UserCreateDataSanitizer", () => {
         birthdate: new Date(), // Sempre incluímos birthdate para ter um objeto válido
       } as unknown as UserCreateData;
 
-      const sanitized = sanitizer.sanitize(data);
+      const sanitized = userCreateDataSanitizer.sanitize(data);
       expect(sanitized[field as keyof UserCreateData]).toBe(expected);
     });
   });
@@ -83,7 +83,9 @@ describe("UserCreateDataSanitizer", () => {
       if (field !== "phone") testData.phone = "123456789";
       if (field !== "password") testData.password = "pass123";
 
-      const sanitized = sanitizer.sanitize(testData as UserCreateData);
+      const sanitized = userCreateDataSanitizer.sanitize(
+        testData as UserCreateData,
+      );
       expect(sanitized[field as keyof UserCreateData]).toBeUndefined();
     });
   });
@@ -95,7 +97,7 @@ describe("UserCreateDataSanitizer", () => {
       birthdate: new Date(),
     } as UserCreateData;
 
-    const sanitized = sanitizer.sanitize(incompleteData);
+    const sanitized = userCreateDataSanitizer.sanitize(incompleteData);
 
     // Verificando que não ocorrem erros e que os valores undefined permanecem undefined
     expect(sanitized.name).toBe("John Doe");

@@ -12,7 +12,7 @@ import { UserCreateUseCase } from "@/backend/domain/usecases";
 interface UserCreateControllerProps {
   userCreateService: UserCreateUseCase;
   userCreateRequestValidator: RequestValidator<UserCreateData>;
-  logger: LoggerProvider;
+  loggerProvider: LoggerProvider;
 }
 
 /**
@@ -28,13 +28,13 @@ export class UserCreateController implements Controller<UserCreateData> {
    * @returns Resposta HTTP
    */
   async handle(request: HttpRequest<UserCreateData>): Promise<HttpResponse> {
-    const { userCreateService, userCreateRequestValidator, logger } =
+    const { userCreateService, userCreateRequestValidator, loggerProvider } =
       this.props;
 
     try {
       // Log com informações seguras (sem dados sensíveis)
       userCreateRequestValidator.validate(request.body!);
-      logger.info("Iniciando criação de usuário via controller", {
+      loggerProvider.info("Iniciando criação de usuário via controller", {
         action: "user_create_controller_start",
         metadata: {
           email: request.body?.email,
@@ -44,7 +44,7 @@ export class UserCreateController implements Controller<UserCreateData> {
       // Processamento da requisição
       await userCreateService.create(request.body!);
 
-      logger.info("Usuário criado com sucesso via controller", {
+      loggerProvider.info("Usuário criado com sucesso via controller", {
         action: "user_create_controller_success",
         metadata: { email: request.body?.email },
       });
@@ -52,7 +52,7 @@ export class UserCreateController implements Controller<UserCreateData> {
       return created();
     } catch (error) {
       // Log de erro com informações seguras
-      logger.error("Erro no controller de criação de usuário", {
+      loggerProvider.error("Erro no controller de criação de usuário", {
         error,
         action: "user_create_controller_error",
         metadata: request.body ? { email: request.body.email } : undefined,

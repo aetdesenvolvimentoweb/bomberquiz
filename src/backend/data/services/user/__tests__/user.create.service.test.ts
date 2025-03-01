@@ -9,7 +9,7 @@ import {
   UserPhoneValidatorMock,
 } from "@/backend/__mocks__/user";
 import {
-  UserCreateValidator,
+  UserCreateDataValidator,
   UserPasswordValidator,
   UserUniqueEmailValidator,
 } from "@/backend/data/validators";
@@ -19,17 +19,17 @@ import { LoggerProviderMock } from "@/backend/__mocks__/logger.provider.mock";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
+import { UserCreateDataValidatorUseCase } from "@/backend/domain/validators";
 import { UserCreateService } from "../user.create.service";
-import { UserCreateValidatorUseCase } from "@/backend/domain/validators";
 import { UserRepository } from "@/backend/domain/repositories";
 
 interface SutResponses {
   sut: UserCreateService;
-  repository: UserRepository;
-  validator: UserCreateValidatorUseCase;
-  sanitizer: UserCreateDataSanitizerUseCase;
+  userRepository: UserRepository;
+  userCreateDataValidator: UserCreateDataValidatorUseCase;
+  userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
   hashProvider: HashProviderMock;
-  logger: LoggerProviderMock;
+  loggerProvider: LoggerProviderMock;
   userBirthdateValidator: UserBirthdateValidatorMock;
   userEmailValidator: UserEmailValidatorMock;
   userPasswordValidator: UserPasswordValidator;
@@ -50,19 +50,21 @@ describe("UserCreateService Integration", () => {
   const makeSut = (): SutResponses => {
     // Mocks e dependências
     const hashProvider = new HashProviderMock();
-    const logger = new LoggerProviderMock();
-    const repository = new InMemoryUserRepository();
-    const sanitizer = new UserCreateDataSanitizer();
+    const loggerProvider = new LoggerProviderMock();
+    const userRepository = new InMemoryUserRepository();
+    const userCreateDataSanitizer = new UserCreateDataSanitizer();
 
     // Validadores
     const userBirthdateValidator = new UserBirthdateValidatorMock();
     const userEmailValidator = new UserEmailValidatorMock();
     const userPasswordValidator = new UserPasswordValidator();
     const userPhoneValidator = new UserPhoneValidatorMock();
-    const userUniqueEmailValidator = new UserUniqueEmailValidator(repository);
+    const userUniqueEmailValidator = new UserUniqueEmailValidator(
+      userRepository,
+    );
 
     // Validador composto
-    const validator = new UserCreateValidator({
+    const userCreateDataValidator = new UserCreateDataValidator({
       userBirthdateValidator,
       userEmailValidator,
       userPasswordValidator,
@@ -72,20 +74,20 @@ describe("UserCreateService Integration", () => {
 
     // Serviço (implementação do caso de uso)
     const sut = new UserCreateService({
-      repository,
+      userRepository,
       hashProvider,
-      logger,
-      sanitizer,
-      validator,
+      loggerProvider,
+      userCreateDataSanitizer,
+      userCreateDataValidator,
     });
 
     return {
       sut,
-      repository,
-      validator,
-      sanitizer,
+      userRepository,
+      userCreateDataValidator,
+      userCreateDataSanitizer,
       hashProvider,
-      logger,
+      loggerProvider,
       userBirthdateValidator,
       userEmailValidator,
       userPasswordValidator,
@@ -103,13 +105,13 @@ describe("UserCreateService Integration", () => {
 
   describe("Success flow", () => {
     it("should create a user with valid data", async () => {
-      const { sut, repository, sanitizer } = makeSut();
+      const { sut, userRepository, userCreateDataSanitizer } = makeSut();
       const userData = makeValidUserData();
-      const sanitedData = sanitizer.sanitize(userData);
+      const sanitedData = userCreateDataSanitizer.sanitize(userData);
 
       await expect(sut.create(userData)).resolves.not.toThrow();
 
-      const createdUser = await repository.findByEmail(userData.email);
+      const createdUser = await userRepository.findByEmail(userData.email);
       expect(createdUser).not.toBeNull();
       expect(createdUser?.name).toBe(sanitedData.name);
       expect(createdUser?.email).toBe(sanitedData.email);
@@ -120,8 +122,8 @@ describe("UserCreateService Integration", () => {
     });
 
     it("should sanitize data before creating the user", async () => {
-      const { sut, repository, sanitizer } = makeSut();
-      const sanitizeSpy = jest.spyOn(sanitizer, "sanitize");
+      const { sut, userRepository, userCreateDataSanitizer } = makeSut();
+      const sanitizeSpy = jest.spyOn(userCreateDataSanitizer, "sanitize");
 
       const userData: UserCreateData = {
         name: "  John Doe  ", // Com espaços extras
@@ -135,18 +137,21 @@ describe("UserCreateService Integration", () => {
 
       expect(sanitizeSpy).toHaveBeenCalledWith(userData);
 
-      const createdUser = await repository.findByEmail("john.doe@example.com");
+      const createdUser = await userRepository.findByEmail(
+        "john.doe@example.com",
+      );
       expect(createdUser).not.toBeNull();
       expect(createdUser?.name).toBe("John Doe"); // Sem espaços extras
       expect(createdUser?.email).toBe("john.doe@example.com"); // Em minúsculas
     });
 
     it("should validate data before creating the user", async () => {
-      const { sut, validator, sanitizer } = makeSut();
-      const validateSpy = jest.spyOn(validator, "validate");
+      const { sut, userCreateDataValidator, userCreateDataSanitizer } =
+        makeSut();
+      const validateSpy = jest.spyOn(userCreateDataValidator, "validate");
 
       const userData = makeValidUserData();
-      const sanitedData = sanitizer.sanitize(userData);
+      const sanitedData = userCreateDataSanitizer.sanitize(userData);
 
       await expect(sut.create(userData)).resolves.not.toThrow();
 
@@ -162,7 +167,7 @@ describe("UserCreateService Integration", () => {
     });
 
     it("should hash the password before saving to repository", async () => {
-      const { sut, hashProvider, repository } = makeSut();
+      const { sut, hashProvider, userRepository } = makeSut();
       const hashSpy = jest.spyOn(hashProvider, "hash");
 
       const userData = makeValidUserData();
@@ -171,14 +176,14 @@ describe("UserCreateService Integration", () => {
 
       expect(hashSpy).toHaveBeenCalledWith(userData.password);
 
-      const createdUser = await repository.findByEmail(userData.email);
+      const createdUser = await userRepository.findByEmail(userData.email);
       expect(createdUser?.password).not.toBe(userData.password);
     });
 
     it("should log during the creation process", async () => {
-      const { sut, logger } = makeSut();
-      const infoSpy = jest.spyOn(logger, "info");
-      const debugSpy = jest.spyOn(logger, "debug");
+      const { sut, loggerProvider } = makeSut();
+      const infoSpy = jest.spyOn(loggerProvider, "info");
+      const debugSpy = jest.spyOn(loggerProvider, "debug");
 
       const userData = makeValidUserData();
 
@@ -265,12 +270,12 @@ describe("UserCreateService Integration", () => {
     });
 
     it("should log errors when an exception occurs", async () => {
-      const { sut, logger, validator } = makeSut();
-      const errorSpy = jest.spyOn(logger, "error");
+      const { sut, loggerProvider, userCreateDataValidator } = makeSut();
+      const errorSpy = jest.spyOn(loggerProvider, "error");
 
       // Forçar um erro na validação
       jest
-        .spyOn(validator, "validate")
+        .spyOn(userCreateDataValidator, "validate")
         .mockRejectedValueOnce(new Error("Erro forçado"));
 
       const userData = makeValidUserData();
