@@ -8,18 +8,20 @@ import {
   UserEmailValidatorMock,
   UserPhoneValidatorMock,
 } from "@/backend/__mocks__/user";
+import {
+  UserCreateValidator,
+  UserPasswordValidator,
+  UserUniqueEmailValidator,
+} from "@/backend/data/validators";
 import { HashProviderMock } from "@/backend/__mocks__/hash.provider.mock";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { LoggerProviderMock } from "@/backend/__mocks__/logger.provider.mock";
 import { UserCreateData } from "@/backend/domain/entities";
-import { UserCreateDataSanitizer } from "@/backend/data/sanitizers/user/user.create.data.sanitizer";
+import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import { UserCreateService } from "../user.create.service";
-import { UserCreateValidator } from "@/backend/data/validators/user/user.create.validator";
 import { UserCreateValidatorUseCase } from "@/backend/domain/validators";
-import { UserPasswordValidator } from "@/backend/data/validators/user/user.password.validator";
 import { UserRepository } from "@/backend/domain/repositories";
-import { UserUniqueEmailValidator } from "@/backend/data/validators/user/user.unique.email.validator";
 
 interface SutResponses {
   sut: UserCreateService;

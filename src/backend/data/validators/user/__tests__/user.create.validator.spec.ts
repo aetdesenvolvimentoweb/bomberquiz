@@ -16,7 +16,7 @@ import {
 } from "@/backend/domain/validators";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { UserCreateData } from "@/backend/domain/entities";
-import { UserCreateValidator } from "@/backend/data/validators/user";
+import { UserCreateValidator } from "@/backend/data/validators";
 import { UserPasswordValidator } from "../user.password.validator";
 import { UserRepository } from "@/backend/domain/repositories";
 import { UserUniqueEmailValidator } from "../user.unique.email.validator";

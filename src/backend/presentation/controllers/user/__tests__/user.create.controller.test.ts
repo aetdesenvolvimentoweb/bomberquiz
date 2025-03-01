@@ -4,19 +4,21 @@ import {
   UserEmailValidatorMock,
   UserPhoneValidatorMock,
 } from "@/backend/__mocks__/user";
-import { ConsoleLoggerProvider } from "@/backend/infra/providers/console.logger.provider";
+import {
+  UserCreateValidator,
+  UserPasswordValidator,
+  UserUniqueEmailValidator,
+} from "@/backend/data/validators";
+import { ConsoleLoggerProvider } from "@/backend/infra/providers";
 import { HashProviderMock } from "@/backend/__mocks__/hash.provider.mock";
 import { HttpRequest } from "@/backend/presentation/protocols";
-import { InMemoryUserRepository } from "@/backend/infra/repositories/inmemory.user.repository";
+import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { InvalidParamError } from "@/backend/domain/errors";
 import { UserCreateController } from "../user.create.controller";
 import { UserCreateData } from "@/backend/domain/entities";
-import { UserCreateDataSanitizer } from "@/backend/data/sanitizers/user/user.create.data.sanitizer";
+import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import { UserCreateRequestValidator } from "@/backend/presentation/validators";
-import { UserCreateService } from "@/backend/data/services/user/user.create.service";
-import { UserCreateValidator } from "@/backend/data/validators/user/user.create.validator";
-import { UserPasswordValidator } from "@/backend/data/validators/user/user.password.validator";
-import { UserUniqueEmailValidator } from "@/backend/data/validators/user/user.unique.email.validator";
+import { UserCreateService } from "@/backend/data/services";
 
 interface SutResponses {
   controller: UserCreateController;

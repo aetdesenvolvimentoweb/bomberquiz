@@ -3,7 +3,7 @@ import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import { UserCreateUseCase } from "@/backend/domain/usecases";
 import { UserCreateValidatorUseCase } from "@/backend/domain/validators";
-import { UserRepository } from "@/backend/domain/repositories/user.repository";
+import { UserRepository } from "@/backend/domain/repositories";
 
 /**
  * Interface que define as dependências necessárias para o serviço de criação de usuário
