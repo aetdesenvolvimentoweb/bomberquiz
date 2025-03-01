@@ -2,6 +2,10 @@ import {
   BcryptHashProvider,
   ConsoleLoggerProvider,
 } from "@/backend/infra/providers";
+import {
+  DateFnsUserBirthdateValidatorAdapter,
+  ValidatorUserEmailValidatorAdapter,
+} from "@/backend/infra/adapters";
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
 import { NextRequest, NextResponse } from "next/server";
 import {
@@ -9,7 +13,6 @@ import {
   UserPasswordValidator,
   UserUniqueEmailValidator,
 } from "@/backend/data/validators";
-import { DateFnsUserBirthdateValidatorAdapter } from "@/backend/infra/adapters";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { UserCreateController } from "@/backend/presentation/controllers";
 import { UserCreateData } from "@/backend/domain/entities";
@@ -25,14 +28,16 @@ const handler = async (request: NextRequest): Promise<NextResponse> => {
         loggerProvider,
       );
       const hashProvider = new BcryptHashProvider();
-      const repository = new InMemoryUserRepository();
-      const sanitizer = new UserCreateDataSanitizer();
+      const userRepository = new InMemoryUserRepository();
+      const userCreateDataSanitizer = new UserCreateDataSanitizer();
       const userBirthdateValidator = new DateFnsUserBirthdateValidatorAdapter();
       const userEmailValidator = new ValidatorUserEmailValidatorAdapter();
       const userPasswordValidator = new UserPasswordValidator();
       const userPhoneValidator = new LibPhoneNumberUserPhoneValidatorAdapter();
-      const userUniqueEmailValidator = new UserUniqueEmailValidator(repository);
-      const validator = new UserCreateDataValidator({
+      const userUniqueEmailValidator = new UserUniqueEmailValidator(
+        userRepository,
+      );
+      const userCreateDataValidator = new UserCreateDataValidator({
         userBirthdateValidator,
         userEmailValidator,
         userPasswordValidator,
@@ -42,9 +47,9 @@ const handler = async (request: NextRequest): Promise<NextResponse> => {
       const userCreateService = new UserCreateService({
         loggerProvider,
         hashProvider,
-        repository,
-        sanitizer,
-        validator,
+        userRepository,
+        userCreateDataSanitizer,
+        userCreateDataValidator,
       });
       const controller = new UserCreateController({
         loggerProvider,

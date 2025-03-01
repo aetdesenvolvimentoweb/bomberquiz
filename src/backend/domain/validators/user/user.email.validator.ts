@@ -8,5 +8,5 @@ export interface UserEmailValidatorUseCase {
    * @param email Email a ser validado
    * @throws {InvalidParamError} Se o email tiver formato inválido
    */
-  validate: (email: string) => void;
+  validate: (email: string) => Promise<void>;
 }
