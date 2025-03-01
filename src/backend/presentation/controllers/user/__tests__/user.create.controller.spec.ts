@@ -474,11 +474,11 @@ describe("UserCreateController", () => {
       const validData = makeValidUserData();
 
       // Get access to the logger
-      const logger = (sut as any).props.logger;
+      const loggerProvider = (sut as any).props.loggerProvider;
 
       // Spy on the logger methods
-      const infoSpy = jest.spyOn(logger, "info");
-      const errorSpy = jest.spyOn(logger, "error");
+      const infoSpy = jest.spyOn(loggerProvider, "info");
+      const errorSpy = jest.spyOn(loggerProvider, "error");
 
       // Test successful case
       const httpRequest: HttpRequest<UserCreateData> = {

@@ -14,7 +14,7 @@ import {
   UserPhoneValidatorUseCase,
 } from "@/backend/domain/validators";
 import {
-  UserCreateValidator,
+  UserCreateDataValidator,
   UserPasswordValidator,
 } from "@/backend/data/validators";
 import { ConsoleLoggerProvider } from "@/backend/infra/providers";
@@ -44,7 +44,7 @@ const makeSut = (): SutResponses => {
   const userPasswordValidator = new UserPasswordValidator();
   const userPhoneValidator = new UserPhoneValidatorMock();
   const userUniqueEmailValidator = new UserUniqueEmailValidator(userRepository);
-  const userCreateDataValidator = new UserCreateValidator({
+  const userCreateDataValidator = new UserCreateDataValidator({
     userBirthdateValidator,
     userEmailValidator,
     userPasswordValidator,
