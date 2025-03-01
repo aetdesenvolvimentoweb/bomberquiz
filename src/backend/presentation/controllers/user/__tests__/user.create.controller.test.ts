@@ -228,6 +228,50 @@ describe("UserCreateController Integration", () => {
       );
     });
 
+    it("should return 400 when email format is invalid", async () => {
+      const { controller, userCreateService } = makeSut();
+
+      // Forçar erro de validação de email no serviço
+      jest
+        .spyOn(userCreateService, "create")
+        .mockRejectedValueOnce(new InvalidParamError("email"));
+
+      const userData = makeValidUserData();
+      userData.email = "invalid-email"; // Email inválido
+
+      const request: HttpRequest<UserCreateData> = {
+        body: userData,
+      };
+
+      const response = await controller.handle(request);
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.errorMessage).toBe("Parâmetro inválido: email");
+    });
+
+    it("should return 400 when phone format is invalid", async () => {
+      const { controller, userCreateService } = makeSut();
+
+      // Forçar erro de validação de telefone no serviço
+      jest
+        .spyOn(userCreateService, "create")
+        .mockRejectedValueOnce(new InvalidParamError("telefone"));
+
+      const userData = makeValidUserData();
+      userData.phone = "invalid-phone"; // Telefone inválido
+
+      const request: HttpRequest<UserCreateData> = {
+        body: userData,
+      };
+
+      const response = await controller.handle(request);
+
+      expect(response.statusCode).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.errorMessage).toBe("Parâmetro inválido: telefone");
+    });
+
     it("should return 409 when email is already registered", async () => {
       const { controller, repository } = makeSut();
       const userData = makeValidUserData();
@@ -265,6 +309,76 @@ describe("UserCreateController Integration", () => {
       expect(response.statusCode).toBe(500);
       expect(response.body.success).toBe(false);
       expect(response.body.errorMessage).toBe("Erro interno do servidor");
+    });
+  });
+
+  describe("Logging behavior", () => {
+    it("should log start, success, and error events", async () => {
+      const { controller, userCreateService } = makeSut();
+      const userData = makeValidUserData();
+
+      // Acessar o logger
+      const logger = (controller as any).props.logger;
+
+      // Espionar os métodos do logger
+      const infoSpy = jest.spyOn(logger, "info");
+      const errorSpy = jest.spyOn(logger, "error");
+
+      // Testar caso de sucesso
+      const request: HttpRequest<UserCreateData> = {
+        body: userData,
+      };
+
+      await controller.handle(request);
+
+      expect(infoSpy).toHaveBeenCalledWith(
+        "Iniciando criação de usuário via controller",
+        expect.any(Object),
+      );
+
+      expect(infoSpy).toHaveBeenCalledWith(
+        "Usuário criado com sucesso via controller",
+        expect.any(Object),
+      );
+
+      // Testar caso de erro
+      jest
+        .spyOn(userCreateService, "create")
+        .mockRejectedValueOnce(new Error("Erro de serviço"));
+
+      await controller.handle(request);
+
+      expect(errorSpy).toHaveBeenCalledWith(
+        "Erro no controller de criação de usuário",
+        expect.any(Object),
+      );
+    });
+
+    it("should include email in log metadata", async () => {
+      const { controller } = makeSut();
+      const userData = makeValidUserData();
+
+      // Acessar o logger
+      const logger = (controller as any).props.logger;
+
+      // Espionar os métodos do logger
+      const infoSpy = jest.spyOn(logger, "info");
+
+      const request: HttpRequest<UserCreateData> = {
+        body: userData,
+      };
+
+      await controller.handle(request);
+
+      // Verificar se o email está nos metadados do log
+      expect(infoSpy).toHaveBeenCalledWith(
+        "Iniciando criação de usuário via controller",
+        expect.objectContaining({
+          metadata: expect.objectContaining({
+            email: userData.email,
+          }),
+        }),
+      );
     });
   });
 });

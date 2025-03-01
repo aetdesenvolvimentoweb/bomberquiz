@@ -1,78 +1,81 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import {
+  DuplicateResourceError,
+  InvalidParamError,
+  MissingParamError,
+} from "@/backend/domain/errors";
 import { HttpRequest, HttpResponse } from "@/backend/presentation/protocols";
-import { InvalidParamError, MissingParamError } from "@/backend/domain/errors";
-import {
-  UserBirthdateValidatorMock,
-  UserEmailValidatorMock,
-  UserPhoneValidatorMock,
-} from "@/backend/__mocks__/user";
-import {
-  UserBirthdateValidatorUseCase,
-  UserEmailValidatorUseCase,
-  UserPhoneValidatorUseCase,
-} from "@/backend/domain/validators";
-import {
-  UserCreateValidator,
-  UserPasswordValidator,
-  UserUniqueEmailValidator,
-} from "@/backend/data/validators";
-import { ConsoleLoggerProvider } from "@/backend/infra/providers";
-import { HashProviderMock } from "@/backend/__mocks__/hash.provider.mock";
-import { InMemoryUserRepository } from "@/backend/infra/repositories";
+import { LoggerProviderMock } from "@/backend/__mocks__/logger.provider.mock";
 import { UserCreateController } from "../user.create.controller";
 import { UserCreateData } from "@/backend/domain/entities";
-import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
-import { UserCreateRequestValidator } from "@/backend/presentation/validators";
-import { UserCreateService } from "@/backend/data/services";
+import { UserCreateUseCase } from "@/backend/domain/usecases";
+// Mock para o RequestValidator
+
+class RequestValidatorMock<T = any> {
+  validate(input: T): void {
+    // Validação básica para campos obrigatórios
+    if (!input) {
+      throw new MissingParamError("Dados não fornecidos");
+    }
+
+    // Verifica se o objeto está vazio
+    if (Object.keys(input as object).length === 0) {
+      throw new MissingParamError("Dados não fornecidos");
+    }
+  }
+}
+
+// Mock para o UserCreateService
+class UserCreateServiceMock implements UserCreateUseCase {
+  private shouldThrowError: Error | null = null;
+
+  setShouldThrowError(error: Error | null): void {
+    this.shouldThrowError = error;
+  }
+
+  async create(data: UserCreateData): Promise<void> {
+    if (this.shouldThrowError) {
+      throw this.shouldThrowError;
+    }
+
+    // Validações simples para simular comportamento do serviço
+    if (!data.name) {
+      throw new MissingParamError("nome");
+    }
+
+    if (data.password && data.password.length < 8) {
+      throw new InvalidParamError("senha deve ter no mínimo 8 caracteres");
+    }
+
+    return Promise.resolve();
+  }
+}
 
 interface SutResponses {
   sut: UserCreateController;
-  userEmailValidator: UserEmailValidatorUseCase;
-  userPhoneValidator: UserPhoneValidatorUseCase;
-  userBirthdateValidator: UserBirthdateValidatorUseCase;
+  userCreateService: UserCreateServiceMock;
+  userCreateRequestValidator: RequestValidatorMock<UserCreateData>;
+  logger: LoggerProviderMock;
 }
 
 const makeSut = (): SutResponses => {
-  const userRepository = new InMemoryUserRepository();
-  const userCreateDataSanitizer = new UserCreateDataSanitizer();
-  const hashProvider = new HashProviderMock();
-  const loggerProvider = new ConsoleLoggerProvider();
-  // inicializa o userCreateDataValidator com as dependências necessárias
-  const userBirthdateValidator = new UserBirthdateValidatorMock();
-  const userEmailValidator = new UserEmailValidatorMock();
-  const userPasswordValidator = new UserPasswordValidator();
-  const userPhoneValidator = new UserPhoneValidatorMock();
-  const userUniqueEmailValidator = new UserUniqueEmailValidator(userRepository);
-  const userCreateDataValidator = new UserCreateValidator({
-    userBirthdateValidator,
-    userEmailValidator,
-    userPasswordValidator,
-    userPhoneValidator,
-    userUniqueEmailValidator,
-  });
-  // inicializa o userCreateService com as dependências necessárias
-  const userCreateService = new UserCreateService({
-    repository: userRepository,
-    sanitizer: userCreateDataSanitizer,
-    hashProvider,
-    logger: loggerProvider,
-    validator: userCreateDataValidator,
-  });
-  // inicializa o userCreateRequestvalidator com as dependências necessárias
-  const userCreateRequestValidator = new UserCreateRequestValidator(
-    loggerProvider,
-  );
+  // Cria mocks para todas as dependências
+  const userCreateService = new UserCreateServiceMock();
+  const userCreateRequestValidator = new RequestValidatorMock<UserCreateData>();
+  const logger = new LoggerProviderMock();
+
+  // Inicializa o controller com os mocks
   const sut = new UserCreateController({
     userCreateService,
     userCreateRequestValidator,
-    logger: loggerProvider,
+    logger,
   });
 
   return {
     sut,
-    userEmailValidator,
-    userPhoneValidator,
-    userBirthdateValidator,
+    userCreateService,
+    userCreateRequestValidator,
+    logger,
   };
 };
 
@@ -111,9 +114,14 @@ describe("UserCreateController", () => {
     test.each(testCases)(
       "should throw a MissingParamError if $field is not provided",
       async ({ field, label }) => {
-        const { sut } = makeSut();
+        const { sut, userCreateService } = makeSut();
         const validData = makeValidUserData();
         const invalidData = omitField(field, validData);
+
+        // Configurar o mock do serviço para lançar o erro esperado
+        jest
+          .spyOn(userCreateService, "create")
+          .mockRejectedValueOnce(new MissingParamError(label));
 
         const httpRequest: HttpRequest<UserCreateData> = {
           body: invalidData,
@@ -148,16 +156,15 @@ describe("UserCreateController", () => {
     test.each(emailTestCases)(
       "should handle email with $scenario",
       async ({ email, shouldThrow, errorMessage }) => {
-        const { userEmailValidator, sut } = makeSut();
+        const { userCreateService, sut } = makeSut();
         const validData = makeValidUserData();
         validData.email = email;
 
         if (shouldThrow) {
+          // Configurar o mock do serviço para lançar o erro esperado
           jest
-            .spyOn(userEmailValidator, "validate")
-            .mockImplementationOnce(() => {
-              throw new InvalidParamError("email");
-            });
+            .spyOn(userCreateService, "create")
+            .mockRejectedValueOnce(new InvalidParamError("email"));
 
           const httpRequest: HttpRequest<UserCreateData> = {
             body: validData,
@@ -197,7 +204,7 @@ describe("UserCreateController", () => {
     test.each(emailTestCases)(
       "should handle email with $scenario",
       async ({ shouldThrow, errorMessage }) => {
-        const { sut } = makeSut();
+        const { sut, userCreateService } = makeSut();
         const validData = makeValidUserData();
 
         const httpRequest: HttpRequest<UserCreateData> = {
@@ -205,7 +212,10 @@ describe("UserCreateController", () => {
         };
 
         if (shouldThrow) {
-          await sut.handle(httpRequest);
+          // Configurar o mock do serviço para lançar o erro de email duplicado
+          jest
+            .spyOn(userCreateService, "create")
+            .mockRejectedValueOnce(new DuplicateResourceError("Email"));
 
           const httpResponse: HttpResponse = await sut.handle(httpRequest);
 
@@ -245,7 +255,7 @@ describe("UserCreateController", () => {
     test.each(phoneTestCases)(
       "should handle phone with $scenario",
       async ({ phone, shouldThrow, errorMessage }) => {
-        const { userPhoneValidator, sut } = makeSut();
+        const { userCreateService, sut } = makeSut();
         const validData = makeValidUserData();
         validData.phone = phone;
 
@@ -255,10 +265,8 @@ describe("UserCreateController", () => {
 
         if (shouldThrow) {
           jest
-            .spyOn(userPhoneValidator, "validate")
-            .mockImplementationOnce(() => {
-              throw new InvalidParamError("telefone");
-            });
+            .spyOn(userCreateService, "create")
+            .mockRejectedValueOnce(new InvalidParamError("telefone"));
 
           const httpResponse: HttpResponse = await sut.handle(httpRequest);
 
@@ -298,7 +306,7 @@ describe("UserCreateController", () => {
     test.each(birthdateTestCases)(
       "should handle birthdate with $scenario",
       async ({ birthdate, shouldThrow, errorMessage }) => {
-        const { userBirthdateValidator, sut } = makeSut();
+        const { userCreateService, sut } = makeSut();
         const validData = makeValidUserData();
         validData.birthdate = birthdate;
 
@@ -308,10 +316,8 @@ describe("UserCreateController", () => {
 
         if (shouldThrow) {
           jest
-            .spyOn(userBirthdateValidator, "validate")
-            .mockImplementationOnce(() => {
-              throw new InvalidParamError("data de nascimento");
-            });
+            .spyOn(userCreateService, "create")
+            .mockRejectedValueOnce(new InvalidParamError("data de nascimento"));
 
           const httpResponse: HttpResponse = await sut.handle(httpRequest);
 
@@ -375,13 +381,15 @@ describe("UserCreateController", () => {
 
   describe("Handle server errors", () => {
     test("should return 500 if an unexpected error occurs", async () => {
-      const { sut, userEmailValidator } = makeSut();
+      const { sut, userCreateRequestValidator } = makeSut();
       const validData = makeValidUserData();
 
       // Simulate an unexpected error (not an ApplicationError)
-      jest.spyOn(userEmailValidator, "validate").mockImplementationOnce(() => {
-        throw new Error("Unexpected error");
-      });
+      jest
+        .spyOn(userCreateRequestValidator, "validate")
+        .mockImplementationOnce(() => {
+          throw new Error("Unexpected error");
+        });
 
       const httpRequest: HttpRequest<UserCreateData> = {
         body: validData,
