@@ -10,6 +10,7 @@ import { LoggerProvider } from "@/backend/domain/providers";
 interface SutTypes {
   sut: UserCreateService;
   userRepository: UserRepository;
+  loggerProvider: LoggerProvider;
 }
 
 const makeSut = (): SutTypes => {
@@ -28,6 +29,7 @@ const makeSut = (): SutTypes => {
   return {
     sut,
     userRepository,
+    loggerProvider,
   };
 };
 
@@ -43,6 +45,7 @@ describe("UserCreateService", () => {
   const sutInstance = makeSut();
   const sut = sutInstance.sut;
   const userRepository = sutInstance.userRepository;
+  const loggerProvider = sutInstance.loggerProvider;
 
   describe("success case", () => {
     it("should create a new user", async () => {
@@ -73,6 +76,20 @@ describe("UserCreateService", () => {
           ...userCreateData,
           password: "hashed_password",
         }),
+      );
+    });
+  });
+
+  describe("logger", () => {
+    it("should log user creation start", async () => {
+      const userCreateData = makeUserCreateData();
+      await sut.create(userCreateData);
+      expect(loggerProvider.info).toHaveBeenCalledWith(
+        "Iniciando a criação de usuário",
+        {
+          action: "user.create.start",
+          metadata: { email: userCreateData.email },
+        },
       );
     });
   });
