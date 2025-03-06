@@ -92,5 +92,11 @@ describe("UserCreateService", () => {
         },
       );
     });
+
+    it("should log user creation success", async () => {
+      const userCreateData = makeUserCreateData();
+      await sut.create(userCreateData);
+      expect(loggerProvider.info).toHaveBeenCalledWith("user.created");
+    });
   });
 });
