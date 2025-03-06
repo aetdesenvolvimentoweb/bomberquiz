@@ -1,6 +1,7 @@
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateService } from "../create";
 import { UserRepository } from "@/backend/domain/repositories";
+import { LoggerProvider } from "@/backend/domain/providers";
 
 interface SutTypes {
   sut: UserCreateService;
@@ -12,7 +13,14 @@ const makeSut = (): SutTypes => {
     create: jest.fn(),
     findByEmail: jest.fn(),
   });
-  const sut = new UserCreateService({ userRepository });
+  const loggerProvider = jest.mocked<LoggerProvider>({
+    debug: jest.fn(),
+    error: jest.fn(),
+    info: jest.fn(),
+    log: jest.fn(),
+    warn: jest.fn(),
+  });
+  const sut = new UserCreateService({ userRepository, loggerProvider });
   return {
     sut,
     userRepository,
@@ -33,7 +41,7 @@ describe("UserCreateService", () => {
   const userRepository = sutInstance.userRepository;
 
   describe("success case", () => {
-    it("should create a user", async () => {
+    it("should create a new user", async () => {
       await expect(sut.create(makeUserCreateData())).resolves.not.toThrow();
     });
 
