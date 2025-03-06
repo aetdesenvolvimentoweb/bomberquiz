@@ -30,10 +30,17 @@ describe("UserCreateService", () => {
 
   const sutInstance = makeSut();
   const sut = sutInstance.sut;
+  const userRepository = sutInstance.userRepository;
 
   describe("success case", () => {
-    it("should create a new user", async () => {
+    it("should create a user", async () => {
       await expect(sut.create(makeUserCreateData())).resolves.not.toThrow();
+    });
+
+    it("should call UserRepository.create with correct values", async () => {
+      const userCreateData = makeUserCreateData();
+      await sut.create(userCreateData);
+      expect(userRepository.create).toHaveBeenCalledWith(userCreateData);
     });
   });
 });
