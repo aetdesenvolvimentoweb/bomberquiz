@@ -98,5 +98,19 @@ describe("UserCreateService", () => {
       await sut.create(userCreateData);
       expect(loggerProvider.info).toHaveBeenCalledWith("user.created");
     });
+
+    it("should log user creation error", async () => {
+      const userCreateData = makeUserCreateData();
+      jest.spyOn(userRepository, "create").mockRejectedValueOnce(new Error());
+      await expect(sut.create(userCreateData)).rejects.toThrow();
+      expect(loggerProvider.error).toHaveBeenCalledWith(
+        "Erro ao criar usuário",
+        {
+          action: "user.creation.failed",
+          metadata: { email: userCreateData.email },
+          error: new Error(),
+        },
+      );
+    });
   });
 });
