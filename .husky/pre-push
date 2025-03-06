@@ -1,0 +1,2 @@
+echo "Executando Testes..."
+pnpm test:coverage
