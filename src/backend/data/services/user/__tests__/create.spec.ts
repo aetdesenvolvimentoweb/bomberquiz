@@ -4,7 +4,11 @@ import { UserCreateService } from "../create";
 import { UserRepository } from "@/backend/domain/repositories";
 import { LoggerProvider } from "@/backend/domain/providers";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
-import { InvalidParamError, MissingParamError } from "@/backend/domain/erros";
+import {
+  DuplicateResourceError,
+  InvalidParamError,
+  MissingParamError,
+} from "@/backend/domain/erros";
 
 interface SutTypes {
   sut: UserCreateService;
@@ -212,6 +216,43 @@ describe("UserCreateService", () => {
 
           await expect(sut.create(validData)).rejects.toThrow(
             new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.create(validData)).resolves.not.toThrow();
+        }
+      },
+    );
+  });
+
+  describe("Validate unique email", () => {
+    // Casos de teste para validação de email duplicado
+    const emailTestCases = [
+      {
+        scenario: "duplicated email",
+        shouldThrow: true,
+        errorMessage: "Email",
+      },
+      {
+        scenario: "unique email",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(emailTestCases)(
+      "should handle email with $scenario",
+      async ({ shouldThrow, errorMessage }) => {
+        const validData = makeUserCreateData();
+
+        if (shouldThrow) {
+          jest
+            .spyOn(userCreateDataValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new DuplicateResourceError(errorMessage);
+            });
+
+          await expect(sut.create(validData)).rejects.toThrow(
+            new DuplicateResourceError(errorMessage),
           );
         } else {
           await expect(sut.create(validData)).resolves.not.toThrow();
