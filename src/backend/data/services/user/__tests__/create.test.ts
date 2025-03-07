@@ -137,7 +137,23 @@ describe("UserCreateService", () => {
     });
 
     it("should sanitize user data before validation", async () => {
-      const createSpy = jest.spyOn(userCreateDataValidator, "validate");
+      const validatorSpy = jest.spyOn(userCreateDataValidator, "validate");
+      const data = {
+        name: "  John Doe  ",
+        email: "  EMAIL@example.com  ",
+        phone: "(11) 98765-4321",
+        birthdate: fixedDate,
+        password: "  password123  ",
+      } as UserCreateData;
+      const sanitizedData = userCreateDataSanitizer.sanitize(data);
+
+      // O teste passa se não houver erros, indicando que os dados foram sanitizados corretamente
+      await expect(sut.create(data)).resolves.not.toThrow();
+      expect(validatorSpy).toHaveBeenCalledWith(sanitizedData);
+    });
+
+    it("should create user with sanitized data", async () => {
+      const createSpy = jest.spyOn(userRepository, "create");
       const data = {
         name: "  John Doe  ",
         email: "  EMAIL@example.com  ",
