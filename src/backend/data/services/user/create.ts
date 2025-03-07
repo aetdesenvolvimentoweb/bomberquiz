@@ -1,11 +1,13 @@
 import { UserCreateData } from "@/backend/domain/entities";
 import { LoggerProvider } from "@/backend/domain/providers";
 import { UserRepository } from "@/backend/domain/repositories";
+import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import { UserCreateUseCase } from "@/backend/domain/usecases";
 
 interface UserCreateServiceProps {
   userRepository: UserRepository;
   loggerProvider: LoggerProvider;
+  userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
 }
 
 export class UserCreateService implements UserCreateUseCase {
@@ -18,6 +20,13 @@ export class UserCreateService implements UserCreateUseCase {
       loggerProvider.info("Iniciando a criação de usuário", {
         action: "user.create.start",
         metadata: { email: data.email },
+      });
+
+      const sanitizedData = this.props.userCreateDataSanitizer.sanitize(data);
+      console.log("limpou", sanitizedData);
+
+      loggerProvider.info("Dados sanitizados", {
+        action: "user.create.data.sanitized",
       });
 
       await userRepository.create(data);

@@ -6,11 +6,13 @@ import {
 import { UserCreateService } from "../create";
 import { UserRepository } from "@/backend/domain/repositories";
 import { LoggerProvider } from "@/backend/domain/providers";
+import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 
 interface SutTypes {
   sut: UserCreateService;
   userRepository: UserRepository;
   loggerProvider: LoggerProvider;
+  userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
 }
 
 const makeSut = (): SutTypes => {
@@ -25,11 +27,19 @@ const makeSut = (): SutTypes => {
     log: jest.fn(),
     warn: jest.fn(),
   });
-  const sut = new UserCreateService({ userRepository, loggerProvider });
+  const userCreateDataSanitizer = jest.mocked<UserCreateDataSanitizerUseCase>({
+    sanitize: jest.fn(),
+  });
+  const sut = new UserCreateService({
+    userRepository,
+    loggerProvider,
+    userCreateDataSanitizer,
+  });
   return {
     sut,
     userRepository,
     loggerProvider,
+    userCreateDataSanitizer,
   };
 };
 
@@ -46,6 +56,7 @@ describe("UserCreateService", () => {
   const sut = sutInstance.sut;
   const userRepository = sutInstance.userRepository;
   const loggerProvider = sutInstance.loggerProvider;
+  const userCreateDataSanitizer = sutInstance.userCreateDataSanitizer;
 
   describe("success case", () => {
     it("should create a new user", async () => {
@@ -110,6 +121,16 @@ describe("UserCreateService", () => {
           metadata: { email: userCreateData.email },
           error: new Error(),
         },
+      );
+    });
+  });
+
+  describe("sanitizer data", () => {
+    it("should sanitize called with correct values", async () => {
+      const userCreateData = makeUserCreateData();
+      await sut.create(userCreateData);
+      expect(userCreateDataSanitizer.sanitize).toHaveBeenCalledWith(
+        userCreateData,
       );
     });
   });
