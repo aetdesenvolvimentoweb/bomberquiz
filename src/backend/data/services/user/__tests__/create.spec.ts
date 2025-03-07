@@ -1,10 +1,10 @@
+import { UserCreateDataValidatorUseCase } from "@/backend/domain/validators";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateService } from "../create";
 import { UserRepository } from "@/backend/domain/repositories";
 import { LoggerProvider } from "@/backend/domain/providers";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
-import { MissingParamError } from "@/backend/domain/erros";
-import { UserCreateDataValidatorUseCase } from "@/backend/domain/validators";
+import { InvalidParamError, MissingParamError } from "@/backend/domain/erros";
 
 interface SutTypes {
   sut: UserCreateService;
@@ -176,5 +176,45 @@ describe("UserCreateService", () => {
         },
       );
     });
+  });
+
+  describe("Validate email format", () => {
+    // Casos de teste para validação de email
+    const emailTestCases = [
+      {
+        scenario: "invalid email",
+        email: "invalid-email",
+        shouldThrow: true,
+        errorMessage: "email inválido.",
+      },
+      {
+        scenario: "valid email",
+        email: "email@example.com",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(emailTestCases)(
+      "should handle email with $scenario",
+      async ({ email, shouldThrow, errorMessage }) => {
+        const validData = makeUserCreateData();
+        validData.email = email;
+
+        if (shouldThrow) {
+          jest
+            .spyOn(userCreateDataValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new InvalidParamError(errorMessage);
+            });
+
+          await expect(sut.create(validData)).rejects.toThrow(
+            new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.create(validData)).resolves.not.toThrow();
+        }
+      },
+    );
   });
 });

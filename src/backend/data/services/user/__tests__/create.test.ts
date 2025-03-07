@@ -7,8 +7,11 @@ import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { ConsoleLoggerProvider } from "@/backend/infra/providers";
 import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import { UserCreateDataValidator } from "@/backend/data/validators";
-import { MissingParamError } from "@/backend/domain/erros";
-import { UserCreateDataValidatorUseCase } from "@/backend/domain/validators";
+import { InvalidParamError, MissingParamError } from "@/backend/domain/erros";
+import {
+  UserCreateDataValidatorUseCase,
+  UserEmailValidatorUseCase,
+} from "@/backend/domain/validators";
 
 interface SutTypes {
   sut: UserCreateService;
@@ -16,13 +19,19 @@ interface SutTypes {
   loggerProvider: LoggerProvider;
   userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
   userCreateDataValidator: UserCreateDataValidatorUseCase;
+  userEmailValidator: UserEmailValidatorUseCase;
 }
 
 const makeSut = (): SutTypes => {
   const userRepository = new InMemoryUserRepository();
   const loggerProvider = new ConsoleLoggerProvider();
   const userCreateDataSanitizer = new UserCreateDataSanitizer();
-  const userCreateDataValidator = new UserCreateDataValidator();
+  const userEmailValidator = jest.mocked<UserEmailValidatorUseCase>({
+    validate: jest.fn(),
+  });
+  const userCreateDataValidator = new UserCreateDataValidator({
+    userEmailValidator,
+  });
   const sut = new UserCreateService({
     userRepository,
     loggerProvider,
@@ -35,6 +44,7 @@ const makeSut = (): SutTypes => {
     loggerProvider,
     userCreateDataSanitizer,
     userCreateDataValidator,
+    userEmailValidator,
   };
 };
 
@@ -53,6 +63,7 @@ describe("UserCreateService", () => {
   let loggerProvider: LoggerProvider;
   let userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
   let userCreateDataValidator: UserCreateDataValidatorUseCase;
+  let userEmailValidator: UserEmailValidatorUseCase;
 
   beforeEach(() => {
     const sutInstance = makeSut();
@@ -61,6 +72,7 @@ describe("UserCreateService", () => {
     loggerProvider = sutInstance.loggerProvider;
     userCreateDataSanitizer = sutInstance.userCreateDataSanitizer;
     userCreateDataValidator = sutInstance.userCreateDataValidator;
+    userEmailValidator = sutInstance.userEmailValidator;
   });
 
   describe("success case", () => {
@@ -201,6 +213,46 @@ describe("UserCreateService", () => {
         await expect(sut.create(missingData)).rejects.toThrow(
           new MissingParamError(label),
         );
+      },
+    );
+  });
+
+  describe("Validate email format", () => {
+    // Casos de teste para validação de email
+    const emailTestCases = [
+      {
+        scenario: "invalid email",
+        email: "invalid-email",
+        shouldThrow: true,
+        errorMessage: "email inválido.",
+      },
+      {
+        scenario: "valid email",
+        email: "email@example.com",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(emailTestCases)(
+      "should handle email with $scenario",
+      async ({ email, shouldThrow, errorMessage }) => {
+        const validData = makeUserCreateData();
+        validData.email = email;
+
+        if (shouldThrow) {
+          jest
+            .spyOn(userEmailValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new InvalidParamError(errorMessage);
+            });
+
+          await expect(sut.create(validData)).rejects.toThrow(
+            new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.create(validData)).resolves.not.toThrow();
+        }
       },
     );
   });
