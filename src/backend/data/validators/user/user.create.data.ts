@@ -4,6 +4,7 @@ import {
   UserEmailValidatorUseCase,
   UserPasswordValidatorUseCase,
   UserPhoneValidatorUseCase,
+  UserUniqueEmailValidatorUseCase,
 } from "@/backend/domain/validators";
 import { UserCreateData } from "@/backend/domain/entities";
 import { MissingParamError } from "@/backend/domain/erros";
@@ -11,6 +12,7 @@ import { MissingParamError } from "@/backend/domain/erros";
 interface UserCreateDataValidatorProps {
   userBirthdateValidator: UserBirthdateValidatorUseCase;
   userEmailValidator: UserEmailValidatorUseCase;
+  userUniqueEmailValidator: UserUniqueEmailValidatorUseCase;
   userPasswordValidator: UserPasswordValidatorUseCase;
   userPhoneValidator: UserPhoneValidatorUseCase;
 }
@@ -23,6 +25,7 @@ export class UserCreateDataValidator implements UserCreateDataValidatorUseCase {
       userEmailValidator,
       userPasswordValidator,
       userPhoneValidator,
+      userUniqueEmailValidator,
     } = this.props;
 
     const requiredFields: { field: keyof UserCreateData; label: string }[] = [
@@ -40,6 +43,7 @@ export class UserCreateDataValidator implements UserCreateDataValidatorUseCase {
     });
 
     userEmailValidator.validate(data.email);
+    await userUniqueEmailValidator.validate(data.email);
     userPhoneValidator.validate(data.phone);
     userBirthdateValidator.validate(data.birthdate);
     userPasswordValidator.validate(data.password);
