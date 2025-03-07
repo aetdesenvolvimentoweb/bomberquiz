@@ -114,10 +114,11 @@ describe("UserCreateService", () => {
   });
 
   describe("validate data", () => {
-    // Mapa de campos para labels
-    const fieldToLabelMap: Record<string, string> = {
-      name: "nome",
-    };
+    // Campos obrigatórios
+    const requiredFields: { field: keyof UserCreateData; label: string }[] = [
+      { field: "name", label: "nome" },
+      { field: "email", label: "email" },
+    ];
 
     // Função genérica para omitir um campo
     const omitField = (field: string, data: UserCreateData) => {
@@ -126,13 +127,7 @@ describe("UserCreateService", () => {
       ) as UserCreateData;
     };
 
-    // Cria os casos de teste a partir do mapa
-    const testCases = Object.entries(fieldToLabelMap).map(([field, label]) => ({
-      field,
-      label,
-    }));
-
-    test.each(testCases)(
+    test.each(requiredFields)(
       "should throw a MissingParamError if $field is not provided",
       async ({ field, label }) => {
         jest
