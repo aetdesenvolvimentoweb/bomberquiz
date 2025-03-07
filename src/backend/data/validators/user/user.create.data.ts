@@ -6,6 +6,7 @@ export class UserCreateDataValidator implements UserCreateDataValidatorUseCase {
   public readonly validate = async (data: UserCreateData): Promise<void> => {
     const requiredFields: { field: keyof UserCreateData; label: string }[] = [
       { field: "name", label: "nome" },
+      { field: "email", label: "email" },
     ];
 
     requiredFields.forEach(({ field, label }) => {
