@@ -6,6 +6,8 @@ import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { ConsoleLoggerProvider } from "@/backend/infra/providers";
 import { UserCreateDataSanitizer } from "@/backend/data/sanitizers/user/user.create.data";
+import { UserCreateDataValidator } from "@/backend/data/validators";
+import { MissingParamError } from "@/backend/domain/erros";
 
 interface SutTypes {
   sut: UserCreateService;
@@ -18,10 +20,12 @@ const makeSut = (): SutTypes => {
   const userRepository = new InMemoryUserRepository();
   const loggerProvider = new ConsoleLoggerProvider();
   const userCreateDataSanitizer = new UserCreateDataSanitizer();
+  const userCreateDataValidator = new UserCreateDataValidator();
   const sut = new UserCreateService({
     userRepository,
     loggerProvider,
     userCreateDataSanitizer,
+    userCreateDataValidator,
   });
   return {
     sut,
@@ -127,5 +131,37 @@ describe("UserCreateService", () => {
         userCreateData,
       );
     });
+  });
+
+  describe("validate data", () => {
+    // Mapa de campos para labels
+    const fieldToLabelMap: Record<string, string> = {
+      name: "nome",
+    };
+
+    // Função genérica para omitir um campo
+    const omitField = (field: string, data: UserCreateData) => {
+      return Object.fromEntries(
+        Object.entries(data).filter(([key]) => key !== field),
+      ) as UserCreateData;
+    };
+
+    // Cria os casos de teste a partir do mapa
+    const testCases = Object.entries(fieldToLabelMap).map(([field, label]) => ({
+      field,
+      label,
+    }));
+
+    test.each(testCases)(
+      "should throw a MissingParamError if $field is not provided",
+      async ({ field, label }) => {
+        const validData = makeUserCreateData();
+        const missingData = omitField(field, validData);
+
+        await expect(sut.create(missingData)).rejects.toThrow(
+          new MissingParamError(label),
+        );
+      },
+    );
   });
 });

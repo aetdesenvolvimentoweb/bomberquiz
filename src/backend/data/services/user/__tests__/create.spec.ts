@@ -7,12 +7,15 @@ import { UserCreateService } from "../create";
 import { UserRepository } from "@/backend/domain/repositories";
 import { LoggerProvider } from "@/backend/domain/providers";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
+import { MissingParamError } from "@/backend/domain/erros";
+import { UserCreateDataValidatorUseCase } from "@/backend/domain/validators";
 
 interface SutTypes {
   sut: UserCreateService;
   userRepository: UserRepository;
   loggerProvider: LoggerProvider;
   userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
+  userCreateDataValidator: UserCreateDataValidatorUseCase;
 }
 
 const makeSut = (): SutTypes => {
@@ -30,16 +33,21 @@ const makeSut = (): SutTypes => {
   const userCreateDataSanitizer = jest.mocked<UserCreateDataSanitizerUseCase>({
     sanitize: jest.fn(),
   });
+  const userCreateDataValidator = jest.mocked<UserCreateDataValidatorUseCase>({
+    validate: jest.fn(),
+  });
   const sut = new UserCreateService({
     userRepository,
     loggerProvider,
     userCreateDataSanitizer,
+    userCreateDataValidator,
   });
   return {
     sut,
     userRepository,
     loggerProvider,
     userCreateDataSanitizer,
+    userCreateDataValidator,
   };
 };
 
@@ -57,6 +65,7 @@ describe("UserCreateService", () => {
   const userRepository = sutInstance.userRepository;
   const loggerProvider = sutInstance.loggerProvider;
   const userCreateDataSanitizer = sutInstance.userCreateDataSanitizer;
+  const userCreateDataValidator = sutInstance.userCreateDataValidator;
 
   describe("success case", () => {
     it("should create a new user", async () => {
@@ -92,6 +101,53 @@ describe("UserCreateService", () => {
         }),
       );
     });
+  });
+
+  describe("sanitizer data", () => {
+    it("should sanitize called with correct values", async () => {
+      const userCreateData = makeUserCreateData();
+      await sut.create(userCreateData);
+      expect(userCreateDataSanitizer.sanitize).toHaveBeenCalledWith(
+        userCreateData,
+      );
+    });
+  });
+
+  describe("validate data", () => {
+    // Mapa de campos para labels
+    const fieldToLabelMap: Record<string, string> = {
+      name: "nome",
+    };
+
+    // Função genérica para omitir um campo
+    const omitField = (field: string, data: UserCreateData) => {
+      return Object.fromEntries(
+        Object.entries(data).filter(([key]) => key !== field),
+      ) as UserCreateData;
+    };
+
+    // Cria os casos de teste a partir do mapa
+    const testCases = Object.entries(fieldToLabelMap).map(([field, label]) => ({
+      field,
+      label,
+    }));
+
+    test.each(testCases)(
+      "should throw a MissingParamError if $field is not provided",
+      async ({ field, label }) => {
+        jest
+          .spyOn(userCreateDataValidator, "validate")
+          .mockImplementationOnce(() => {
+            throw new MissingParamError(label);
+          });
+        const validData = makeUserCreateData();
+        const missingData = omitField(field, validData);
+
+        await expect(sut.create(missingData)).rejects.toThrow(
+          new MissingParamError(label),
+        );
+      },
+    );
   });
 
   describe("logger", () => {
@@ -137,16 +193,6 @@ describe("UserCreateService", () => {
           metadata: { email: userCreateData.email },
           error: new Error(),
         },
-      );
-    });
-  });
-
-  describe("sanitizer data", () => {
-    it("should sanitize called with correct values", async () => {
-      const userCreateData = makeUserCreateData();
-      await sut.create(userCreateData);
-      expect(userCreateDataSanitizer.sanitize).toHaveBeenCalledWith(
-        userCreateData,
       );
     });
   });
