@@ -8,6 +8,7 @@ export class UserCreateDataValidator implements UserCreateDataValidatorUseCase {
       { field: "name", label: "nome" },
       { field: "email", label: "email" },
       { field: "phone", label: "telefone" },
+      { field: "birthdate", label: "data de nascimento" },
     ];
 
     requiredFields.forEach(({ field, label }) => {
