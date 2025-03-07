@@ -23,15 +23,16 @@ export class UserCreateService implements UserCreateUseCase {
       });
 
       const sanitizedData = this.props.userCreateDataSanitizer.sanitize(data);
-      console.log("limpou", sanitizedData);
 
       loggerProvider.info("Dados sanitizados", {
         action: "user.create.data.sanitized",
       });
 
-      await userRepository.create(data);
+      await userRepository.create(sanitizedData);
 
-      loggerProvider.info("user.created");
+      loggerProvider.info("Usuário criado com sucesso", {
+        action: "user.created",
+      });
     } catch (error: unknown) {
       loggerProvider.error("Erro ao criar usuário", {
         action: "user.creation.failed",

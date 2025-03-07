@@ -65,6 +65,9 @@ describe("UserCreateService", () => {
 
     it("should call UserRepository.create with correct values", async () => {
       const userCreateData = makeUserCreateData();
+      jest
+        .spyOn(userCreateDataSanitizer, "sanitize")
+        .mockReturnValueOnce(userCreateData);
       await sut.create(userCreateData);
       expect(userRepository.create).toHaveBeenCalledWith(userCreateData);
     });
@@ -104,10 +107,23 @@ describe("UserCreateService", () => {
       );
     });
 
+    it("should log user sanitized data", async () => {
+      const userCreateData = makeUserCreateData();
+      await sut.create(userCreateData);
+      expect(loggerProvider.info).toHaveBeenCalledWith("Dados sanitizados", {
+        action: "user.create.data.sanitized",
+      });
+    });
+
     it("should log user creation success", async () => {
       const userCreateData = makeUserCreateData();
       await sut.create(userCreateData);
-      expect(loggerProvider.info).toHaveBeenCalledWith("user.created");
+      expect(loggerProvider.info).toHaveBeenCalledWith(
+        "Usuário criado com sucesso",
+        {
+          action: "user.created",
+        },
+      );
     });
 
     it("should log user creation error", async () => {
