@@ -12,8 +12,6 @@ export class UserCreateDataSanitizer implements UserCreateDataSanitizerUseCase {
     // Cria um novo objeto com os mesmos campos do original
     const sanitized = Object.assign({}, data);
 
-    console.log("sanitize", sanitized);
-
     // Sanitiza cada campo individualmente
     if (typeof data.name === "string") {
       sanitized.name = this.sanitizeName(data.name);

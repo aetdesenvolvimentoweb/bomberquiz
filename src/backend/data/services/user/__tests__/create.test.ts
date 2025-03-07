@@ -69,7 +69,6 @@ describe("UserCreateService", () => {
 
     it("should create user with correct values", async () => {
       const userCreateData = makeUserCreateData();
-      console.log("vai começar o problema", userCreateData.birthdate);
       const sanitizedData = userCreateDataSanitizer.sanitize(userCreateData);
       await sut.create(userCreateData);
       const user = await userRepository.findByEmail(userCreateData.email);

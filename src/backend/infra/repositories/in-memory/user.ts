@@ -10,7 +10,6 @@ export class InMemoryUserRepository implements UserRepository {
   private users: User[] = [];
 
   public readonly create = async (data: UserCreateData): Promise<void> => {
-    console.log("dentro repositório", data.birthdate);
     const user = Object.assign({}, data, {
       id: crypto.randomUUID(),
       avatarUrl: USER_DEFAULT_AVATAR_URL,
