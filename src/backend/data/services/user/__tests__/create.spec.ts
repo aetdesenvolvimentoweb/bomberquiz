@@ -217,4 +217,50 @@ describe("UserCreateService", () => {
       },
     );
   });
+
+  describe("Validate phone format", () => {
+    // Casos de teste para validação de phone
+    const phoneTestCases = [
+      {
+        scenario: "invalid phone",
+        phone: "invalid-phone 3212211",
+        shouldThrow: true,
+        errorMessage: "telefone",
+      },
+      {
+        scenario: "valid mobile phone",
+        phone: "(62) 99999-9999",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+      {
+        scenario: "valid phone",
+        phone: "(62) 9999-9999",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(phoneTestCases)(
+      "should handle phone with $scenario",
+      async ({ phone, shouldThrow, errorMessage }) => {
+        const validData = makeUserCreateData();
+        validData.phone = phone;
+
+        if (shouldThrow) {
+          jest
+            .spyOn(userCreateDataValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new InvalidParamError(errorMessage);
+            });
+
+          await expect(sut.create(validData)).rejects.toThrow(
+            new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.create(validData)).resolves.not.toThrow();
+        }
+      },
+    );
+  });
 });
