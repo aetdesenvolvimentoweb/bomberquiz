@@ -8,12 +8,14 @@ import { ConsoleLoggerProvider } from "@/backend/infra/providers";
 import { UserCreateDataSanitizer } from "@/backend/data/sanitizers/user/user.create.data";
 import { UserCreateDataValidator } from "@/backend/data/validators";
 import { MissingParamError } from "@/backend/domain/erros";
+import { UserCreateDataValidatorUseCase } from "@/backend/domain/validators";
 
 interface SutTypes {
   sut: UserCreateService;
   userRepository: UserRepository;
   loggerProvider: LoggerProvider;
   userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
+  userCreateDataValidator: UserCreateDataValidatorUseCase;
 }
 
 const makeSut = (): SutTypes => {
@@ -32,6 +34,7 @@ const makeSut = (): SutTypes => {
     userRepository,
     loggerProvider,
     userCreateDataSanitizer,
+    userCreateDataValidator,
   };
 };
 
@@ -50,6 +53,7 @@ describe("UserCreateService", () => {
   const userRepository = sutInstance.userRepository;
   const loggerProvider = sutInstance.loggerProvider;
   const userCreateDataSanitizer = sutInstance.userCreateDataSanitizer;
+  const userCreateDataValidator = sutInstance.userCreateDataValidator;
 
   describe("success case", () => {
     it("should create a new user", async () => {
@@ -130,6 +134,22 @@ describe("UserCreateService", () => {
       expect(userCreateDataSanitizer.sanitize).toHaveBeenCalledWith(
         userCreateData,
       );
+    });
+
+    it("should sanitize user data before validation", async () => {
+      const createSpy = jest.spyOn(userCreateDataValidator, "validate");
+      const data = {
+        name: "  John Doe  ",
+        email: "  EMAIL@example.com  ",
+        phone: "(11) 98765-4321",
+        birthdate: fixedDate,
+        password: "  password123  ",
+      } as UserCreateData;
+      const sanitizedData = userCreateDataSanitizer.sanitize(data);
+
+      // O teste passa se não houver erros, indicando que os dados foram sanitizados corretamente
+      await expect(sut.create(data)).resolves.not.toThrow();
+      expect(createSpy).toHaveBeenCalledWith(sanitizedData);
     });
   });
 
