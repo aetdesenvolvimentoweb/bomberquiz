@@ -48,12 +48,14 @@ const makeSut = (): SutTypes => {
 };
 
 describe("UserCreateService", () => {
+  const fixedDate = new Date("2007-01-01T00:00:00.000Z");
+
   const makeUserCreateData = (): UserCreateData => ({
     name: "any_name",
-    email: "any_email",
-    phone: "any_phone",
-    birthdate: new Date(),
-    password: "any_password",
+    email: "any_email@mail.com",
+    phone: "(99) 99999-9999",
+    birthdate: fixedDate,
+    password: "AB123ab@",
   });
 
   let sut: UserCreateService;
@@ -300,6 +302,76 @@ describe("UserCreateService", () => {
               throw new InvalidParamError(errorMessage);
             });
 
+          await expect(sut.create(validData)).rejects.toThrow(
+            new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.create(validData)).resolves.not.toThrow();
+        }
+      },
+    );
+  });
+
+  describe("Validate password format", () => {
+    // Casos de teste para validação de senha
+    const passwordTestCases = [
+      {
+        scenario: "less than 8 characters",
+        password: "1234567",
+        shouldThrow: true,
+        errorMessage: "senha deve ter no mínimo 8 caracteres",
+      },
+      {
+        scenario: "without uppercase letter",
+        password: "1234567a",
+        shouldThrow: true,
+        errorMessage: "senha deve ter pelo menos uma letra maiúscula",
+      },
+      {
+        scenario: "without lowercase letter",
+        password: "1234567B",
+        shouldThrow: true,
+        errorMessage: "senha deve ter pelo menos uma letra minúscula",
+      },
+      {
+        scenario: "without number",
+        password: "ABCDEFab",
+        shouldThrow: true,
+        errorMessage: "senha deve ter pelo menos um número",
+      },
+      {
+        scenario: "without special character",
+        password: "ABC123abc",
+        shouldThrow: true,
+        errorMessage:
+          "senha deve ter pelo menos um caractere especial (@, #, $, %, etc.)",
+      },
+      {
+        scenario: "exactly 8 characters",
+        password: "AB12ab%*",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+      {
+        scenario: "more than 8 characters",
+        password: "ABC123abc@",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(passwordTestCases)(
+      "should handle password with $scenario",
+      async ({ password, shouldThrow, errorMessage }) => {
+        const validData = makeUserCreateData();
+        validData.password = password;
+
+        if (shouldThrow) {
+          jest
+            .spyOn(userCreateDataValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new InvalidParamError(errorMessage);
+            });
           await expect(sut.create(validData)).rejects.toThrow(
             new InvalidParamError(errorMessage),
           );

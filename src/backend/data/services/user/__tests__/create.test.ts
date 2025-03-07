@@ -14,6 +14,7 @@ import {
   UserEmailValidatorUseCase,
   UserPhoneValidatorUseCase,
 } from "@/backend/domain/validators";
+import { UserPasswordValidator } from "@/backend/data/validators/user/user.password.validator";
 
 interface SutTypes {
   sut: UserCreateService;
@@ -36,12 +37,14 @@ const makeSut = (): SutTypes => {
   const userEmailValidator = jest.mocked<UserEmailValidatorUseCase>({
     validate: jest.fn(),
   });
+  const userPasswordValidator = new UserPasswordValidator();
   const userPhoneValidator = jest.mocked<UserPhoneValidatorUseCase>({
     validate: jest.fn(),
   });
   const userCreateDataValidator = new UserCreateDataValidator({
     userBirthdateValidator,
     userEmailValidator,
+    userPasswordValidator,
     userPhoneValidator,
   });
   const sut = new UserCreateService({
@@ -66,10 +69,10 @@ describe("UserCreateService", () => {
   const fixedDate = new Date("2007-01-01T00:00:00.000Z");
   const makeUserCreateData = (): UserCreateData => ({
     name: "any_name",
-    email: "any_email",
+    email: "any_email@mail.com",
     phone: "(99) 99999-9999",
     birthdate: fixedDate,
-    password: "any_password",
+    password: "Val1d_P@ssw0rd",
   });
 
   let sut: UserCreateService;
@@ -179,7 +182,7 @@ describe("UserCreateService", () => {
         email: "  EMAIL@example.com  ",
         phone: "(11) 98765-4321",
         birthdate: fixedDate,
-        password: "  password123  ",
+        password: "  P@ssw0rd  ",
       } as UserCreateData;
       const sanitizedData = userCreateDataSanitizer.sanitize(data);
 
@@ -195,7 +198,7 @@ describe("UserCreateService", () => {
         email: "  EMAIL@example.com  ",
         phone: "(11) 98765-4321",
         birthdate: fixedDate,
-        password: "  password123  ",
+        password: "  P@ssw0rd  ",
       } as UserCreateData;
       const sanitizedData = userCreateDataSanitizer.sanitize(data);
 
@@ -357,6 +360,71 @@ describe("UserCreateService", () => {
               throw new InvalidParamError(errorMessage);
             });
 
+          await expect(sut.create(validData)).rejects.toThrow(
+            new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.create(validData)).resolves.not.toThrow();
+        }
+      },
+    );
+  });
+
+  describe("Validate password format", () => {
+    // Casos de teste para validação de senha
+    const passwordTestCases = [
+      {
+        scenario: "less than 8 characters",
+        password: "1234567",
+        shouldThrow: true,
+        errorMessage: "senha deve ter no mínimo 8 caracteres",
+      },
+      {
+        scenario: "without uppercase letter",
+        password: "1234567a",
+        shouldThrow: true,
+        errorMessage: "senha deve ter pelo menos uma letra maiúscula",
+      },
+      {
+        scenario: "without lowercase letter",
+        password: "1234567B",
+        shouldThrow: true,
+        errorMessage: "senha deve ter pelo menos uma letra minúscula",
+      },
+      {
+        scenario: "without number",
+        password: "ABCDEFab",
+        shouldThrow: true,
+        errorMessage: "senha deve ter pelo menos um número",
+      },
+      {
+        scenario: "without special character",
+        password: "ABC123abc",
+        shouldThrow: true,
+        errorMessage:
+          "senha deve ter pelo menos um caractere especial (@, #, $, %, etc.)",
+      },
+      {
+        scenario: "exactly 8 characters",
+        password: "AB12ab%*",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+      {
+        scenario: "more than 8 characters",
+        password: "ABC123abc@",
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(passwordTestCases)(
+      "should handle password with $scenario",
+      async ({ password, shouldThrow, errorMessage }) => {
+        const validData = makeUserCreateData();
+        validData.password = password;
+
+        if (shouldThrow) {
           await expect(sut.create(validData)).rejects.toThrow(
             new InvalidParamError(errorMessage),
           );
