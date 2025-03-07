@@ -15,7 +15,7 @@ import {
   DuplicateResourceError,
   InvalidParamError,
   MissingParamError,
-} from "@/backend/domain/erros";
+} from "@/backend/domain/errors";
 import {
   UserBirthdateValidatorUseCase,
   UserCreateDataValidatorUseCase,

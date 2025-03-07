@@ -1,4 +1,4 @@
-import { InvalidParamError } from "@/backend/domain/erros";
+import { InvalidParamError } from "@/backend/domain/errors";
 import { UserPasswordValidatorUseCase } from "@/backend/domain/validators";
 
 export class UserPasswordValidator implements UserPasswordValidatorUseCase {

@@ -6,6 +6,7 @@ const config: Config = {
   collectCoverageFrom: [
     "<rootDir>/src/backend/**/*.ts",
     "!<rootDir>/src/backend/domain/**/*.ts",
+    "<rootDir>/src/backend/domain/errors/*.ts",
   ],
   coveragePathIgnorePatterns: ["/node_modules/"],
   coverageDirectory: "coverage",

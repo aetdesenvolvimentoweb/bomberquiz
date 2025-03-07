@@ -15,7 +15,7 @@ import {
   DuplicateResourceError,
   InvalidParamError,
   MissingParamError,
-} from "@/backend/domain/erros";
+} from "@/backend/domain/errors";
 import { UserCreateDataValidator } from "@/backend/data/validators";
 
 interface SutTypes {

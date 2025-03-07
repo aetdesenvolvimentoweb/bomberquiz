@@ -1,4 +1,4 @@
-import { DuplicateResourceError } from "@/backend/domain/erros";
+import { DuplicateResourceError } from "@/backend/domain/errors";
 import { UserRepository } from "@/backend/domain/repositories";
 import { UserUniqueEmailValidatorUseCase } from "@/backend/domain/validators";
 
