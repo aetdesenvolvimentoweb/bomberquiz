@@ -1,8 +1,4 @@
-import {
-  USER_DEFAULT_AVATAR_URL,
-  USER_DEFAULT_ROLE,
-  UserCreateData,
-} from "@/backend/domain/entities";
+import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateService } from "../create";
 import { UserRepository } from "@/backend/domain/repositories";
 import { LoggerProvider } from "@/backend/domain/providers";
@@ -60,12 +56,20 @@ describe("UserCreateService", () => {
     password: "any_password",
   });
 
-  const sutInstance = makeSut();
-  const sut = sutInstance.sut;
-  const userRepository = sutInstance.userRepository;
-  const loggerProvider = sutInstance.loggerProvider;
-  const userCreateDataSanitizer = sutInstance.userCreateDataSanitizer;
-  const userCreateDataValidator = sutInstance.userCreateDataValidator;
+  let sut: UserCreateService;
+  let userRepository: UserRepository;
+  let loggerProvider: LoggerProvider;
+  let userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
+  let userCreateDataValidator: UserCreateDataValidatorUseCase;
+
+  beforeEach(() => {
+    const sutInstance = makeSut();
+    sut = sutInstance.sut;
+    userRepository = sutInstance.userRepository;
+    loggerProvider = sutInstance.loggerProvider;
+    userCreateDataSanitizer = sutInstance.userCreateDataSanitizer;
+    userCreateDataValidator = sutInstance.userCreateDataValidator;
+  });
 
   describe("success case", () => {
     it("should create a new user", async () => {
@@ -79,27 +83,6 @@ describe("UserCreateService", () => {
         .mockReturnValueOnce(userCreateData);
       await sut.create(userCreateData);
       expect(userRepository.create).toHaveBeenCalledWith(userCreateData);
-    });
-
-    it("should create user with correct values", async () => {
-      const userCreateData = makeUserCreateData();
-      jest.spyOn(userRepository, "findByEmail").mockResolvedValueOnce({
-        ...userCreateData,
-        id: "any_id",
-        avatarUrl: USER_DEFAULT_AVATAR_URL,
-        role: USER_DEFAULT_ROLE,
-        password: "hashed_password",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-      await sut.create(userCreateData);
-      const user = await userRepository.findByEmail(userCreateData.email);
-      expect(user).toEqual(
-        expect.objectContaining({
-          ...userCreateData,
-          password: "hashed_password",
-        }),
-      );
     });
   });
 

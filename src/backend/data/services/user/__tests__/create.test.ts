@@ -5,7 +5,7 @@ import { LoggerProvider } from "@/backend/domain/providers";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
 import { ConsoleLoggerProvider } from "@/backend/infra/providers";
-import { UserCreateDataSanitizer } from "@/backend/data/sanitizers/user/user.create.data";
+import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import { UserCreateDataValidator } from "@/backend/data/validators";
 import { MissingParamError } from "@/backend/domain/erros";
 import { UserCreateDataValidatorUseCase } from "@/backend/domain/validators";
@@ -48,12 +48,20 @@ describe("UserCreateService", () => {
     password: "any_password",
   });
 
-  const sutInstance = makeSut();
-  const sut = sutInstance.sut;
-  const userRepository = sutInstance.userRepository;
-  const loggerProvider = sutInstance.loggerProvider;
-  const userCreateDataSanitizer = sutInstance.userCreateDataSanitizer;
-  const userCreateDataValidator = sutInstance.userCreateDataValidator;
+  let sut: UserCreateService;
+  let userRepository: UserRepository;
+  let loggerProvider: LoggerProvider;
+  let userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
+  let userCreateDataValidator: UserCreateDataValidatorUseCase;
+
+  beforeEach(() => {
+    const sutInstance = makeSut();
+    sut = sutInstance.sut;
+    userRepository = sutInstance.userRepository;
+    loggerProvider = sutInstance.loggerProvider;
+    userCreateDataSanitizer = sutInstance.userCreateDataSanitizer;
+    userCreateDataValidator = sutInstance.userCreateDataValidator;
+  });
 
   describe("success case", () => {
     it("should create a new user", async () => {
@@ -129,10 +137,9 @@ describe("UserCreateService", () => {
   describe("sanitizer data", () => {
     it("should sanitize called with correct values", async () => {
       const userCreateData = makeUserCreateData();
+      const sanitizeSpy = jest.spyOn(userCreateDataSanitizer, "sanitize");
       await sut.create(userCreateData);
-      expect(userCreateDataSanitizer.sanitize).toHaveBeenCalledWith(
-        userCreateData,
-      );
+      expect(sanitizeSpy).toHaveBeenCalledWith(userCreateData);
     });
 
     it("should sanitize user data before validation", async () => {
