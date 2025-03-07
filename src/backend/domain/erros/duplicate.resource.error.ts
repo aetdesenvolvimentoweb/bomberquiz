@@ -6,6 +6,6 @@ import { ApplicationError } from "./application.error";
  */
 export class DuplicateResourceError extends ApplicationError {
   constructor(param: string) {
-    super(`${param} já está cadastrado no sistema`, 400);
+    super(`${param} já cadastrado no sistema`, 409);
   }
 }

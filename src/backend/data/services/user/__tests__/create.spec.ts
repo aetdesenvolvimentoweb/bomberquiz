@@ -1,5 +1,6 @@
 import {
   UserBirthdateValidatorUseCase,
+  UserCreateDataValidatorUseCase,
   UserEmailValidatorUseCase,
   UserPasswordValidatorUseCase,
   UserPhoneValidatorUseCase,
@@ -22,6 +23,7 @@ interface SutTypes {
   userRepository: UserRepository;
   loggerProvider: LoggerProvider;
   userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
+  userCreateDataValidator: UserCreateDataValidatorUseCase;
   userEmailValidator: UserEmailValidatorUseCase;
   userUniqueEmailValidator: UserUniqueEmailValidatorUseCase;
   userPhoneValidator: UserPhoneValidatorUseCase;
@@ -77,6 +79,7 @@ const makeSut = (): SutTypes => {
     userRepository,
     loggerProvider,
     userCreateDataSanitizer,
+    userCreateDataValidator,
     userEmailValidator,
     userUniqueEmailValidator,
     userPhoneValidator,
@@ -100,6 +103,7 @@ describe("UserCreateService", () => {
   let userRepository: UserRepository;
   let loggerProvider: LoggerProvider;
   let userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
+  let userCreateDataValidator: UserCreateDataValidatorUseCase;
   let userEmailValidator: UserEmailValidatorUseCase;
   let userUniqueEmailValidator: UserUniqueEmailValidatorUseCase;
   let userPhoneValidator: UserPhoneValidatorUseCase;
@@ -112,6 +116,7 @@ describe("UserCreateService", () => {
     userRepository = sutInstance.userRepository;
     loggerProvider = sutInstance.loggerProvider;
     userCreateDataSanitizer = sutInstance.userCreateDataSanitizer;
+    userCreateDataValidator = sutInstance.userCreateDataValidator;
     userEmailValidator = sutInstance.userEmailValidator;
     userUniqueEmailValidator = sutInstance.userUniqueEmailValidator;
     userPhoneValidator = sutInstance.userPhoneValidator;
@@ -184,6 +189,11 @@ describe("UserCreateService", () => {
       "should throw a MissingParamError if $field is not provided",
       async ({ field, label }) => {
         const missingData = omitField(field, userCreateData);
+        jest
+          .spyOn(userCreateDataValidator, "validate")
+          .mockImplementationOnce(() => {
+            throw new MissingParamError(label);
+          });
 
         await expect(sut.create(missingData)).rejects.toThrow(
           new MissingParamError(label),
