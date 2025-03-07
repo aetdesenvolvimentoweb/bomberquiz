@@ -138,6 +138,7 @@ describe("UserCreateService", () => {
     const requiredFields: { field: keyof UserCreateData; label: string }[] = [
       { field: "name", label: "nome" },
       { field: "email", label: "email" },
+      { field: "phone", label: "telefone" },
     ];
 
     // Função genérica para omitir um campo
