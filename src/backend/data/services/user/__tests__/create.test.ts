@@ -106,19 +106,19 @@ describe("UserCreateService", () => {
   });
 
   describe("success case", () => {
+    const userCreateData = makeUserCreateData();
+
     it("should create a new user", async () => {
-      await expect(sut.create(makeUserCreateData())).resolves.not.toThrow();
+      await expect(sut.create(userCreateData)).resolves.not.toThrow();
     });
 
     it("should call UserRepository.create with correct values", async () => {
-      const userCreateData = makeUserCreateData();
       const sanitizeSpy = jest.spyOn(userCreateDataSanitizer, "sanitize");
       await sut.create(userCreateData);
       expect(sanitizeSpy).toHaveBeenCalledWith(userCreateData);
     });
 
     it("should create user with correct values", async () => {
-      const userCreateData = makeUserCreateData();
       const sanitizedData = userCreateDataSanitizer.sanitize(userCreateData);
       await sut.create(userCreateData);
       const user = await userRepository.findByEmail(userCreateData.email);
@@ -133,8 +133,9 @@ describe("UserCreateService", () => {
   });
 
   describe("logger", () => {
+    const userCreateData = makeUserCreateData();
+
     it("should log user creation start", async () => {
-      const userCreateData = makeUserCreateData();
       const loggerSpy = jest.spyOn(loggerProvider, "info");
       await sut.create(userCreateData);
       expect(loggerSpy).toHaveBeenCalledWith("Iniciando a criação de usuário", {
@@ -144,7 +145,6 @@ describe("UserCreateService", () => {
     });
 
     it("should log user sanitized data", async () => {
-      const userCreateData = makeUserCreateData();
       const loggerSpy = jest.spyOn(loggerProvider, "info");
       await sut.create(userCreateData);
       expect(loggerSpy).toHaveBeenCalledWith("Dados sanitizados", {
@@ -153,7 +153,6 @@ describe("UserCreateService", () => {
     });
 
     it("should log user creation success", async () => {
-      const userCreateData = makeUserCreateData();
       const loggerSpy = jest.spyOn(loggerProvider, "info");
       await sut.create(userCreateData);
       expect(loggerSpy).toHaveBeenCalledWith("Usuário criado com sucesso", {
@@ -162,7 +161,6 @@ describe("UserCreateService", () => {
     });
 
     it("should log user creation error", async () => {
-      const userCreateData = makeUserCreateData();
       jest.spyOn(userRepository, "create").mockImplementationOnce(() => {
         throw new Error();
       });
@@ -177,8 +175,15 @@ describe("UserCreateService", () => {
   });
 
   describe("sanitizer data", () => {
+    const userCreateData = {
+      name: "  John Doe  ",
+      email: "  EMAIL@example.com  ",
+      phone: "(11) 98765-4321",
+      birthdate: fixedDate,
+      password: "  P@ssw0rd  ",
+    } as UserCreateData;
+
     it("should sanitize called with correct values", async () => {
-      const userCreateData = makeUserCreateData();
       const sanitizeSpy = jest.spyOn(userCreateDataSanitizer, "sanitize");
       await sut.create(userCreateData);
       expect(sanitizeSpy).toHaveBeenCalledWith(userCreateData);
@@ -186,38 +191,26 @@ describe("UserCreateService", () => {
 
     it("should sanitize user data before validation", async () => {
       const validatorSpy = jest.spyOn(userCreateDataValidator, "validate");
-      const data = {
-        name: "  John Doe  ",
-        email: "  EMAIL@example.com  ",
-        phone: "(11) 98765-4321",
-        birthdate: fixedDate,
-        password: "  P@ssw0rd  ",
-      } as UserCreateData;
-      const sanitizedData = userCreateDataSanitizer.sanitize(data);
+      const sanitizedData = userCreateDataSanitizer.sanitize(userCreateData);
 
       // O teste passa se não houver erros, indicando que os dados foram sanitizados corretamente
-      await expect(sut.create(data)).resolves.not.toThrow();
+      await expect(sut.create(userCreateData)).resolves.not.toThrow();
       expect(validatorSpy).toHaveBeenCalledWith(sanitizedData);
     });
 
     it("should create user with sanitized data", async () => {
       const createSpy = jest.spyOn(userRepository, "create");
-      const data = {
-        name: "  John Doe  ",
-        email: "  EMAIL@example.com  ",
-        phone: "(11) 98765-4321",
-        birthdate: fixedDate,
-        password: "  P@ssw0rd  ",
-      } as UserCreateData;
-      const sanitizedData = userCreateDataSanitizer.sanitize(data);
+      const sanitizedData = userCreateDataSanitizer.sanitize(userCreateData);
 
       // O teste passa se não houver erros, indicando que os dados foram sanitizados corretamente
-      await expect(sut.create(data)).resolves.not.toThrow();
+      await expect(sut.create(userCreateData)).resolves.not.toThrow();
       expect(createSpy).toHaveBeenCalledWith(sanitizedData);
     });
   });
 
   describe("validate data", () => {
+    const userCreateData = makeUserCreateData();
+
     // Campos obrigatórios
     const requiredFields: { field: keyof UserCreateData; label: string }[] = [
       { field: "name", label: "nome" },
@@ -237,8 +230,7 @@ describe("UserCreateService", () => {
     test.each(requiredFields)(
       "should throw a MissingParamError if $field is not provided",
       async ({ field, label }) => {
-        const validData = makeUserCreateData();
-        const missingData = omitField(field, validData);
+        const missingData = omitField(field, userCreateData);
 
         await expect(sut.create(missingData)).rejects.toThrow(
           new MissingParamError(label),
@@ -248,6 +240,8 @@ describe("UserCreateService", () => {
   });
 
   describe("Validate email format", () => {
+    const userCreateData = makeUserCreateData();
+
     // Casos de teste para validação de email
     const emailTestCases = [
       {
@@ -267,8 +261,7 @@ describe("UserCreateService", () => {
     test.each(emailTestCases)(
       "should handle email with $scenario",
       async ({ email, shouldThrow, errorMessage }) => {
-        const validData = makeUserCreateData();
-        validData.email = email;
+        userCreateData.email = email;
 
         if (shouldThrow) {
           jest
@@ -277,17 +270,19 @@ describe("UserCreateService", () => {
               throw new InvalidParamError(errorMessage);
             });
 
-          await expect(sut.create(validData)).rejects.toThrow(
+          await expect(sut.create(userCreateData)).rejects.toThrow(
             new InvalidParamError(errorMessage),
           );
         } else {
-          await expect(sut.create(validData)).resolves.not.toThrow();
+          await expect(sut.create(userCreateData)).resolves.not.toThrow();
         }
       },
     );
   });
 
   describe("Validate unique email", () => {
+    const userCreateData = makeUserCreateData();
+
     // Casos de teste para validação de email duplicado
     const emailTestCases = [
       {
@@ -305,22 +300,22 @@ describe("UserCreateService", () => {
     test.each(emailTestCases)(
       "should handle email with $scenario",
       async ({ shouldThrow, errorMessage }) => {
-        const validData = makeUserCreateData();
-
         if (shouldThrow) {
-          await sut.create(validData);
+          await sut.create(userCreateData);
 
-          await expect(sut.create(validData)).rejects.toThrow(
+          await expect(sut.create(userCreateData)).rejects.toThrow(
             new DuplicateResourceError(errorMessage),
           );
         } else {
-          await expect(sut.create(validData)).resolves.not.toThrow();
+          await expect(sut.create(userCreateData)).resolves.not.toThrow();
         }
       },
     );
   });
 
   describe("Validate phone format", () => {
+    const userCreateData = makeUserCreateData();
+
     // Casos de teste para validação de phone
     const phoneTestCases = [
       {
@@ -346,8 +341,7 @@ describe("UserCreateService", () => {
     test.each(phoneTestCases)(
       "should handle phone with $scenario",
       async ({ phone, shouldThrow, errorMessage }) => {
-        const validData = makeUserCreateData();
-        validData.phone = phone;
+        userCreateData.phone = phone;
 
         if (shouldThrow) {
           jest
@@ -356,17 +350,19 @@ describe("UserCreateService", () => {
               throw new InvalidParamError(errorMessage);
             });
 
-          await expect(sut.create(validData)).rejects.toThrow(
+          await expect(sut.create(userCreateData)).rejects.toThrow(
             new InvalidParamError(errorMessage),
           );
         } else {
-          await expect(sut.create(validData)).resolves.not.toThrow();
+          await expect(sut.create(userCreateData)).resolves.not.toThrow();
         }
       },
     );
   });
 
   describe("Validate birthdate format", () => {
+    const userCreateData = makeUserCreateData();
+
     // Casos de teste para validação de data de nascimento
     const birthdateTestCases = [
       {
@@ -392,8 +388,7 @@ describe("UserCreateService", () => {
     test.each(birthdateTestCases)(
       "should handle birthdate with $scenario",
       async ({ birthdate, shouldThrow, errorMessage }) => {
-        const validData = makeUserCreateData();
-        validData.birthdate = birthdate;
+        userCreateData.birthdate = birthdate;
 
         if (shouldThrow) {
           jest
@@ -402,17 +397,19 @@ describe("UserCreateService", () => {
               throw new InvalidParamError(errorMessage);
             });
 
-          await expect(sut.create(validData)).rejects.toThrow(
+          await expect(sut.create(userCreateData)).rejects.toThrow(
             new InvalidParamError(errorMessage),
           );
         } else {
-          await expect(sut.create(validData)).resolves.not.toThrow();
+          await expect(sut.create(userCreateData)).resolves.not.toThrow();
         }
       },
     );
   });
 
   describe("Validate password format", () => {
+    const userCreateData = makeUserCreateData();
+
     // Casos de teste para validação de senha
     const passwordTestCases = [
       {
@@ -463,15 +460,14 @@ describe("UserCreateService", () => {
     test.each(passwordTestCases)(
       "should handle password with $scenario",
       async ({ password, shouldThrow, errorMessage }) => {
-        const validData = makeUserCreateData();
-        validData.password = password;
+        userCreateData.password = password;
 
         if (shouldThrow) {
-          await expect(sut.create(validData)).rejects.toThrow(
+          await expect(sut.create(userCreateData)).rejects.toThrow(
             new InvalidParamError(errorMessage),
           );
         } else {
-          await expect(sut.create(validData)).resolves.not.toThrow();
+          await expect(sut.create(userCreateData)).resolves.not.toThrow();
         }
       },
     );
