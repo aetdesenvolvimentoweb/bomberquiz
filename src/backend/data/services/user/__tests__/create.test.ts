@@ -9,6 +9,7 @@ import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import { UserCreateDataValidator } from "@/backend/data/validators";
 import { InvalidParamError, MissingParamError } from "@/backend/domain/erros";
 import {
+  UserBirthdateValidatorUseCase,
   UserCreateDataValidatorUseCase,
   UserEmailValidatorUseCase,
   UserPhoneValidatorUseCase,
@@ -22,12 +23,16 @@ interface SutTypes {
   userCreateDataValidator: UserCreateDataValidatorUseCase;
   userEmailValidator: UserEmailValidatorUseCase;
   userPhoneValidator: UserPhoneValidatorUseCase;
+  userBirthdateValidator: UserBirthdateValidatorUseCase;
 }
 
 const makeSut = (): SutTypes => {
   const userRepository = new InMemoryUserRepository();
   const loggerProvider = new ConsoleLoggerProvider();
   const userCreateDataSanitizer = new UserCreateDataSanitizer();
+  const userBirthdateValidator = jest.mocked<UserBirthdateValidatorUseCase>({
+    validate: jest.fn(),
+  });
   const userEmailValidator = jest.mocked<UserEmailValidatorUseCase>({
     validate: jest.fn(),
   });
@@ -35,6 +40,7 @@ const makeSut = (): SutTypes => {
     validate: jest.fn(),
   });
   const userCreateDataValidator = new UserCreateDataValidator({
+    userBirthdateValidator,
     userEmailValidator,
     userPhoneValidator,
   });
@@ -52,6 +58,7 @@ const makeSut = (): SutTypes => {
     userCreateDataValidator,
     userEmailValidator,
     userPhoneValidator,
+    userBirthdateValidator,
   };
 };
 
@@ -72,6 +79,7 @@ describe("UserCreateService", () => {
   let userCreateDataValidator: UserCreateDataValidatorUseCase;
   let userEmailValidator: UserEmailValidatorUseCase;
   let userPhoneValidator: UserPhoneValidatorUseCase;
+  let userBirthdateValidator: UserBirthdateValidatorUseCase;
 
   beforeEach(() => {
     const sutInstance = makeSut();
@@ -82,6 +90,7 @@ describe("UserCreateService", () => {
     userCreateDataValidator = sutInstance.userCreateDataValidator;
     userEmailValidator = sutInstance.userEmailValidator;
     userPhoneValidator = sutInstance.userPhoneValidator;
+    userBirthdateValidator = sutInstance.userBirthdateValidator;
   });
 
   describe("success case", () => {
@@ -298,6 +307,52 @@ describe("UserCreateService", () => {
         if (shouldThrow) {
           jest
             .spyOn(userPhoneValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new InvalidParamError(errorMessage);
+            });
+
+          await expect(sut.create(validData)).rejects.toThrow(
+            new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.create(validData)).resolves.not.toThrow();
+        }
+      },
+    );
+  });
+
+  describe("Validate birthdate format", () => {
+    // Casos de teste para validação de data de nascimento
+    const birthdateTestCases = [
+      {
+        scenario: "invalid date",
+        birthdate: "invalid-date" as unknown as Date,
+        shouldThrow: true,
+        errorMessage: "data de nascimento inválida.",
+      },
+      {
+        scenario: "birthdate less then 18 years old",
+        birthdate: new Date(),
+        shouldThrow: true,
+        errorMessage: "data de nascimento inválida.",
+      },
+      {
+        scenario: "valid birthdate",
+        birthdate: new Date("2000-01-01"),
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(birthdateTestCases)(
+      "should handle birthdate with $scenario",
+      async ({ birthdate, shouldThrow, errorMessage }) => {
+        const validData = makeUserCreateData();
+        validData.birthdate = birthdate;
+
+        if (shouldThrow) {
+          jest
+            .spyOn(userBirthdateValidator, "validate")
             .mockImplementationOnce(() => {
               throw new InvalidParamError(errorMessage);
             });

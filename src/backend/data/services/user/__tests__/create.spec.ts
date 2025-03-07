@@ -263,4 +263,50 @@ describe("UserCreateService", () => {
       },
     );
   });
+
+  describe("Validate birthdate format", () => {
+    // Casos de teste para validação de data de nascimento
+    const birthdateTestCases = [
+      {
+        scenario: "invalid date",
+        birthdate: "invalid-date" as unknown as Date,
+        shouldThrow: true,
+        errorMessage: "data de nascimento inválida.",
+      },
+      {
+        scenario: "birthdate less then 18 years old",
+        birthdate: new Date(),
+        shouldThrow: true,
+        errorMessage: "data de nascimento inválida.",
+      },
+      {
+        scenario: "valid birthdate",
+        birthdate: new Date("2000-01-01"),
+        shouldThrow: false,
+        errorMessage: "",
+      },
+    ];
+
+    test.each(birthdateTestCases)(
+      "should handle birthdate with $scenario",
+      async ({ birthdate, shouldThrow, errorMessage }) => {
+        const validData = makeUserCreateData();
+        validData.birthdate = birthdate;
+
+        if (shouldThrow) {
+          jest
+            .spyOn(userCreateDataValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new InvalidParamError(errorMessage);
+            });
+
+          await expect(sut.create(validData)).rejects.toThrow(
+            new InvalidParamError(errorMessage),
+          );
+        } else {
+          await expect(sut.create(validData)).resolves.not.toThrow();
+        }
+      },
+    );
+  });
 });
