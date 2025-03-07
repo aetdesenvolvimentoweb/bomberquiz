@@ -140,6 +140,7 @@ describe("UserCreateService", () => {
       { field: "email", label: "email" },
       { field: "phone", label: "telefone" },
       { field: "birthdate", label: "data de nascimento" },
+      { field: "password", label: "senha" },
     ];
 
     // Função genérica para omitir um campo
