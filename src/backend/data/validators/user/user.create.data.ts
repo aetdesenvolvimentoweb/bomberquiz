@@ -7,6 +7,7 @@ export class UserCreateDataValidator implements UserCreateDataValidatorUseCase {
     const requiredFields: { field: keyof UserCreateData; label: string }[] = [
       { field: "name", label: "nome" },
       { field: "email", label: "email" },
+      { field: "phone", label: "telefone" },
     ];
 
     requiredFields.forEach(({ field, label }) => {
