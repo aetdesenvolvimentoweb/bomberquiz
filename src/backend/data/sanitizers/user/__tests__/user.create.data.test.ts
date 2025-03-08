@@ -1,20 +1,21 @@
-import {
-  UserBirthdateValidatorUseCase,
-  UserEmailValidatorUseCase,
-  UserPhoneValidatorUseCase,
-} from "@/backend/domain/validators";
+import { UserCreateService } from "@/backend/data/services";
 import {
   UserCreateDataValidator,
   UserPasswordValidator,
   UserUniqueEmailValidator,
 } from "@/backend/data/validators";
+import { UserCreateData } from "@/backend/domain/entities";
+import { UserRepository } from "@/backend/domain/repositories";
+import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
+import {
+  UserBirthdateValidatorUseCase,
+  UserEmailValidatorUseCase,
+  UserPhoneValidatorUseCase,
+} from "@/backend/domain/validators";
 import { ConsoleLoggerProvider } from "@/backend/infra/providers";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
+
 import { UserCreateDataSanitizer } from "../user.create.data";
-import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
-import { UserCreateService } from "@/backend/data/services";
-import { UserRepository } from "@/backend/domain/repositories";
-import { UserCreateData } from "@/backend/domain/entities";
 
 interface SutResponses {
   sut: UserCreateDataSanitizerUseCase;

@@ -3,6 +3,7 @@ import {
   LogLevel,
   LogPayload,
 } from "@/backend/domain/providers";
+
 import { ConsoleLoggerProvider } from "../console.logger";
 
 describe("ConsoleLogger", () => {

@@ -1,3 +1,5 @@
+import { UserCreateData } from "@/backend/domain/entities";
+import { MissingParamError } from "@/backend/domain/errors";
 import {
   UserBirthdateValidatorUseCase,
   UserCreateDataValidatorUseCase,
@@ -6,8 +8,6 @@ import {
   UserPhoneValidatorUseCase,
   UserUniqueEmailValidatorUseCase,
 } from "@/backend/domain/validators";
-import { UserCreateData } from "@/backend/domain/entities";
-import { MissingParamError } from "@/backend/domain/errors";
 
 interface UserCreateDataValidatorProps {
   userBirthdateValidator: UserBirthdateValidatorUseCase;

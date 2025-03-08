@@ -1,18 +1,19 @@
-import {
-  UserBirthdateValidatorUseCase,
-  UserCreateDataValidatorUseCase,
-  UserEmailValidatorUseCase,
-  UserPhoneValidatorUseCase,
-} from "@/backend/domain/validators";
-import { UserRepository } from "@/backend/domain/repositories";
-import { UserCreateDataValidator } from "../user.create.data";
 import { UserCreateData } from "@/backend/domain/entities";
 import {
   DuplicateResourceError,
   InvalidParamError,
   MissingParamError,
 } from "@/backend/domain/errors";
+import { UserRepository } from "@/backend/domain/repositories";
+import {
+  UserBirthdateValidatorUseCase,
+  UserCreateDataValidatorUseCase,
+  UserEmailValidatorUseCase,
+  UserPhoneValidatorUseCase,
+} from "@/backend/domain/validators";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
+
+import { UserCreateDataValidator } from "../user.create.data";
 import { UserPasswordValidator } from "../user.password.validator";
 import { UserUniqueEmailValidator } from "../user.unique.email.validator";
 

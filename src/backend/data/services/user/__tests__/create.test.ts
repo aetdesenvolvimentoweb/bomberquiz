@@ -1,27 +1,28 @@
+import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import {
   UserCreateDataValidator,
   UserPasswordValidator,
   UserUniqueEmailValidator,
 } from "@/backend/data/validators";
 import { UserCreateData } from "@/backend/domain/entities";
-import { UserRepository } from "@/backend/domain/repositories";
-import { UserCreateService } from "../create";
-import { LoggerProvider } from "@/backend/domain/providers";
-import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
-import { InMemoryUserRepository } from "@/backend/infra/repositories";
-import { ConsoleLoggerProvider } from "@/backend/infra/providers";
-import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import {
   DuplicateResourceError,
   InvalidParamError,
   MissingParamError,
 } from "@/backend/domain/errors";
+import { LoggerProvider } from "@/backend/domain/providers";
+import { UserRepository } from "@/backend/domain/repositories";
+import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import {
   UserBirthdateValidatorUseCase,
   UserCreateDataValidatorUseCase,
   UserEmailValidatorUseCase,
   UserPhoneValidatorUseCase,
 } from "@/backend/domain/validators";
+import { ConsoleLoggerProvider } from "@/backend/infra/providers";
+import { InMemoryUserRepository } from "@/backend/infra/repositories";
+
+import { UserCreateService } from "../create";
 
 interface SutTypes {
   sut: UserCreateService;

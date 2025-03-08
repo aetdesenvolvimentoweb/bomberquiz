@@ -1,3 +1,10 @@
+import { UserCreateData } from "@/backend/domain/entities";
+import {
+  DuplicateResourceError,
+  InvalidParamError,
+  MissingParamError,
+} from "@/backend/domain/errors";
+import { UserRepository } from "@/backend/domain/repositories";
 import {
   UserBirthdateValidatorUseCase,
   UserCreateDataValidatorUseCase,
@@ -6,14 +13,8 @@ import {
   UserPhoneValidatorUseCase,
   UserUniqueEmailValidatorUseCase,
 } from "@/backend/domain/validators";
-import { UserRepository } from "@/backend/domain/repositories";
+
 import { UserCreateDataValidator } from "../user.create.data";
-import { UserCreateData } from "@/backend/domain/entities";
-import {
-  DuplicateResourceError,
-  InvalidParamError,
-  MissingParamError,
-} from "@/backend/domain/errors";
 
 interface SutResponses {
   sut: UserCreateDataValidatorUseCase;

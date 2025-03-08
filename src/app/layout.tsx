@@ -1,6 +1,7 @@
+import "@/frontend/styles/globals.css";
+
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
-import "@/frontend/styles/globals.css";
 
 const montSerrat = Montserrat({
   weight: ["300", "400", "600", "700"],

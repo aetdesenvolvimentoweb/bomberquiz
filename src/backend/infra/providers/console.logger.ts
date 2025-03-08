@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  LoggerProvider,
   LogLevel,
   LogPayload,
-  LoggerProvider,
 } from "@/backend/domain/providers";
 
 export class ConsoleLoggerProvider implements LoggerProvider {

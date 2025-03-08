@@ -1,3 +1,13 @@
+import { UserCreateDataValidator } from "@/backend/data/validators";
+import { UserCreateData } from "@/backend/domain/entities";
+import {
+  DuplicateResourceError,
+  InvalidParamError,
+  MissingParamError,
+} from "@/backend/domain/errors";
+import { LoggerProvider } from "@/backend/domain/providers";
+import { UserRepository } from "@/backend/domain/repositories";
+import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import {
   UserBirthdateValidatorUseCase,
   UserCreateDataValidatorUseCase,
@@ -6,17 +16,8 @@ import {
   UserPhoneValidatorUseCase,
   UserUniqueEmailValidatorUseCase,
 } from "@/backend/domain/validators";
-import { UserCreateData } from "@/backend/domain/entities";
+
 import { UserCreateService } from "../create";
-import { UserRepository } from "@/backend/domain/repositories";
-import { LoggerProvider } from "@/backend/domain/providers";
-import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
-import {
-  DuplicateResourceError,
-  InvalidParamError,
-  MissingParamError,
-} from "@/backend/domain/errors";
-import { UserCreateDataValidator } from "@/backend/data/validators";
 
 interface SutTypes {
   sut: UserCreateService;
