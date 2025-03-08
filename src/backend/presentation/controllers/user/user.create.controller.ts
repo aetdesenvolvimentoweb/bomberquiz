@@ -1,6 +1,6 @@
 import { UserCreateService } from "@/backend/data/services";
 import { UserCreateData } from "@/backend/domain/entities";
-import { ApplicationError } from "@/backend/domain/errors";
+import { ApplicationError, MissingParamError } from "@/backend/domain/errors";
 
 import { Controller, HttpRequest, HttpResponse } from "../../protocols";
 
@@ -16,6 +16,10 @@ export class UserCreateController implements Controller<UserCreateData> {
   ): Promise<HttpResponse> => {
     try {
       const { userCreateService } = this.props;
+
+      if (!request.body) {
+        throw new MissingParamError("corpo da requisição não informado");
+      }
 
       await userCreateService.create(request.body as UserCreateData);
 
