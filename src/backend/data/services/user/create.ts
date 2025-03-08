@@ -25,7 +25,7 @@ export class UserCreateService implements UserCreateUseCase {
 
     try {
       loggerProvider.info("Iniciando a criação de usuário", {
-        action: "user.create.start",
+        action: "user.create.service.start",
         metadata: { email: data.email },
       });
 
@@ -44,11 +44,11 @@ export class UserCreateService implements UserCreateUseCase {
       await userRepository.create(sanitizedData);
 
       loggerProvider.info("Usuário criado com sucesso", {
-        action: "user.created",
+        action: "user.created.service",
       });
     } catch (error: unknown) {
       loggerProvider.error("Erro ao criar usuário", {
-        action: "user.creation.failed",
+        action: "user.creation.failed.service",
         metadata: { email: data.email },
         error,
       });

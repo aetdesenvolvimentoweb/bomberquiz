@@ -140,7 +140,7 @@ describe("UserCreateService", () => {
       const loggerSpy = jest.spyOn(loggerProvider, "info");
       await sut.create(userCreateData);
       expect(loggerSpy).toHaveBeenCalledWith("Iniciando a criação de usuário", {
-        action: "user.create.start",
+        action: "user.create.service.start",
         metadata: { email: userCreateData.email },
       });
     });
@@ -157,7 +157,7 @@ describe("UserCreateService", () => {
       const loggerSpy = jest.spyOn(loggerProvider, "info");
       await sut.create(userCreateData);
       expect(loggerSpy).toHaveBeenCalledWith("Usuário criado com sucesso", {
-        action: "user.created",
+        action: "user.created.service",
       });
     });
 
@@ -168,7 +168,7 @@ describe("UserCreateService", () => {
       const loggerSpy = jest.spyOn(loggerProvider, "error");
       await expect(sut.create(userCreateData)).rejects.toThrow();
       expect(loggerSpy).toHaveBeenCalledWith("Erro ao criar usuário", {
-        action: "user.creation.failed",
+        action: "user.creation.failed.service",
         metadata: { email: userCreateData.email },
         error: new Error(),
       });

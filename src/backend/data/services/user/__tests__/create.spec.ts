@@ -217,7 +217,7 @@ describe("UserCreateService", () => {
       expect(loggerProvider.info).toHaveBeenCalledWith(
         "Iniciando a criação de usuário",
         {
-          action: "user.create.start",
+          action: "user.create.service.start",
           metadata: { email: userCreateData.email },
         },
       );
@@ -235,7 +235,7 @@ describe("UserCreateService", () => {
       expect(loggerProvider.info).toHaveBeenCalledWith(
         "Usuário criado com sucesso",
         {
-          action: "user.created",
+          action: "user.created.service",
         },
       );
     });
@@ -246,7 +246,7 @@ describe("UserCreateService", () => {
       expect(loggerProvider.error).toHaveBeenCalledWith(
         "Erro ao criar usuário",
         {
-          action: "user.creation.failed",
+          action: "user.creation.failed.service",
           metadata: { email: userCreateData.email },
           error: new Error(),
         },

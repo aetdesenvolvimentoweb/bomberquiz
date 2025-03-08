@@ -22,6 +22,7 @@ interface SutResponses {
   sut: Controller<UserCreateData>;
   userCreateService: UserCreateService;
   userCreateDataValidator: UserCreateDataValidator;
+  loggerProvider: LoggerProvider;
 }
 
 const makeSut = (): SutResponses => {
@@ -69,11 +70,13 @@ const makeSut = (): SutResponses => {
   });
   const sut = new UserCreateController({
     userCreateService,
+    loggerProvider,
   });
   return {
     sut,
     userCreateService,
     userCreateDataValidator,
+    loggerProvider,
   };
 };
 
@@ -91,12 +94,74 @@ describe("UserCreateController", () => {
   let sut: Controller<UserCreateData>;
   let userCreateService: UserCreateService;
   let userCreateDataValidator: UserCreateDataValidator;
+  let loggerProvider: LoggerProvider;
 
   beforeEach(() => {
     const sutInstance = makeSut();
     sut = sutInstance.sut;
     userCreateService = sutInstance.userCreateService;
     userCreateDataValidator = sutInstance.userCreateDataValidator;
+    loggerProvider = sutInstance.loggerProvider;
+  });
+
+  describe("logger", () => {
+    it("should log user creation start", async () => {
+      const httpRequest = makeHttpRequest();
+      const loggerSpy = jest.spyOn(loggerProvider, "info");
+
+      await sut.handle(httpRequest);
+
+      expect(loggerSpy).toHaveBeenCalledWith("Iniciando a criação de usuário", {
+        action: "user.create.service.start",
+        metadata: { email: httpRequest.body?.email },
+      });
+    });
+
+    it("should log request validated", async () => {
+      const httpRequest = makeHttpRequest();
+      const loggerSpy = jest.spyOn(loggerProvider, "info");
+
+      await sut.handle(httpRequest);
+
+      expect(loggerSpy).toHaveBeenCalledWith(
+        "Requisição validada com sucesso",
+        {
+          action: "request.body.validated",
+        },
+      );
+    });
+
+    it("should log user creation success", async () => {
+      const httpRequest = makeHttpRequest();
+      jest.spyOn(userCreateService, "create").mockImplementationOnce(() => {
+        return Promise.resolve();
+      });
+      const loggerSpy = jest.spyOn(loggerProvider, "info");
+
+      await sut.handle(httpRequest);
+
+      expect(loggerSpy).toHaveBeenCalledWith("Usuário criado com sucesso", {
+        action: "user.created.controller",
+      });
+    });
+
+    it("should log user creation error", async () => {
+      const httpRequest = makeHttpRequest();
+      jest.spyOn(userCreateService, "create").mockImplementationOnce(() => {
+        throw new Error();
+      });
+      const loggerSpy = jest.spyOn(loggerProvider, "error");
+
+      const httpResponse: HttpResponse = await sut.handle(httpRequest);
+
+      expect(httpResponse.statusCode).toBe(500);
+
+      expect(loggerSpy).toHaveBeenCalledWith("Erro ao criar usuário", {
+        action: "user.creation.failed.controller",
+        metadata: { email: httpRequest.body?.email },
+        error: new Error(),
+      });
+    });
   });
 
   describe("success", () => {
