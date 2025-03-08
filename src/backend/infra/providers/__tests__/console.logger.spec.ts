@@ -115,6 +115,48 @@ describe("ConsoleLogger", () => {
         loggerProvider.log(LogLevel.INFO, message, payload);
       }).not.toThrow();
     });
+
+    it("should call console.warn for WARN level and include formatted payload", () => {
+      const message = "Warning message";
+      const payload = { action: "test_action", metadata: { test: true } };
+
+      loggerProvider.log(LogLevel.WARN, message, payload);
+
+      // Verificar que foi chamado e contém a estrutura esperada
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+      const logArgument = consoleWarnSpy.mock.calls[0][0];
+
+      // Converter de volta para objeto para verificação estruturada
+      const parsedLog = JSON.parse(logArgument);
+      expect(parsedLog.payload.metadata.test).toBe(true);
+    });
+
+    it("should call console.debug for DEBUG level and include formatted payload", () => {
+      const message = "Debug message";
+      const payload = { action: "test_action", metadata: { test: true } };
+
+      loggerProvider.log(LogLevel.DEBUG, message, payload);
+
+      expect(consoleDebugSpy).toHaveBeenCalledTimes(1);
+      const logArgument = consoleDebugSpy.mock.calls[0][0];
+
+      const parsedLog = JSON.parse(logArgument);
+      expect(parsedLog.payload.metadata.test).toBe(true);
+    });
+
+    it("should call console.log for TRACE level (not recognized level)", () => {
+      const message = "Trace message";
+      const payload = { action: "test_action", metadata: { test: true } };
+
+      // Usando um nível não reconhecido diretamente
+      loggerProvider.log("TRACE" as LogLevel, message, payload);
+
+      expect(consoleLogSpy).toHaveBeenCalledTimes(1);
+      const logArgument = consoleLogSpy.mock.calls[0][0];
+
+      const parsedLog = JSON.parse(logArgument);
+      expect(parsedLog.payload.metadata.test).toBe(true);
+    });
   });
 
   describe("convenience methods", () => {
