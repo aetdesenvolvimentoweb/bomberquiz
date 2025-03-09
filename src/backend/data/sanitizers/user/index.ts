@@ -1,1 +1,1 @@
-export * from "./user.create.data";
+export * from "./user.create.data.sanitizer";

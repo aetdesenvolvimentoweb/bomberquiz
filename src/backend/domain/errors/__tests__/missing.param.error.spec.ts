@@ -1,4 +1,4 @@
-import { MissingParamError } from "../missing.param.error";
+import { MissingParamError } from "@/backend/domain/errors";
 
 describe("MissingParamError", () => {
   it("should create an error with the provided message", () => {

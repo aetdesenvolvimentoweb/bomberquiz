@@ -1,3 +1,4 @@
+import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import { UserCreateService } from "@/backend/data/services";
 import {
   UserCreateDataValidator,
@@ -14,8 +15,6 @@ import {
 } from "@/backend/domain/validators";
 import { ConsoleLoggerProvider } from "@/backend/infra/providers";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
-
-import { UserCreateDataSanitizer } from "../user.create.data";
 
 interface SutResponses {
   sut: UserCreateDataSanitizerUseCase;

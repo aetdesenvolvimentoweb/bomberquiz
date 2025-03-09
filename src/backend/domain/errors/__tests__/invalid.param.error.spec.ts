@@ -1,4 +1,4 @@
-import { InvalidParamError } from "../invalid.param.error";
+import { InvalidParamError } from "@/backend/domain/errors";
 
 describe("InvalidParamError", () => {
   it("should create an invalid param error with the provided message", () => {

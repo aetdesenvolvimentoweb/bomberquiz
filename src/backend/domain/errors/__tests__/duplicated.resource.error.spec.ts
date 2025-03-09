@@ -1,4 +1,4 @@
-import { DuplicateResourceError } from "../duplicate.resource.error";
+import { DuplicateResourceError } from "@/backend/domain/errors";
 
 describe("DuplicateResourceError", () => {
   it("should create a duplicate resource error with the provided message", () => {

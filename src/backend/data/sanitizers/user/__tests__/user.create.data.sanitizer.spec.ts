@@ -1,7 +1,6 @@
+import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
-
-import { UserCreateDataSanitizer } from "../user.create.data";
 
 describe("UserCreateDataSanitizer", () => {
   let userCreateDataSanitizer: UserCreateDataSanitizerUseCase;

@@ -1,3 +1,4 @@
+import { UserCreateDataValidator } from "@/backend/data/validators";
 import { UserCreateData } from "@/backend/domain/entities";
 import {
   DuplicateResourceError,
@@ -9,13 +10,10 @@ import {
   UserBirthdateValidatorUseCase,
   UserCreateDataValidatorUseCase,
   UserEmailValidatorUseCase,
+  UserPasswordValidatorUseCase,
   UserPhoneValidatorUseCase,
+  UserUniqueEmailValidatorUseCase,
 } from "@/backend/domain/validators";
-import { InMemoryUserRepository } from "@/backend/infra/repositories";
-
-import { UserCreateDataValidator } from "../user.create.data";
-import { UserPasswordValidator } from "../user.password.validator";
-import { UserUniqueEmailValidator } from "../user.unique.email.validator";
 
 interface SutResponses {
   sut: UserCreateDataValidatorUseCase;
@@ -23,21 +21,32 @@ interface SutResponses {
   userEmailValidator: UserEmailValidatorUseCase;
   userPhoneValidator: UserPhoneValidatorUseCase;
   userRepository: UserRepository;
+  userUniqueEmailValidator: UserUniqueEmailValidatorUseCase;
+  userPasswordValidator: UserPasswordValidatorUseCase;
 }
 
 const makeSut = (): SutResponses => {
-  const userRepository = new InMemoryUserRepository();
+  const userRepository = jest.mocked<UserRepository>({
+    create: jest.fn(),
+    findByEmail: jest.fn(),
+  });
   const userBirthdateValidator = jest.mocked<UserBirthdateValidatorUseCase>({
     validate: jest.fn(),
   });
   const userEmailValidator = jest.mocked<UserEmailValidatorUseCase>({
     validate: jest.fn(),
   });
+  const userPasswordValidator = jest.mocked<UserPasswordValidatorUseCase>({
+    validate: jest.fn(),
+  });
   const userPhoneValidator = jest.mocked<UserPhoneValidatorUseCase>({
     validate: jest.fn(),
   });
-  const userUniqueEmailValidator = new UserUniqueEmailValidator(userRepository);
-  const userPasswordValidator = new UserPasswordValidator();
+  const userUniqueEmailValidator = jest.mocked<UserUniqueEmailValidatorUseCase>(
+    {
+      validate: jest.fn(),
+    },
+  );
   const sut = new UserCreateDataValidator({
     userBirthdateValidator,
     userEmailValidator,
@@ -52,16 +61,18 @@ const makeSut = (): SutResponses => {
     userEmailValidator,
     userPhoneValidator,
     userRepository,
+    userUniqueEmailValidator,
+    userPasswordValidator,
   };
 };
 
 describe("UserCreateDataValidator", () => {
   const makeUserCreateData = (): UserCreateData => ({
     name: "any_name",
-    email: "any_email@mail.com",
-    phone: "(99) 99999-9999",
-    birthdate: new Date("2007-01-01T00:00:00.000Z"),
-    password: "P@ssw0rd",
+    email: "any_email",
+    phone: "any_phone",
+    birthdate: new Date(),
+    password: "any_password",
   });
 
   let sut: UserCreateDataValidatorUseCase;
@@ -69,6 +80,8 @@ describe("UserCreateDataValidator", () => {
   let userEmailValidator: UserEmailValidatorUseCase;
   let userPhoneValidator: UserPhoneValidatorUseCase;
   let userRepository: UserRepository;
+  let userUniqueEmailValidator: UserUniqueEmailValidatorUseCase;
+  let userPasswordValidator: UserPasswordValidatorUseCase;
 
   beforeEach(() => {
     const sutInstance = makeSut();
@@ -77,11 +90,11 @@ describe("UserCreateDataValidator", () => {
     userEmailValidator = sutInstance.userEmailValidator;
     userPhoneValidator = sutInstance.userPhoneValidator;
     userRepository = sutInstance.userRepository;
+    userUniqueEmailValidator = sutInstance.userUniqueEmailValidator;
+    userPasswordValidator = sutInstance.userPasswordValidator;
   });
 
   describe("validate required fields", () => {
-    const userCreateData = makeUserCreateData();
-
     // Mapa de campos para labels
     const fieldToLabelMap: Record<string, string> = {
       name: "nome",
@@ -107,7 +120,8 @@ describe("UserCreateDataValidator", () => {
     test.each(testCases)(
       "should throw a MissingParamError if $field is not provided",
       async ({ field, label }) => {
-        const invalidData = omitField(field, userCreateData);
+        const validData = makeUserCreateData();
+        const invalidData = omitField(field, validData);
 
         await expect(sut.validate(invalidData)).rejects.toThrow(
           new MissingParamError(label),
@@ -116,13 +130,13 @@ describe("UserCreateDataValidator", () => {
     );
 
     it("should not throw if all required fields are provided", async () => {
-      await expect(sut.validate(userCreateData)).resolves.not.toThrow();
+      const validData = makeUserCreateData();
+
+      await expect(sut.validate(validData)).resolves.not.toThrow();
     });
   });
 
   describe("Validate email format", () => {
-    const userCreateData = makeUserCreateData();
-
     // Casos de teste para validação de email
     const emailTestCases = [
       {
@@ -142,7 +156,8 @@ describe("UserCreateDataValidator", () => {
     test.each(emailTestCases)(
       "should handle email with $scenario",
       async ({ email, shouldThrow, errorMessage }) => {
-        userCreateData.email = email;
+        const validData = makeUserCreateData();
+        validData.email = email;
 
         if (shouldThrow) {
           jest
@@ -151,19 +166,17 @@ describe("UserCreateDataValidator", () => {
               throw new InvalidParamError(errorMessage);
             });
 
-          await expect(sut.validate(userCreateData)).rejects.toThrow(
+          await expect(sut.validate(validData)).rejects.toThrow(
             new InvalidParamError(errorMessage),
           );
         } else {
-          await expect(sut.validate(userCreateData)).resolves.not.toThrow();
+          await expect(sut.validate(validData)).resolves.not.toThrow();
         }
       },
     );
   });
 
   describe("Validate unique email", () => {
-    const userCreateData = makeUserCreateData();
-
     // Casos de teste para validação de email duplicado
     const emailTestCases = [
       {
@@ -181,22 +194,27 @@ describe("UserCreateDataValidator", () => {
     test.each(emailTestCases)(
       "should handle email with $scenario",
       async ({ shouldThrow, errorMessage }) => {
-        if (shouldThrow) {
-          await userRepository.create(userCreateData);
+        const validData = makeUserCreateData();
 
-          await expect(sut.validate(userCreateData)).rejects.toThrow(
+        if (shouldThrow) {
+          await userRepository.create(validData);
+          jest
+            .spyOn(userUniqueEmailValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new DuplicateResourceError(errorMessage);
+            });
+
+          await expect(sut.validate(validData)).rejects.toThrow(
             new DuplicateResourceError(errorMessage),
           );
         } else {
-          await expect(sut.validate(userCreateData)).resolves.not.toThrow();
+          await expect(sut.validate(validData)).resolves.not.toThrow();
         }
       },
     );
   });
 
   describe("Validate phone format", () => {
-    const userCreateData = makeUserCreateData();
-
     // Casos de teste para validação de telefone
     const phoneTestCases = [
       {
@@ -222,7 +240,8 @@ describe("UserCreateDataValidator", () => {
     test.each(phoneTestCases)(
       "should handle phone with $scenario",
       async ({ phone, shouldThrow, errorMessage }) => {
-        userCreateData.phone = phone;
+        const validData = makeUserCreateData();
+        validData.phone = phone;
 
         if (shouldThrow) {
           jest
@@ -231,19 +250,17 @@ describe("UserCreateDataValidator", () => {
               throw new InvalidParamError(errorMessage);
             });
 
-          await expect(sut.validate(userCreateData)).rejects.toThrow(
+          await expect(sut.validate(validData)).rejects.toThrow(
             new InvalidParamError(errorMessage),
           );
         } else {
-          await expect(sut.validate(userCreateData)).resolves.not.toThrow();
+          await expect(sut.validate(validData)).resolves.not.toThrow();
         }
       },
     );
   });
 
   describe("Validate birthdate format", () => {
-    const userCreateData = makeUserCreateData();
-
     // Casos de teste para validação de data de nascimento
     const birthdateTestCases = [
       {
@@ -269,7 +286,8 @@ describe("UserCreateDataValidator", () => {
     test.each(birthdateTestCases)(
       "should handle birthdate with $scenario",
       async ({ birthdate, shouldThrow, errorMessage }) => {
-        userCreateData.birthdate = birthdate;
+        const validData = makeUserCreateData();
+        validData.birthdate = birthdate;
 
         if (shouldThrow) {
           jest
@@ -278,19 +296,17 @@ describe("UserCreateDataValidator", () => {
               throw new InvalidParamError(errorMessage);
             });
 
-          await expect(sut.validate(userCreateData)).rejects.toThrow(
+          await expect(sut.validate(validData)).rejects.toThrow(
             new InvalidParamError(errorMessage),
           );
         } else {
-          await expect(sut.validate(userCreateData)).resolves.not.toThrow();
+          await expect(sut.validate(validData)).resolves.not.toThrow();
         }
       },
     );
   });
 
   describe("Validate password format", () => {
-    const userCreateData = makeUserCreateData();
-
     // Casos de teste para validação de senha
     const passwordTestCases = [
       {
@@ -341,9 +357,15 @@ describe("UserCreateDataValidator", () => {
     test.each(passwordTestCases)(
       "should handle password with $scenario",
       async ({ password, shouldThrow, errorMessage }) => {
-        userCreateData.password = password;
-
+        const userCreateData = makeUserCreateData();
         if (shouldThrow) {
+          userCreateData.password = password;
+          jest
+            .spyOn(userPasswordValidator, "validate")
+            .mockImplementationOnce(() => {
+              throw new InvalidParamError(errorMessage);
+            });
+
           await expect(sut.validate(userCreateData)).rejects.toThrow(
             new InvalidParamError(errorMessage),
           );

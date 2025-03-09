@@ -1,4 +1,4 @@
-import { ApplicationError } from "../application.error";
+import { ApplicationError } from "@/backend/domain/errors";
 
 describe("ApplicationError", () => {
   it("should create an application error with the provided message and status code", () => {

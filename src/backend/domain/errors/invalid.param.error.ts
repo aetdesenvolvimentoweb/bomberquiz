@@ -1,4 +1,4 @@
-import { ApplicationError } from "./application.error";
+import { ApplicationError } from "@/backend/domain/errors";
 
 /**
  * Erro lançado quando um parâmetro informado é inválido

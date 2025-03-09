@@ -1,4 +1,4 @@
-import { UserCreateData } from "../../entities";
+import { UserCreateData } from "@/backend/domain/entities";
 
 /**
  * Interface que define o sanitizador para dados de criação de usuário

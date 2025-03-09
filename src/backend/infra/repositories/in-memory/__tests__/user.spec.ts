@@ -1,7 +1,6 @@
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserRepository } from "@/backend/domain/repositories";
-
-import { InMemoryUserRepository } from "../user";
+import { InMemoryUserRepository } from "@/backend/infra/repositories";
 
 interface SutResponses {
   sut: UserRepository;
