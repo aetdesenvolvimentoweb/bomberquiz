@@ -1,25 +1,22 @@
-import {
-  LoggerProvider,
-  LogLevel,
-  LogPayload,
-} from "@/backend/domain/providers";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { LogLevel, LogPayload } from "@/backend/domain/providers";
 import { ConsoleLoggerProvider } from "@/backend/infra/providers";
 
-describe("ConsoleLogger", () => {
-  let loggerProvider: LoggerProvider;
-  let consoleErrorSpy: jest.SpyInstance;
-  let consoleWarnSpy: jest.SpyInstance;
-  let consoleInfoSpy: jest.SpyInstance;
-  let consoleDebugSpy: jest.SpyInstance;
+describe("ConsoleLoggerProvider", () => {
+  let consoleLoggerProvider: ConsoleLoggerProvider;
   let consoleLogSpy: jest.SpyInstance;
+  let consoleInfoSpy: jest.SpyInstance;
+  let consoleWarnSpy: jest.SpyInstance;
+  let consoleErrorSpy: jest.SpyInstance;
+  let consoleDebugSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    loggerProvider = new ConsoleLoggerProvider();
-    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
-    consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation();
-    consoleInfoSpy = jest.spyOn(console, "info").mockImplementation();
-    consoleDebugSpy = jest.spyOn(console, "debug").mockImplementation();
+    consoleLoggerProvider = new ConsoleLoggerProvider();
     consoleLogSpy = jest.spyOn(console, "log").mockImplementation();
+    consoleInfoSpy = jest.spyOn(console, "info").mockImplementation();
+    consoleWarnSpy = jest.spyOn(console, "warn").mockImplementation();
+    consoleErrorSpy = jest.spyOn(console, "error").mockImplementation();
+    consoleDebugSpy = jest.spyOn(console, "debug").mockImplementation();
   });
 
   afterEach(() => {
@@ -27,219 +24,145 @@ describe("ConsoleLogger", () => {
   });
 
   describe("log method", () => {
-    it("should call console.error for ERROR level", () => {
-      const message = "Error message";
-      const payload: LogPayload = { action: "test_action" };
+    it("should log using console.log for unrecognized log levels", () => {
+      const message = "Test message";
+      const payload: LogPayload = { action: "test data" };
 
-      loggerProvider.log(LogLevel.ERROR, message, payload);
+      // @ts-expect-error - Testing with invalid log level
+      consoleLoggerProvider.log("INVALID_LEVEL", message, payload);
+
+      expect(consoleLogSpy).toHaveBeenCalledTimes(1);
+      expect(consoleLogSpy.mock.calls[0][0]).toContain(message);
+      expect(consoleLogSpy.mock.calls[0][0]).toContain("test data");
+    });
+
+    it("should log using console.error for ERROR level", () => {
+      const message = "Error message";
+      consoleLoggerProvider.log(LogLevel.ERROR, message);
 
       expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining(message),
-      );
+      expect(consoleErrorSpy.mock.calls[0][0]).toContain(message);
+      expect(consoleErrorSpy.mock.calls[0][0]).toContain(LogLevel.ERROR);
     });
 
-    it("should call console.warn for WARN level", () => {
+    it("should log using console.warn for WARN level", () => {
       const message = "Warning message";
-      const payload: LogPayload = { action: "test_action" };
-
-      loggerProvider.log(LogLevel.WARN, message, payload);
+      consoleLoggerProvider.log(LogLevel.WARN, message);
 
       expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining(message),
-      );
+      expect(consoleWarnSpy.mock.calls[0][0]).toContain(message);
+      expect(consoleWarnSpy.mock.calls[0][0]).toContain(LogLevel.WARN);
     });
 
-    it("should call console.info for INFO level", () => {
+    it("should log using console.info for INFO level", () => {
       const message = "Info message";
-      const payload: LogPayload = { action: "test_action" };
-
-      loggerProvider.log(LogLevel.INFO, message, payload);
+      consoleLoggerProvider.log(LogLevel.INFO, message);
 
       expect(consoleInfoSpy).toHaveBeenCalledTimes(1);
-      expect(consoleInfoSpy).toHaveBeenCalledWith(
-        expect.stringContaining(message),
-      );
+      expect(consoleInfoSpy.mock.calls[0][0]).toContain(message);
+      expect(consoleInfoSpy.mock.calls[0][0]).toContain(LogLevel.INFO);
     });
 
-    it("should call console.debug for DEBUG level", () => {
+    it("should log using console.debug for DEBUG level", () => {
       const message = "Debug message";
-      const payload: LogPayload = { action: "test_action" };
-
-      loggerProvider.log(LogLevel.DEBUG, message, payload);
+      consoleLoggerProvider.log(LogLevel.DEBUG, message);
 
       expect(consoleDebugSpy).toHaveBeenCalledTimes(1);
-      expect(consoleDebugSpy).toHaveBeenCalledWith(
-        expect.stringContaining(message),
-      );
-    });
-
-    it("should call console.log for unknown level", () => {
-      const message = "Unknown level message";
-      const payload: LogPayload = { action: "test_action" };
-      const unknownLevel = "UNKNOWN" as LogLevel;
-
-      loggerProvider.log(unknownLevel, message, payload);
-
-      expect(consoleLogSpy).toHaveBeenCalledTimes(1);
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        expect.stringContaining(message),
-      );
-    });
-
-    it("should include error stack in log for ERROR level with Error object", () => {
-      const message = "Error with stack";
-      const error = new Error("Test error");
-      const payload: LogPayload = { action: "test_action", error };
-
-      loggerProvider.log(LogLevel.ERROR, message, payload);
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining("stack"),
-      );
-    });
-
-    it("should handle circular references in payload", () => {
-      const message = "Circular reference";
-      const circularObj: Record<string, unknown> = { name: "circular" };
-      circularObj.self = circularObj;
-      const payload: LogPayload = {
-        action: "test_action",
-        metadata: circularObj,
-      };
-
-      // This should not throw an error
-      expect(() => {
-        loggerProvider.log(LogLevel.INFO, message, payload);
-      }).not.toThrow();
-    });
-
-    it("should call console.warn for WARN level and include formatted payload", () => {
-      const message = "Warning message";
-      const payload = { action: "test_action", metadata: { test: true } };
-
-      loggerProvider.log(LogLevel.WARN, message, payload);
-
-      // Verificar que foi chamado e contém a estrutura esperada
-      expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
-      const logArgument = consoleWarnSpy.mock.calls[0][0];
-
-      // Converter de volta para objeto para verificação estruturada
-      const parsedLog = JSON.parse(logArgument);
-      expect(parsedLog.payload.metadata.test).toBe(true);
-    });
-
-    it("should call console.debug for DEBUG level and include formatted payload", () => {
-      const message = "Debug message";
-      const payload = { action: "test_action", metadata: { test: true } };
-
-      loggerProvider.log(LogLevel.DEBUG, message, payload);
-
-      expect(consoleDebugSpy).toHaveBeenCalledTimes(1);
-      const logArgument = consoleDebugSpy.mock.calls[0][0];
-
-      const parsedLog = JSON.parse(logArgument);
-      expect(parsedLog.payload.metadata.test).toBe(true);
-    });
-
-    it("should call console.log for TRACE level (not recognized level)", () => {
-      const message = "Trace message";
-      const payload = { action: "test_action", metadata: { test: true } };
-
-      // Usando um nível não reconhecido diretamente
-      loggerProvider.log("TRACE" as LogLevel, message, payload);
-
-      expect(consoleLogSpy).toHaveBeenCalledTimes(1);
-      const logArgument = consoleLogSpy.mock.calls[0][0];
-
-      const parsedLog = JSON.parse(logArgument);
-      expect(parsedLog.payload.metadata.test).toBe(true);
+      expect(consoleDebugSpy.mock.calls[0][0]).toContain(message);
+      expect(consoleDebugSpy.mock.calls[0][0]).toContain(LogLevel.DEBUG);
     });
   });
 
   describe("convenience methods", () => {
-    it("should call log with ERROR level from error method", () => {
-      const logSpy = jest.spyOn(loggerProvider, "log");
-      const message = "Error method";
-      const payload: LogPayload = { action: "test_action" };
+    it("should call log with INFO level when using info method", () => {
+      const logSpy = jest.spyOn(consoleLoggerProvider, "log");
+      const message = "Info message";
+      const payload = { action: "test" };
 
-      loggerProvider.error(message, payload);
-
-      expect(logSpy).toHaveBeenCalledWith(LogLevel.ERROR, message, payload);
-    });
-
-    it("should call log with WARN level from warn method", () => {
-      const logSpy = jest.spyOn(loggerProvider, "log");
-      const message = "Warn method";
-      const payload: LogPayload = { action: "test_action" };
-
-      loggerProvider.warn(message, payload);
-
-      expect(logSpy).toHaveBeenCalledWith(LogLevel.WARN, message, payload);
-    });
-
-    it("should call log with INFO level from info method", () => {
-      const logSpy = jest.spyOn(loggerProvider, "log");
-      const message = "Info method";
-      const payload: LogPayload = { action: "test_action" };
-
-      loggerProvider.info(message, payload);
+      consoleLoggerProvider.info(message, payload);
 
       expect(logSpy).toHaveBeenCalledWith(LogLevel.INFO, message, payload);
+      expect(consoleInfoSpy).toHaveBeenCalledTimes(1);
     });
 
-    it("should call log with DEBUG level from debug method", () => {
-      const logSpy = jest.spyOn(loggerProvider, "log");
-      const message = "Debug method";
-      const payload: LogPayload = { action: "test_action" };
+    it("should call log with ERROR level when using error method", () => {
+      const logSpy = jest.spyOn(consoleLoggerProvider, "log");
+      const message = "Error message";
+      const payload = { error: new Error("Test error") };
 
-      loggerProvider.debug(message, payload);
+      consoleLoggerProvider.error(message, payload);
 
-      expect(logSpy).toHaveBeenCalledWith(LogLevel.DEBUG, message, payload);
+      expect(logSpy).toHaveBeenCalledWith(LogLevel.ERROR, message, payload);
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call log with WARN level when using warn method", () => {
+      const logSpy = jest.spyOn(consoleLoggerProvider, "log");
+      const message = "Warning message";
+
+      consoleLoggerProvider.warn(message);
+
+      expect(logSpy).toHaveBeenCalledWith(LogLevel.WARN, message, undefined);
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it("should call log with DEBUG level when using debug method", () => {
+      const logSpy = jest.spyOn(consoleLoggerProvider, "log");
+      const message = "Debug message";
+
+      consoleLoggerProvider.debug(message);
+
+      expect(logSpy).toHaveBeenCalledWith(LogLevel.DEBUG, message, undefined);
+      expect(consoleDebugSpy).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe("default payload handling", () => {
-    it("should handle undefined payload in log method", () => {
-      const message = "No payload";
+  describe("formatLog functionality", () => {
+    it("should handle circular references in payload", () => {
+      const message = "Circular reference test";
 
-      // Chamando sem o parâmetro payload
-      loggerProvider.log(LogLevel.INFO, message);
+      const circularObj: any = { name: "circular" };
+      circularObj.self = circularObj;
+
+      consoleLoggerProvider.info(message, { action: circularObj });
 
       expect(consoleInfoSpy).toHaveBeenCalledTimes(1);
-      expect(consoleInfoSpy).toHaveBeenCalledWith(
-        expect.stringContaining(message),
-      );
+      expect(consoleInfoSpy.mock.calls[0][0]).toContain("[Circular Reference]");
     });
 
-    it("should handle undefined payload in convenience methods", () => {
-      const logSpy = jest.spyOn(loggerProvider, "log");
-      const message = "No payload";
+    it("should format Error objects correctly", () => {
+      const message = "Error object test";
+      const error = new Error("Test error");
 
-      // Testando todos os métodos de conveniência sem payload
-      loggerProvider.error(message);
-      loggerProvider.warn(message);
-      loggerProvider.info(message);
-      loggerProvider.debug(message);
+      consoleLoggerProvider.error(message, { error });
 
-      // Ajustado para corresponder ao comportamento real
-      expect(logSpy).toHaveBeenCalledWith(LogLevel.ERROR, message, undefined);
-      expect(logSpy).toHaveBeenCalledWith(LogLevel.WARN, message, undefined);
-      expect(logSpy).toHaveBeenCalledWith(LogLevel.INFO, message, undefined);
-      expect(logSpy).toHaveBeenCalledWith(LogLevel.DEBUG, message, undefined);
+      expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+      const logString = consoleErrorSpy.mock.calls[0][0];
+      expect(logString).toContain("Test error");
+      expect(logString).toContain("stack");
     });
 
-    it("should handle null payload", () => {
-      const logSpy = jest.spyOn(loggerProvider, "log");
-      const message = "Null payload";
+    it("should include timestamp in log output", () => {
+      const message = "Timestamp test";
 
-      // Passando null explicitamente como payload
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      loggerProvider.log(LogLevel.INFO, message, null as any);
+      consoleLoggerProvider.info(message);
 
-      // Ajustado para corresponder ao comportamento real
-      expect(logSpy).toHaveBeenCalledWith(LogLevel.INFO, message, null);
+      expect(consoleInfoSpy).toHaveBeenCalledTimes(1);
+      const logString = consoleInfoSpy.mock.calls[0][0];
+
+      // Check for ISO date format pattern
+      const isoDatePattern = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z/;
+      expect(logString).toMatch(isoDatePattern);
+    });
+
+    it("should handle empty payload gracefully", () => {
+      const message = "Empty payload test";
+
+      consoleLoggerProvider.info(message);
+
+      expect(consoleInfoSpy).toHaveBeenCalledTimes(1);
+      const logString = consoleInfoSpy.mock.calls[0][0];
+      expect(logString).toContain('"payload": {}');
     });
   });
 });

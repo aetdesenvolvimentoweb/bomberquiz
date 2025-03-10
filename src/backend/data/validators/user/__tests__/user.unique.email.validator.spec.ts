@@ -44,4 +44,21 @@ describe("UserUniqueEmailValidator", () => {
 
     await expect(sut.validate(email)).rejects.toThrow();
   });
+
+  it("should throw if UserRepository returns a user", async () => {
+    const { sut, userRepository } = makeSut();
+    const email = "any_email@mail.com";
+    jest.spyOn(userRepository, "findByEmail").mockResolvedValueOnce({
+      id: "any_id",
+      name: "any_name",
+      email: "any_email@mail.com",
+      phone: "any_phone",
+      birthdate: new Date(),
+      password: "any_password",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    await expect(sut.validate(email)).rejects.toThrow();
+  });
 });

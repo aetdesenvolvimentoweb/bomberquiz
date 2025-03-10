@@ -1,18 +1,20 @@
 import type { Config } from "jest";
 
 const config: Config = {
-  collectCoverage: false,
+  collectCoverage: true,
   roots: ["<rootDir>/src"],
   collectCoverageFrom: [
     "<rootDir>/src/backend/**/*.ts",
-    "!<rootDir>/src/backend/domain/**/*.ts",
-    "<rootDir>/src/backend/domain/errors/*.ts",
-    "!<rootDir>/src/backend/presentation/protocols/*.ts",
-    "!**/tests/**",
     "!**/node_modules/**",
+    "!<rootDir>/src/**/tests/**",
+    "!<rootDir>/src/**/__tests__/**",
+    "!<rootDir>/src/**/*.test.ts",
+    "!<rootDir>/src/**/*.spec.ts",
+    "!<rootDir>/src/backend/domain/**/*.ts",
+    "!<rootDir>/src/backend/presentation/protocols/*.ts",
+    "<rootDir>/src/backend/domain/errors/*.ts",
   ],
   coverageReporters: ["json", "lcov", "text", "clover", "json-summary"],
-  coveragePathIgnorePatterns: ["/node_modules/"],
   coverageDirectory: "coverage",
   coverageProvider: "v8",
   preset: "ts-jest",
@@ -20,8 +22,9 @@ const config: Config = {
   moduleFileExtensions: ["ts", "js"],
   moduleNameMapper: { "^@/(.*)$": "<rootDir>/src/$1" },
   passWithNoTests: true,
-  noStackTrace: true,
-  maxWorkers: 1,
+  clearMocks: true,
+  resetMocks: true,
+  maxWorkers: "50%",
 };
 
 export default config;
