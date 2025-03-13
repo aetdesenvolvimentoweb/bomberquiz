@@ -1,4 +1,7 @@
-import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
+import {
+  BasicXssSanitizer,
+  UserCreateDataSanitizer,
+} from "@/backend/data/sanitizers";
 import { UserCreateService } from "@/backend/data/services";
 import {
   UserCreateDataValidator,
@@ -23,7 +26,8 @@ interface SutResponses {
 }
 
 const makeSut = (): SutResponses => {
-  const sut = new UserCreateDataSanitizer();
+  const basicXssSanitizer = new BasicXssSanitizer();
+  const sut = new UserCreateDataSanitizer(basicXssSanitizer);
   const userRepository = new InMemoryUserRepository();
   const loggerProvider = new ConsoleLoggerProvider();
   const userBirthdateValidator = jest.mocked<UserBirthdateValidatorUseCase>({
@@ -130,8 +134,10 @@ describe("UserCreateDataSanitizer Integration", () => {
 
       const sanitizedData = sut.sanitize(userData);
 
-      // Verifica se os dados foram sanitizados corretamente
-      expect(sanitizedData.name).toBe("<script>alert('XSS')</script> John Doe"); // O sanitizador atual não remove scripts
+      // Atualiza a expectativa para o nome sanitizado
+      expect(sanitizedData.name).toBe(
+        "&lt;scrīpt&gt;alert('XSS')&lt;/scrīpt&gt; John Doe",
+      ); // Agora o sanitizador remove scripts
       expect(sanitizedData.email).toBe("john.doe+test@example.com"); // Mantém o + no email
     });
 

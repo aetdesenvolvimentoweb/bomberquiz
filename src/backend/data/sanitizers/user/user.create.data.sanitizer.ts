@@ -1,7 +1,18 @@
 import { UserCreateData } from "@/backend/domain/entities";
-import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
+import {
+  UserCreateDataSanitizerUseCase,
+  XssSanitizerUseCase,
+} from "@/backend/domain/sanitizers";
+
+import { BasicXssSanitizer } from "../security";
 
 export class UserCreateDataSanitizer implements UserCreateDataSanitizerUseCase {
+  private readonly xssSanitizer: XssSanitizerUseCase;
+
+  constructor(xssSanitizer?: XssSanitizerUseCase) {
+    this.xssSanitizer = xssSanitizer || new BasicXssSanitizer();
+  }
+
   /**
    * Sanitiza os dados de entrada do usuário
    * @param data Dados do usuário a serem sanitizados
@@ -39,7 +50,8 @@ export class UserCreateDataSanitizer implements UserCreateDataSanitizerUseCase {
    * @private
    */
   private sanitizeName(name: string): string {
-    return name.trim();
+    const trimmed = name.trim();
+    return this.xssSanitizer.sanitize(trimmed);
   }
 
   /**

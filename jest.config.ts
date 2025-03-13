@@ -1,7 +1,7 @@
 import type { Config } from "jest";
 
 const config: Config = {
-  collectCoverage: true,
+  collectCoverage: false,
   roots: ["<rootDir>/src"],
   collectCoverageFrom: [
     "<rootDir>/src/backend/**/*.ts",
@@ -21,10 +21,10 @@ const config: Config = {
   testEnvironment: "node",
   moduleFileExtensions: ["ts", "js"],
   moduleNameMapper: { "^@/(.*)$": "<rootDir>/src/$1" },
+  maxWorkers: "25%",
   passWithNoTests: true,
   clearMocks: true,
   resetMocks: true,
-  maxWorkers: "50%",
 };
 
 export default config;

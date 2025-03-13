@@ -66,6 +66,23 @@ describe("UserCreateDataSanitizer", () => {
       const sanitized = userCreateDataSanitizer.sanitize(data);
       expect(sanitized[field as keyof UserCreateData]).toBe(expected);
     });
+
+    it("should sanitize XSS attempts in name field", () => {
+      const userData = {
+        name: "<script>alert('XSS')</script> John Doe",
+        email: "john.doe@example.com",
+        phone: "(11) 98765-4321",
+        birthdate: new Date(),
+        password: "P@ssw0rd",
+      } as UserCreateData;
+
+      const sanitized = userCreateDataSanitizer.sanitize(userData);
+
+      // Verifica que tags e scripts foram sanitizados
+      expect(sanitized.name).toBe(
+        "&lt;scrīpt&gt;alert('XSS')&lt;/scrīpt&gt; John Doe",
+      );
+    });
   });
 
   // Testes parametrizados para campos undefined

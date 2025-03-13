@@ -1,4 +1,7 @@
-import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
+import {
+  BasicXssSanitizer,
+  UserCreateDataSanitizer,
+} from "@/backend/data/sanitizers";
 import { UserCreateService } from "@/backend/data/services";
 import {
   UserCreateDataValidator,
@@ -6,26 +9,23 @@ import {
   UserUniqueEmailValidator,
 } from "@/backend/data/validators";
 import {
-  UserBirthdateValidatorUseCase,
-  UserEmailValidatorUseCase,
-  UserPhoneValidatorUseCase,
-} from "@/backend/domain/validators";
+  UserBirthdateValidatorAdapter,
+  UserEmailValidatorAdapter,
+  UserPhoneValidatorAdapter,
+} from "@/backend/infra/adapters";
 import { ConsoleLoggerProvider } from "@/backend/infra/providers";
 import { InMemoryUserRepository } from "@/backend/infra/repositories";
 
 export const makeUserCreateService = (): UserCreateService => {
   const loggerProvider = new ConsoleLoggerProvider();
-  const userCreateDataSanitizer = new UserCreateDataSanitizer();
+  const basicXssSanitizer = new BasicXssSanitizer();
+  const userCreateDataSanitizer = new UserCreateDataSanitizer(
+    basicXssSanitizer,
+  );
   const userRepository = new InMemoryUserRepository();
-  const userEmailValidator = jest.mocked<UserEmailValidatorUseCase>({
-    validate: jest.fn().mockResolvedValue(true),
-  });
-  const userBirthdateValidator = jest.mocked<UserBirthdateValidatorUseCase>({
-    validate: jest.fn().mockResolvedValue(true),
-  });
-  const userPhoneValidator = jest.mocked<UserPhoneValidatorUseCase>({
-    validate: jest.fn().mockResolvedValue(true),
-  });
+  const userEmailValidator = new UserEmailValidatorAdapter();
+  const userBirthdateValidator = new UserBirthdateValidatorAdapter();
+  const userPhoneValidator = new UserPhoneValidatorAdapter();
   const userPasswordValidator = new UserPasswordValidator();
   const userUniqueEmailValidator = new UserUniqueEmailValidator(userRepository);
   const userCreateDataValidator = new UserCreateDataValidator({
