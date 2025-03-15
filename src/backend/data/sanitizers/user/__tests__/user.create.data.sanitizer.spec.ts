@@ -1,4 +1,7 @@
-import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
+import {
+  BasicXssSanitizer,
+  UserCreateDataSanitizer,
+} from "@/backend/data/sanitizers";
 import { UserCreateData } from "@/backend/domain/entities";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 
@@ -6,7 +9,9 @@ describe("UserCreateDataSanitizer", () => {
   let userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
 
   beforeEach(() => {
-    userCreateDataSanitizer = new UserCreateDataSanitizer();
+    userCreateDataSanitizer = new UserCreateDataSanitizer(
+      new BasicXssSanitizer(),
+    );
   });
 
   it("should sanitize all user data correctly", () => {

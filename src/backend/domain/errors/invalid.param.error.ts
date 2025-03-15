@@ -5,7 +5,12 @@ import { ApplicationError } from "@/backend/domain/errors";
  * @param param Nome do parâmetro que é inválido
  */
 export class InvalidParamError extends ApplicationError {
-  constructor(param: string) {
-    super(`Parâmetro inválido: ${param}`, 400);
+  constructor(param: string, reason?: string) {
+    const capitalizedParam = param.charAt(0).toUpperCase() + param.slice(1);
+    const capitalizedReason = reason
+      ? `(${reason.charAt(0).toUpperCase() + reason.slice(1)})`
+      : "";
+    const message = `Parâmetro inválido: ${capitalizedParam}. ${capitalizedReason}`;
+    super(message, 400);
   }
 }

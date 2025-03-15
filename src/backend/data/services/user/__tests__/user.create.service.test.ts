@@ -1,4 +1,7 @@
-import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
+import {
+  BasicXssSanitizer,
+  UserCreateDataSanitizer,
+} from "@/backend/data/sanitizers";
 import { UserCreateService } from "@/backend/data/services";
 import {
   UserCreateDataValidator,
@@ -37,7 +40,9 @@ interface SutTypes {
 const makeSut = (): SutTypes => {
   const userRepository = new InMemoryUserRepository();
   const loggerProvider = new ConsoleLoggerProvider();
-  const userCreateDataSanitizer = new UserCreateDataSanitizer();
+  const userCreateDataSanitizer = new UserCreateDataSanitizer(
+    new BasicXssSanitizer(),
+  );
   const userBirthdateValidator = jest.mocked<UserBirthdateValidatorUseCase>({
     validate: jest.fn(),
   });

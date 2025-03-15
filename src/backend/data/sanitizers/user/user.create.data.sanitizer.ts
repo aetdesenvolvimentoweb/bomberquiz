@@ -4,14 +4,8 @@ import {
   XssSanitizerUseCase,
 } from "@/backend/domain/sanitizers";
 
-import { BasicXssSanitizer } from "../security";
-
 export class UserCreateDataSanitizer implements UserCreateDataSanitizerUseCase {
-  private readonly xssSanitizer: XssSanitizerUseCase;
-
-  constructor(xssSanitizer?: XssSanitizerUseCase) {
-    this.xssSanitizer = xssSanitizer || new BasicXssSanitizer();
-  }
+  constructor(private readonly xssSanitizer: XssSanitizerUseCase) {}
 
   /**
    * Sanitiza os dados de entrada do usuário
