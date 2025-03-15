@@ -6,6 +6,9 @@ import { ApplicationError } from "@/backend/domain/errors";
  */
 export class ServerError extends ApplicationError {
   constructor(error: Error) {
-    super(`Erro inesperado do servidor. ${error.message}`, 500);
+    const capitalizedError =
+      error.message.charAt(0).toUpperCase() + error.message.slice(1);
+
+    super(`Erro inesperado do servidor. ${capitalizedError}`, 500);
   }
 }

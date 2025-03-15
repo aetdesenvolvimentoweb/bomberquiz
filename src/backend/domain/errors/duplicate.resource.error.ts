@@ -5,7 +5,9 @@ import { ApplicationError } from "@/backend/domain/errors";
  * @param param Nome do parâmetro duplicado
  */
 export class DuplicateResourceError extends ApplicationError {
-  constructor(param: string) {
-    super(`${param} já cadastrado no sistema`, 409);
+  constructor(resource: string) {
+    const capitalizedResource =
+      resource.charAt(0).toUpperCase() + resource.slice(1);
+    super(`${capitalizedResource} já cadastrado no sistema`, 409);
   }
 }
