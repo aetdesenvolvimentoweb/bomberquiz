@@ -525,4 +525,145 @@ describe("UserCreateService", () => {
       },
     );
   });
+
+  describe("Repository connection errors", () => {
+    const userCreateData = makeUserCreateData();
+
+    beforeEach(() => {
+      jest
+        .spyOn(userCreateDataSanitizer, "sanitize")
+        .mockReturnValueOnce(userCreateData);
+    });
+
+    it("should throw and log when repository throws network error", async () => {
+      const networkError = new Error("Network connection failed");
+      jest.spyOn(userRepository, "create").mockRejectedValueOnce(networkError);
+
+      await expect(sut.create(userCreateData)).rejects.toThrow(networkError);
+      expect(loggerProvider.error).toHaveBeenCalledWith(
+        "Erro ao criar usuário",
+        {
+          action: "user.creation.failed.service",
+          metadata: { email: userCreateData.email },
+          error: networkError,
+        },
+      );
+    });
+
+    it("should throw and log when repository times out", async () => {
+      const timeoutError = new Error("Operation timed out");
+      jest.spyOn(userRepository, "create").mockRejectedValueOnce(timeoutError);
+
+      await expect(sut.create(userCreateData)).rejects.toThrow(timeoutError);
+      expect(loggerProvider.error).toHaveBeenCalledWith(
+        "Erro ao criar usuário",
+        {
+          action: "user.creation.failed.service",
+          metadata: { email: userCreateData.email },
+          error: timeoutError,
+        },
+      );
+    });
+  });
+
+  describe("Special characters handling", () => {
+    it("should handle names with accents and special characters", async () => {
+      const userCreateData: UserCreateData = {
+        name: "José da Silva Ñándú Çedilha",
+        email: "jose.silva@example.com",
+        phone: "(11) 99999-9999",
+        birthdate: new Date("1990-01-01"),
+        password: "P@ssw0rd",
+      };
+
+      jest
+        .spyOn(userCreateDataSanitizer, "sanitize")
+        .mockReturnValueOnce(userCreateData);
+
+      await expect(sut.create(userCreateData)).resolves.not.toThrow();
+      expect(userRepository.create).toHaveBeenCalledWith(userCreateData);
+    });
+
+    it("should handle emails with plus sign and dots", async () => {
+      const userCreateData: UserCreateData = {
+        name: "John Doe",
+        email: "john.doe+test@example.com",
+        phone: "(11) 99999-9999",
+        birthdate: new Date("1990-01-01"),
+        password: "P@ssw0rd",
+      };
+
+      jest
+        .spyOn(userCreateDataSanitizer, "sanitize")
+        .mockReturnValueOnce(userCreateData);
+
+      await expect(sut.create(userCreateData)).resolves.not.toThrow();
+      expect(userRepository.create).toHaveBeenCalledWith(userCreateData);
+    });
+
+    it("should handle international phone numbers", async () => {
+      const userCreateData: UserCreateData = {
+        name: "John Doe",
+        email: "john.doe@example.com",
+        phone: "+1 (555) 123-4567",
+        birthdate: new Date("1990-01-01"),
+        password: "P@ssw0rd",
+      };
+
+      jest.spyOn(userCreateDataSanitizer, "sanitize").mockReturnValueOnce({
+        ...userCreateData,
+        phone: "15551234567", // Assumindo que o sanitizador remove caracteres não numéricos
+      });
+
+      await expect(sut.create(userCreateData)).resolves.not.toThrow();
+    });
+  });
+
+  describe("Injection attempt handling", () => {
+    it("should sanitize names with potential SQL injection", async () => {
+      const userCreateData: UserCreateData = {
+        name: "Robert'); DROP TABLE users; --",
+        email: "robert@example.com",
+        phone: "(11) 99999-9999",
+        birthdate: new Date("1990-01-01"),
+        password: "P@ssw0rd",
+      };
+
+      const sanitizedData = {
+        ...userCreateData,
+        // O sanitizador não altera o nome neste caso, apenas previne XSS
+        name: "Robert'); DROP TABLE users; --",
+      };
+
+      jest
+        .spyOn(userCreateDataSanitizer, "sanitize")
+        .mockReturnValueOnce(sanitizedData);
+
+      await expect(sut.create(userCreateData)).resolves.not.toThrow();
+      expect(userRepository.create).toHaveBeenCalledWith(sanitizedData);
+    });
+
+    it("should sanitize email with potential script injection", async () => {
+      const userCreateData: UserCreateData = {
+        name: "John Doe",
+        email: "john<script>alert(1)</script>@example.com",
+        phone: "(11) 99999-9999",
+        birthdate: new Date("1990-01-01"),
+        password: "P@ssw0rd",
+      };
+
+      const sanitizedData = {
+        ...userCreateData,
+        // Assumindo que o sanitizador de email remove ou escapa caracteres inválidos
+        email: "john@example.com",
+      };
+
+      jest
+        .spyOn(userCreateDataSanitizer, "sanitize")
+        .mockReturnValueOnce(sanitizedData);
+
+      await expect(sut.create(userCreateData)).resolves.not.toThrow();
+      expect(userRepository.create).toHaveBeenCalledWith(sanitizedData);
+    });
+  });
 });

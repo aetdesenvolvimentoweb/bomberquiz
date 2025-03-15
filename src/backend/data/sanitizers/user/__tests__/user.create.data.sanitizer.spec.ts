@@ -129,4 +129,100 @@ describe("UserCreateDataSanitizer", () => {
     expect(sanitized.password).toBeUndefined();
     expect(sanitized.birthdate).toBe(incompleteData.birthdate);
   });
+
+  describe("internationalization and special characters", () => {
+    it("should correctly sanitize names with accents and special characters", () => {
+      const userData = {
+        name: "  María José Ñándú Çedilha  ",
+        email: "maria.jose@example.com",
+        phone: "(11) 98765-4321",
+        birthdate: new Date(),
+        password: "P@ssw0rd",
+      } as UserCreateData;
+
+      const sanitized = userCreateDataSanitizer.sanitize(userData);
+
+      expect(sanitized.name).toBe("María José Ñándú Çedilha");
+    });
+
+    it("should correctly sanitize international phone numbers", () => {
+      const userData = {
+        name: "John Doe",
+        email: "john.doe@example.com",
+        phone: "+1 (555) 123-4567",
+        birthdate: new Date(),
+        password: "P@ssw0rd",
+      } as UserCreateData;
+
+      const sanitized = userCreateDataSanitizer.sanitize(userData);
+
+      expect(sanitized.phone).toBe("15551234567");
+    });
+
+    it("should handle email addresses with subaddressing (plus sign)", () => {
+      const userData = {
+        name: "John Doe",
+        email: "  JOHN.DOE+FILTERS@EXAMPLE.COM  ",
+        phone: "(11) 98765-4321",
+        birthdate: new Date(),
+        password: "P@ssw0rd",
+      } as UserCreateData;
+
+      const sanitized = userCreateDataSanitizer.sanitize(userData);
+
+      expect(sanitized.email).toBe("john.doe+filters@example.com");
+    });
+  });
+
+  describe("edge cases and emoji handling", () => {
+    it("should handle names with emoji characters", () => {
+      const userData = {
+        name: "John 😀 Doe 👍",
+        email: "john.doe@example.com",
+        phone: "(11) 98765-4321",
+        birthdate: new Date(),
+        password: "P@ssw0rd",
+      } as UserCreateData;
+
+      const sanitized = userCreateDataSanitizer.sanitize(userData);
+
+      // O sanitizador deve preservar os emojis, pois são caracteres válidos
+      expect(sanitized.name).toBe("John 😀 Doe 👍");
+    });
+
+    it("should handle extremely long names", () => {
+      const veryLongName = "A".repeat(500);
+      const userData = {
+        name: veryLongName,
+        email: "john.doe@example.com",
+        phone: "(11) 98765-4321",
+        birthdate: new Date(),
+        password: "P@ssw0rd",
+      } as UserCreateData;
+
+      const sanitized = userCreateDataSanitizer.sanitize(userData);
+
+      // O sanitizador deve preservar nomes longos, a validação de tamanho é responsabilidade do validador
+      expect(sanitized.name).toBe(veryLongName);
+    });
+
+    it("should handle extremely long email addresses", () => {
+      const longLocalPart = "a".repeat(64); // Máximo permitido para local part do email
+      const longDomain = "d".repeat(63) + ".com"; // Domínio perto do limite
+      const veryLongEmail = `${longLocalPart}@${longDomain}`;
+
+      const userData = {
+        name: "John Doe",
+        email: veryLongEmail.toUpperCase(), // Em maiúsculas para testar sanitização
+        phone: "(11) 98765-4321",
+        birthdate: new Date(),
+        password: "P@ssw0rd",
+      } as UserCreateData;
+
+      const sanitized = userCreateDataSanitizer.sanitize(userData);
+
+      // Email deve ser convertido para minúsculas
+      expect(sanitized.email).toBe(veryLongEmail.toLowerCase());
+    });
+  });
 });

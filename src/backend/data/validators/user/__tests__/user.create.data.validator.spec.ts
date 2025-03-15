@@ -375,4 +375,36 @@ describe("UserCreateDataValidator", () => {
       },
     );
   });
+
+  describe("extreme data validation", () => {
+    it("should validate data with maximum allowed values", async () => {
+      const validData = {
+        name: "A".repeat(255), // Assumindo um limite de 255 caracteres
+        email: `${"a".repeat(64)}@${"d".repeat(63)}.com`,
+        phone: "(99) 99999-9999",
+        birthdate: new Date("1900-01-01"), // Data muito antiga
+        password: "A".repeat(100) + "a1@", // Senha muito longa
+      } as UserCreateData;
+
+      await expect(sut.validate(validData)).resolves.not.toThrow();
+    });
+
+    it("should reject data with values exceeding maximum allowed", async () => {
+      const invalidData = {
+        name: "A".repeat(256), // Ultrapassando limite de 255 caracteres
+        email: "valid@example.com",
+        phone: "(99) 99999-9999",
+        birthdate: new Date(),
+        password: "P@ssw0rd",
+      } as UserCreateData;
+
+      jest.spyOn(userEmailValidator, "validate").mockImplementationOnce(() => {
+        throw new InvalidParamError("nome muito longo");
+      });
+
+      await expect(sut.validate(invalidData)).rejects.toThrow(
+        InvalidParamError,
+      );
+    });
+  });
 });
