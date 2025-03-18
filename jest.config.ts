@@ -11,6 +11,8 @@ const config: Config = {
     "!<rootDir>/src/**/__tests__/**",
     "!<rootDir>/src/**/*.test.ts",
     "!<rootDir>/src/**/*.spec.ts",
+    "!<rootDir>/src/domain/**/*.ts",
+    "<rootDir>/src/backend/domain/errors/*.ts",
   ],
   coverageDirectory: "coverage",
   coverageProvider: "v8",
