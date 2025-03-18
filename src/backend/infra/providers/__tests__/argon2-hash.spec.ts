@@ -9,7 +9,7 @@
  * @group Security
  */
 
-import { Argon2Hash } from "../argon2-hash";
+import { Argon2Hash } from "@/backend/infra/providers";
 import argon2 from "argon2";
 import { InvalidParamError, ServerError } from "@/backend/domain/errors";
 
@@ -145,6 +145,22 @@ describe("Argon2Hash", () => {
       // Act & Assert
       await expect(hasher.hash(plaintext)).rejects.toThrow(ServerError);
     });
+
+    // Novo teste para cobrir o caso de erro não-Error
+    it("deve lançar ServerError quando argon2.hash lançar um erro que não é instância de Error", async () => {
+      // Arrange
+      const hasher = new Argon2Hash();
+      const plaintext = "password123";
+
+      // Mock do erro do argon2.hash com um valor que não é Error
+      (argon2.hash as jest.Mock).mockRejectedValue("string error");
+
+      // Act & Assert
+      await expect(hasher.hash(plaintext)).rejects.toThrow(ServerError);
+      await expect(hasher.hash(plaintext)).rejects.toThrow(
+        "Erro desconhecido durante o processo de hash",
+      );
+    });
   });
 
   describe("compare method", () => {
@@ -248,6 +264,26 @@ describe("Argon2Hash", () => {
       // Act & Assert
       await expect(hasher.compare(plaintext, hashedText)).rejects.toThrow(
         ServerError,
+      );
+    });
+
+    // Novo teste para cobrir o caso de erro não-Error
+    it("deve lançar ServerError quando argon2.verify lançar um erro que não é instância de Error", async () => {
+      // Arrange
+      const hasher = new Argon2Hash();
+      const plaintext = "password123";
+      const hashedText =
+        "$argon2id$v=19$m=65536,t=3,p=4$abcdefghijklmnop$hashedpassword";
+
+      // Mock do erro do argon2.verify com um valor que não é Error
+      (argon2.verify as jest.Mock).mockRejectedValue("string error");
+
+      // Act & Assert
+      await expect(hasher.compare(plaintext, hashedText)).rejects.toThrow(
+        ServerError,
+      );
+      await expect(hasher.compare(plaintext, hashedText)).rejects.toThrow(
+        "Erro desconhecido durante a verificação do hash",
       );
     });
   });
