@@ -9,3 +9,5 @@
 
 /** Erro base da aplicação com suporte a códigos HTTP */
 export * from "./application-error";
+/** Erro para parâmetros obrigatórios não informados (HTTP 400) */
+export * from "./missing-param-error";
