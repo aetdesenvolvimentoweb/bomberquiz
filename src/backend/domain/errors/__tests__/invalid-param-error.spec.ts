@@ -10,8 +10,7 @@
  * @group Validation
  */
 
-import { InvalidParamError } from "../invalid-param-error";
-import { ApplicationError } from "../application-error";
+import { ApplicationError, InvalidParamError } from "@/backend/domain/errors";
 
 describe("InvalidParamError", () => {
   describe("constructor", () => {
