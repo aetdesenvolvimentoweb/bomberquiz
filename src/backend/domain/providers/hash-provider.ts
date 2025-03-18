@@ -16,26 +16,12 @@ export interface HashOptions {
   algorithm?: string;
   /** Número de rounds/iterações para o algoritmo de hash */
   iterations?: number;
-  /** Tamanho do salt em bytes */
-  saltLength?: number;
   /** Fator de memória em KiB (específico para Argon2) */
   memoryCost?: number;
   /** Fator de paralelismo (específico para Argon2) */
   parallelism?: number;
   /** Comprimento do hash resultante em bytes */
   hashLength?: number;
-}
-
-/**
- * Resultado da operação de hash
- *
- * @interface
- */
-export interface HashResult {
-  /** String resultante do processo de hash */
-  hash: string;
-  /** Salt utilizado na geração do hash, se aplicável */
-  salt?: string;
 }
 
 /**
@@ -52,9 +38,9 @@ export interface HashProvider {
    *
    * @param {string} plaintext - Texto em formato plano para ser transformado em hash
    * @param {HashOptions} [options] - Opções de configuração do algoritmo
-   * @returns {Promise<HashResult>} Resultado contendo o hash gerado
+   * @returns {Promise<string>} Hash gerado
    */
-  hash(plaintext: string, options?: HashOptions): Promise<HashResult>;
+  hash(plaintext: string, options?: HashOptions): Promise<string>;
 
   /**
    * Verifica se um texto em formato plano corresponde a um hash previamente gerado
@@ -64,14 +50,6 @@ export interface HashProvider {
    * @returns {Promise<boolean>} Verdadeiro se o plaintext corresponde ao hash
    */
   compare(plaintext: string, hashedText: string): Promise<boolean>;
-
-  /**
-   * Gera um salt aleatório para uso em operações de hash
-   *
-   * @param {number} [length] - Tamanho do salt a ser gerado
-   * @returns {Promise<string>} Salt gerado
-   */
-  generateSalt(length?: number): Promise<string>;
 
   /**
    * Cria uma nova instância do hash provider com configurações personalizadas
@@ -86,12 +64,12 @@ export interface HashProvider {
    * @example
    * // Criar um hash provider com configurações específicas
    * const secureHasher = hashProvider.withOptions({
-   *   rounds: 12,
-   *   algorithm: 'bcrypt'
+   *   iterations: 4,
+   *   memoryCost: 131072 // 128 MiB
    * });
    *
    * // Todos os hashes usarão automaticamente estas configurações
-   * const result = await secureHasher.hash('senha123');
+   * const hash = await secureHasher.hash('senha123');
    */
   withOptions(options: HashOptions): HashProvider;
 }

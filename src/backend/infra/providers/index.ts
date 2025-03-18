@@ -8,3 +8,4 @@
  */
 
 export * from "./console-logger";
+export * from "./argon2-hash";
