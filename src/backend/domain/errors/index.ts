@@ -11,3 +11,5 @@
 export * from "./application-error";
 /** Erro para parâmetros obrigatórios não informados (HTTP 400) */
 export * from "./missing-param-error";
+/** Erro para parâmetros com valores inválidos (HTTP 400) */
+export * from "./invalid-param-error";
