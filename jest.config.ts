@@ -17,7 +17,7 @@ const config: Config = {
   coverageDirectory: "coverage",
   coverageProvider: "v8",
   coverageReporters: ["json", "lcov", "text", "clover", "json-summary"],
-  maxWorkers: "25%",
+  maxWorkers: "50%",
   moduleFileExtensions: ["ts", "js"],
   moduleNameMapper: { "^@/(.*)$": "<rootDir>/src/$1" },
   passWithNoTests: true,
