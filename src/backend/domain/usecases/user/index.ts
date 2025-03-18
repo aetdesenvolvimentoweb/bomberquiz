@@ -9,3 +9,6 @@
 
 /** Exporta o caso de uso para criação de usuários */
 export * from "./user-create-usecase";
+
+/** Exporta o caso de uso para busca de usuários por e-mail */
+export * from "./user-find-by-email";
