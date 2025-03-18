@@ -9,3 +9,6 @@
 
 /** Exporta o provedor de serviços de log */
 export * from "./logger-provider";
+
+/** Exporta o provedor de serviços de hash */
+export * from "./hash-provider";

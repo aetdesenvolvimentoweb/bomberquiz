@@ -1,0 +1,97 @@
+/**
+ * Definições de contratos para o serviço de hash da aplicação
+ *
+ * Este módulo define a interface e tipos relacionados ao serviço de hash,
+ * permitindo a implementação de diferentes estratégias de encriptação sem
+ * alterar o código do domínio.
+ */
+
+/**
+ * Opções de configuração para a geração de hash
+ *
+ * @interface
+ */
+export interface HashOptions {
+  /** Tipo de algoritmo a ser utilizado (ex: 'argon2id', 'bcrypt') */
+  algorithm?: string;
+  /** Número de rounds/iterações para o algoritmo de hash */
+  iterations?: number;
+  /** Tamanho do salt em bytes */
+  saltLength?: number;
+  /** Fator de memória em KiB (específico para Argon2) */
+  memoryCost?: number;
+  /** Fator de paralelismo (específico para Argon2) */
+  parallelism?: number;
+  /** Comprimento do hash resultante em bytes */
+  hashLength?: number;
+}
+
+/**
+ * Resultado da operação de hash
+ *
+ * @interface
+ */
+export interface HashResult {
+  /** String resultante do processo de hash */
+  hash: string;
+  /** Salt utilizado na geração do hash, se aplicável */
+  salt?: string;
+}
+
+/**
+ * Contrato para implementações de serviços de hash
+ *
+ * Define os métodos que qualquer implementação de hash provider deve fornecer.
+ * Suporta diferentes algoritmos e configurações de hash.
+ *
+ * @interface
+ */
+export interface HashProvider {
+  /**
+   * Gera um hash a partir de uma string fornecida
+   *
+   * @param {string} plaintext - Texto em formato plano para ser transformado em hash
+   * @param {HashOptions} [options] - Opções de configuração do algoritmo
+   * @returns {Promise<HashResult>} Resultado contendo o hash gerado
+   */
+  hash(plaintext: string, options?: HashOptions): Promise<HashResult>;
+
+  /**
+   * Verifica se um texto em formato plano corresponde a um hash previamente gerado
+   *
+   * @param {string} plaintext - Texto em formato plano para comparação
+   * @param {string} hashedText - Hash previamente gerado para comparação
+   * @returns {Promise<boolean>} Verdadeiro se o plaintext corresponde ao hash
+   */
+  compare(plaintext: string, hashedText: string): Promise<boolean>;
+
+  /**
+   * Gera um salt aleatório para uso em operações de hash
+   *
+   * @param {number} [length] - Tamanho do salt a ser gerado
+   * @returns {Promise<string>} Salt gerado
+   */
+  generateSalt(length?: number): Promise<string>;
+
+  /**
+   * Cria uma nova instância do hash provider com configurações personalizadas
+   *
+   * Este método permite criar um hash provider que inclui automaticamente
+   * determinadas configurações em todas as chamadas subsequentes, útil para
+   * padronizar as configurações de hash em diferentes partes da aplicação.
+   *
+   * @param {HashOptions} options - Configurações a serem aplicadas em todas as operações
+   * @returns {HashProvider} Nova instância do hash provider com as configurações incorporadas
+   *
+   * @example
+   * // Criar um hash provider com configurações específicas
+   * const secureHasher = hashProvider.withOptions({
+   *   rounds: 12,
+   *   algorithm: 'bcrypt'
+   * });
+   *
+   * // Todos os hashes usarão automaticamente estas configurações
+   * const result = await secureHasher.hash('senha123');
+   */
+  withOptions(options: HashOptions): HashProvider;
+}
