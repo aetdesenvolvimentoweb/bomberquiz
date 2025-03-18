@@ -14,17 +14,32 @@
  *
  * @example
  *
- * // Importação simplificada
- * import { UserBirthdateValidatorUseCase } from "@/backend/domain/validators/user";
+ * // Importação simplificada de múltiplos validadores
+ * import {
+ *   UserBirthdateValidatorUseCase,
+ *   UserEmailValidatorUseCase,
+ *   UserPasswordValidatorUseCase
+ * } from "@/backend/domain/validators/user";
  *
- * // Uso em um serviço
- * class UserService {
- *   constructor(private birthdateValidator: UserBirthdateValidatorUseCase) {}
+ * // Uso em um serviço que orquestra múltiplas validações
+ * class UserValidationService {
+ *   constructor(
+ *     private birthdateValidator: UserBirthdateValidatorUseCase,
+ *     private emailValidator: UserEmailValidatorUseCase,
+ *     private passwordValidator: UserPasswordValidatorUseCase
+ *   ) {}
  *
- *   createUser(userData) {
- *     // Valida a data de nascimento antes de prosseguir
- *     this.birthdateValidator.validate(userData.birthdate);
- *     // Continua o processamento...
+ *   validateUserData(userData) {
+ *     // Aciona validadores específicos para cada campo
+ *     this.emailValidator.validate(userData.email);
+ *     this.passwordValidator.validate(userData.password);
+ *
+ *     if (userData.birthdate) {
+ *       this.birthdateValidator.validate(userData.birthdate);
+ *     }
+ *
+ *     // Todos os dados são válidos se chegou até aqui
+ *     return true;
  *   }
  * }
  *
@@ -35,3 +50,4 @@ export * from "./user-phone-validator";
 export * from "./user-email-validator";
 export * from "./user-password-validator";
 export * from "./user-unique-email-validator";
+export * from "./user-create-data-validator";
