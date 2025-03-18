@@ -31,3 +31,4 @@
  */
 
 export * from "./user-birthdate-validator";
+export * from "./user-phone-validator";
