@@ -13,3 +13,5 @@ export * from "./application-error";
 export * from "./missing-param-error";
 /** Erro para parâmetros com valores inválidos (HTTP 400) */
 export * from "./invalid-param-error";
+/** Erro para recursos duplicados (HTTP 409) */
+export * from "./duplicate-resource-error";
