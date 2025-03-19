@@ -53,89 +53,84 @@ describe("PasswordValidatorAdapter", () => {
     it("deve lançar InvalidParamError quando a senha é muito curta", () => {
       // Arrange
       const shortPassword = "Abc12!";
+      const errorReason = "deve ter pelo menos 8 caracteres";
 
       // Act & Assert
       expect(() => validator.validate(shortPassword)).toThrow(
         InvalidParamError,
       );
       expect(() => validator.validate(shortPassword)).toThrow(
-        new InvalidParamError("senha", "deve ter pelo menos 8 caracteres")
-          .message,
+        new InvalidParamError("senha", errorReason),
       );
     });
 
     it("deve lançar InvalidParamError quando a senha não contém letra maiúscula", () => {
       // Arrange
       const noUppercasePassword = "abc123!@";
+      const errorReason = "deve conter pelo menos uma letra maiúscula";
 
       // Act & Assert
       expect(() => validator.validate(noUppercasePassword)).toThrow(
         InvalidParamError,
       );
       expect(() => validator.validate(noUppercasePassword)).toThrow(
-        new InvalidParamError(
-          "senha",
-          "deve conter pelo menos uma letra maiúscula",
-        ).message,
+        new InvalidParamError("senha", errorReason),
       );
     });
 
     it("deve lançar InvalidParamError quando a senha não contém letra minúscula", () => {
       // Arrange
       const noLowercasePassword = "ABC123!@";
+      const errorReason = "deve conter pelo menos uma letra minúscula";
 
       // Act & Assert
       expect(() => validator.validate(noLowercasePassword)).toThrow(
         InvalidParamError,
       );
       expect(() => validator.validate(noLowercasePassword)).toThrow(
-        new InvalidParamError(
-          "senha",
-          "deve conter pelo menos uma letra minúscula",
-        ).message,
+        new InvalidParamError("senha", errorReason),
       );
     });
 
     it("deve lançar InvalidParamError quando a senha não contém números", () => {
       // Arrange
       const noDigitsPassword = "AbcDef!@";
+      const errorReason = "deve conter pelo menos um número";
 
       // Act & Assert
       expect(() => validator.validate(noDigitsPassword)).toThrow(
         InvalidParamError,
       );
       expect(() => validator.validate(noDigitsPassword)).toThrow(
-        new InvalidParamError("senha", "deve conter pelo menos um número")
-          .message,
+        new InvalidParamError("senha", errorReason),
       );
     });
 
     it("deve lançar InvalidParamError quando a senha não contém caracteres especiais", () => {
       // Arrange
       const noSymbolsPassword = "Abcdef123";
+      const errorReason = "deve conter pelo menos um caractere especial";
 
       // Act & Assert
       expect(() => validator.validate(noSymbolsPassword)).toThrow(
         InvalidParamError,
       );
       expect(() => validator.validate(noSymbolsPassword)).toThrow(
-        new InvalidParamError(
-          "senha",
-          "deve conter pelo menos um caractere especial",
-        ).message,
+        new InvalidParamError("senha", errorReason),
       );
     });
 
     it("deve lançar InvalidParamError quando a senha contém espaços", () => {
       // Arrange
       const passwordWithSpaces = "Abc 123!@";
+      const errorReason = "não deve conter espaços";
 
       // Act & Assert
       expect(() => validator.validate(passwordWithSpaces)).toThrow(
         InvalidParamError,
       );
       expect(() => validator.validate(passwordWithSpaces)).toThrow(
-        new InvalidParamError("senha", "não deve conter espaços").message,
+        new InvalidParamError("senha", errorReason),
       );
     });
 

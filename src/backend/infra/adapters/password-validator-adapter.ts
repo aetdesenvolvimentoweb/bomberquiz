@@ -84,8 +84,7 @@ export class PasswordValidatorAdapter implements UserPasswordValidatorUseCase {
       };
 
       const failureType = validationFailures[0];
-      const errorMessage =
-        errorMessageMap[failureType] || "não atende aos critérios de segurança";
+      const errorMessage = errorMessageMap[failureType];
 
       throw new InvalidParamError("senha", errorMessage);
     }
