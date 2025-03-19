@@ -4,8 +4,8 @@
  * Define o contrato para implementações que validam a data de nascimento
  * fornecida durante o cadastro ou atualização de um usuário. A validação
  * pode incluir verificações como:
- * - Idade mínima permitida
- * - Idade máxima razoável
+ * - Idade mínima permitida 18 anos
+ * - Idade máxima razoável 65 anos
  * - Data no passado (não no futuro)
  * - Formato válido de data
  *
