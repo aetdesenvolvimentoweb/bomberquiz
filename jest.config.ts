@@ -1,7 +1,8 @@
 import type { Config } from "jest";
 
 const config: Config = {
-  roots: ["<rootDir>/src"],
+  roots: ["<rootDir>/src/backend"],
+  cache: false,
   clearMocks: true,
   collectCoverage: false,
   collectCoverageFrom: [
@@ -17,7 +18,7 @@ const config: Config = {
   coverageDirectory: "coverage",
   coverageProvider: "v8",
   coverageReporters: ["json", "lcov", "text", "clover", "json-summary"],
-  maxWorkers: "50%",
+  maxWorkers: 1,
   moduleFileExtensions: ["ts", "js"],
   moduleNameMapper: { "^@/(.*)$": "<rootDir>/src/$1" },
   passWithNoTests: true,
@@ -25,6 +26,20 @@ const config: Config = {
   resetMocks: true,
   silent: true,
   testEnvironment: "node",
+  transform: {
+    "^.+\\.tsx?$": [
+      "@swc/jest",
+      {
+        jsc: {
+          parser: {
+            syntax: "typescript",
+            tsx: true,
+          },
+          target: "es2021",
+        },
+      },
+    ],
+  },
 };
 
 export default config;

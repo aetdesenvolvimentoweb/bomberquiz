@@ -22,7 +22,7 @@ describe("InvalidParamError", () => {
       const error = new InvalidParamError(paramName);
 
       // Assert
-      expect(error.message).toBe(`Parâmetro inválido: Email`);
+      expect(error.message).toBe(`Parâmetro inválido: Email.`);
     });
 
     it("deve criar uma instância com a mensagem formatada corretamente com razão", () => {
@@ -35,7 +35,7 @@ describe("InvalidParamError", () => {
 
       // Assert
       expect(error.message).toBe(
-        `Parâmetro inválido: Email. (Formato inválido)`,
+        `Parâmetro inválido: Email. Formato inválido.`,
       );
     });
 
@@ -79,8 +79,19 @@ describe("InvalidParamError", () => {
       const error = new InvalidParamError("senha", "muito curta");
 
       // Assert
-      expect(error.message).toContain("(Muito curta)");
-      expect(error.message).not.toContain("(muito curta)");
+      expect(error.message).toContain("Muito curta");
+      expect(error.message).not.toContain("muito curta");
+    });
+
+    it("deve retornar a mensagem sem a razão quando ela não for fornecida", () => {
+      // Arrange
+      const paramName = "senha";
+
+      // Act
+      const error = new InvalidParamError(paramName);
+
+      // Assert
+      expect(error.message).toBe(`Parâmetro inválido: Senha.`);
     });
   });
 
@@ -135,12 +146,12 @@ describe("InvalidParamError", () => {
       );
 
       // Assert
-      expect(error1.message).toBe("Parâmetro inválido: Email");
+      expect(error1.message).toBe("Parâmetro inválido: Email.");
       expect(error2.message).toBe(
-        "Parâmetro inválido: Email. (Formato inválido)",
+        "Parâmetro inválido: Email. Formato inválido.",
       );
       expect(error3.message).toBe(
-        "Parâmetro inválido: Idade. (Deve ser um número positivo)",
+        "Parâmetro inválido: Idade. Deve ser um número positivo.",
       );
     });
   });
