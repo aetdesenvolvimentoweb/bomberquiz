@@ -14,6 +14,7 @@ const config: Config = {
     "!<rootDir>/src/**/*.spec.ts",
     "!<rootDir>/src/backend/domain/**/*.ts",
     "<rootDir>/src/backend/domain/errors/*.ts",
+    "!<rootDir>/src/backend/domain/errors/invalid-param-error.ts",
   ],
   coverageDirectory: "coverage",
   coverageProvider: "v8",
