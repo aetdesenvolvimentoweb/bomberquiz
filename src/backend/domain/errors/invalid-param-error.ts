@@ -44,11 +44,13 @@ export class InvalidParamError extends ApplicationError {
    * @param {string} param - Nome do parâmetro que é inválido
    * @param {string} [reason] - Razão opcional para o parâmetro ser inválido
    */
-  constructor(param: string, reason: string = "") {
+  constructor(param: string, reason?: string) {
     const capitalizedParam = param.charAt(0).toUpperCase() + param.slice(1);
-    const capitalizedReason = reason.charAt(0).toUpperCase() + reason.slice(1);
     let message: string;
-    if (capitalizedReason) {
+
+    if (reason && reason.trim() !== "") {
+      const capitalizedReason =
+        reason.charAt(0).toUpperCase() + reason.slice(1);
       message = `Parâmetro inválido: ${capitalizedParam}. ${capitalizedReason}.`;
     } else {
       message = `Parâmetro inválido: ${capitalizedParam}.`;
