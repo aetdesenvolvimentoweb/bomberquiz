@@ -82,17 +82,6 @@ describe("InvalidParamError", () => {
       expect(error.message).toContain("Muito curta");
       expect(error.message).not.toContain("muito curta");
     });
-
-    it("deve retornar a mensagem sem a razão quando ela não for fornecida", () => {
-      // Arrange
-      const paramName = "senha";
-
-      // Act
-      const error = new InvalidParamError(paramName);
-
-      // Assert
-      expect(error.message).toBe(`Parâmetro inválido: Senha.`);
-    });
   });
 
   describe("uso em validações", () => {

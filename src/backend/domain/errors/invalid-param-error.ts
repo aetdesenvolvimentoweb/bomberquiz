@@ -45,9 +45,6 @@ export class InvalidParamError extends ApplicationError {
    * @param {string} [reason] - Razão opcional para o parâmetro ser inválido
    */
   constructor(param: string, reason?: string) {
-    console.log("entrou no constructor");
-    console.log("param", param);
-    console.log("reason", reason);
     const capitalizedParam = param.charAt(0).toUpperCase() + param.slice(1);
     let message: string;
 
