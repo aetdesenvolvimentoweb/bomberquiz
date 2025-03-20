@@ -1,3 +1,10 @@
+/**
+ * Configuração do Jest
+ *
+ * Convenções de nomenclatura de testes:
+ * - *.spec.ts: Testes unitários que utilizam mocks para isolar a unidade testada
+ * - *.test.ts: Testes de integração que utilizam implementações reais de dependências
+ */
 import type { Config } from "jest";
 
 const config: Config = {

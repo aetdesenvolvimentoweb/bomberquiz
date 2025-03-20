@@ -12,7 +12,7 @@
 import { UserCreateService } from "@/backend/data/services/user/user-create";
 import { UserCreateData } from "@/backend/domain/entities";
 import { InvalidParamError, MissingParamError } from "@/backend/domain/errors";
-import { LoggerProvider } from "@/backend/domain/providers";
+import { HashProvider, LoggerProvider } from "@/backend/domain/providers";
 import { UserRepository } from "@/backend/domain/repositories";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import { UserCreateDataValidatorUseCase } from "@/backend/domain/validators";
@@ -32,6 +32,12 @@ const mockUserCreateValidator: jest.Mocked<UserCreateDataValidatorUseCase> = {
   validate: jest.fn(),
 };
 
+const mockHashProvider: jest.Mocked<HashProvider> = {
+  hash: jest.fn(),
+  compare: jest.fn(),
+  withOptions: jest.fn().mockReturnThis(),
+};
+
 const mockLoggerProvider: jest.Mocked<LoggerProvider> = {
   log: jest.fn(),
   error: jest.fn(),
@@ -39,13 +45,14 @@ const mockLoggerProvider: jest.Mocked<LoggerProvider> = {
   info: jest.fn(),
   debug: jest.fn(),
   trace: jest.fn(),
-  withContext: jest.fn().mockReturnThis(), // Adicionando o método withContext
+  withContext: jest.fn().mockReturnThis(),
 };
 
 describe("UserCreateService", () => {
   let userCreateService: UserCreateService;
   let userData: UserCreateData;
   let sanitizedUserData: UserCreateData;
+  const hashedPassword = "hashed_password_123";
 
   beforeEach(() => {
     // Reset all mocks
@@ -55,7 +62,8 @@ describe("UserCreateService", () => {
     userCreateService = new UserCreateService({
       userRepository: mockUserRepository,
       userCreateDataSanitizer: mockUserCreateDataSanitizer,
-      userCreateValidator: mockUserCreateValidator,
+      userCreateDataValidator: mockUserCreateValidator,
+      hashProvider: mockHashProvider,
       loggerProvider: mockLoggerProvider,
     });
 
@@ -80,6 +88,7 @@ describe("UserCreateService", () => {
     // Configure default mock behavior
     mockUserCreateDataSanitizer.sanitize.mockReturnValue(sanitizedUserData);
     mockUserCreateValidator.validate.mockResolvedValue(undefined);
+    mockHashProvider.hash.mockResolvedValue(hashedPassword);
     mockUserRepository.create.mockResolvedValue(undefined);
   });
 
@@ -95,7 +104,13 @@ describe("UserCreateService", () => {
       expect(mockUserCreateValidator.validate).toHaveBeenCalledWith(
         sanitizedUserData,
       );
-      expect(mockUserRepository.create).toHaveBeenCalledWith(sanitizedUserData);
+      expect(mockHashProvider.hash).toHaveBeenCalledWith(
+        sanitizedUserData.password,
+      );
+      expect(mockUserRepository.create).toHaveBeenCalledWith({
+        ...sanitizedUserData,
+        password: hashedPassword,
+      });
 
       // Verify logs
       expect(mockLoggerProvider.debug).toHaveBeenCalledWith(
@@ -107,6 +122,11 @@ describe("UserCreateService", () => {
             userEmail: userData.email,
           }),
         }),
+      );
+
+      expect(mockLoggerProvider.debug).toHaveBeenCalledWith(
+        "Senha criptografada com sucesso",
+        expect.anything(),
       );
 
       expect(mockLoggerProvider.info).toHaveBeenCalledWith(
@@ -142,6 +162,9 @@ describe("UserCreateService", () => {
         sanitizedUserData,
       );
 
+      // Verify hash was NOT called (because validation failed)
+      expect(mockHashProvider.hash).not.toHaveBeenCalled();
+
       // Verify repository was NOT called (because validation failed)
       expect(mockUserRepository.create).not.toHaveBeenCalled();
 
@@ -153,6 +176,42 @@ describe("UserCreateService", () => {
             error: expect.objectContaining({
               name: validationError.name,
               message: validationError.message,
+            }),
+          }),
+        }),
+      );
+    });
+
+    it("deve propagar erro quando o hash da senha falha", async () => {
+      // Arrange
+      const hashError = new Error("Falha ao criptografar senha");
+      mockHashProvider.hash.mockRejectedValue(hashError);
+
+      // Act & Assert
+      await expect(userCreateService.create(userData)).rejects.toThrow(
+        hashError,
+      );
+
+      // Verify sanitization and validation were called
+      expect(mockUserCreateDataSanitizer.sanitize).toHaveBeenCalled();
+      expect(mockUserCreateValidator.validate).toHaveBeenCalled();
+
+      // Verify hash was called
+      expect(mockHashProvider.hash).toHaveBeenCalledWith(
+        sanitizedUserData.password,
+      );
+
+      // Verify repository was NOT called (because hash failed)
+      expect(mockUserRepository.create).not.toHaveBeenCalled();
+
+      // Verify error was logged
+      expect(mockLoggerProvider.error).toHaveBeenCalledWith(
+        "Erro ao criar usuário",
+        expect.objectContaining({
+          metadata: expect.objectContaining({
+            error: expect.objectContaining({
+              name: hashError.name,
+              message: hashError.message,
             }),
           }),
         }),
@@ -171,16 +230,22 @@ describe("UserCreateService", () => {
         repositoryError,
       );
 
-      // Verify sanitization and validation were called
+      // Verify sanitization, validation and hash were called
       expect(mockUserCreateDataSanitizer.sanitize).toHaveBeenCalledWith(
         userData,
       );
       expect(mockUserCreateValidator.validate).toHaveBeenCalledWith(
         sanitizedUserData,
       );
+      expect(mockHashProvider.hash).toHaveBeenCalledWith(
+        sanitizedUserData.password,
+      );
 
-      // Verify repository was called
-      expect(mockUserRepository.create).toHaveBeenCalledWith(sanitizedUserData);
+      // Verify repository was called with hashed password
+      expect(mockUserRepository.create).toHaveBeenCalledWith({
+        ...sanitizedUserData,
+        password: hashedPassword,
+      });
 
       // Verify error was logged
       expect(mockLoggerProvider.error).toHaveBeenCalledWith(
@@ -220,7 +285,8 @@ describe("UserCreateService", () => {
       // Verify validation was called with empty object
       expect(mockUserCreateValidator.validate).toHaveBeenCalledWith({});
 
-      // Verify repository was NOT called
+      // Verify hash and repository were NOT called
+      expect(mockHashProvider.hash).not.toHaveBeenCalled();
       expect(mockUserRepository.create).not.toHaveBeenCalled();
 
       // Verify error was logged

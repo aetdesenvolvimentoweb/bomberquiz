@@ -5,13 +5,14 @@
  * orquestrar o processo completo de criação de um novo usuário, incluindo:
  * - Sanitização dos dados de entrada
  * - Validação dos dados sanitizados
+ * - Criptografia da senha do usuário
  * - Persistência do usuário no repositório
  * - Registro de logs durante todo o processo
  *
  * @implements {UserCreateUseCase}
  */
 import { UserCreateData } from "@/backend/domain/entities";
-import { LoggerProvider } from "@/backend/domain/providers";
+import { HashProvider, LoggerProvider } from "@/backend/domain/providers";
 import { UserRepository } from "@/backend/domain/repositories";
 import { UserCreateDataSanitizerUseCase } from "@/backend/domain/sanitizers";
 import { UserCreateUseCase } from "@/backend/domain/usecases";
@@ -28,7 +29,9 @@ interface UserCreateServiceProps {
   /** Sanitizador para limpeza e normalização dos dados de entrada */
   userCreateDataSanitizer: UserCreateDataSanitizerUseCase;
   /** Validador para garantir a integridade dos dados do usuário */
-  userCreateValidator: UserCreateDataValidatorUseCase;
+  userCreateDataValidator: UserCreateDataValidatorUseCase;
+  /** Provedor de hash para criptografia de senha */
+  hashProvider: HashProvider;
   /** Provedor de logs para registro de eventos e erros */
   loggerProvider: LoggerProvider;
 }
@@ -42,6 +45,12 @@ export class UserCreateService implements UserCreateUseCase {
   /**
    * Cria um novo usuário no sistema
    *
+   * O processo segue as seguintes etapas:
+   * 1. Sanitiza os dados brutos de entrada
+   * 2. Valida os dados sanitizados
+   * 3. Criptografa a senha do usuário
+   * 4. Persiste os dados do usuário no repositório
+   *
    * @param {UserCreateData} data - Dados brutos do usuário a ser criado
    * @returns {Promise<void>} - Promise que resolve quando o usuário é criado com sucesso
    * @throws {MissingParamError} - Se algum parâmetro obrigatório estiver ausente
@@ -51,9 +60,10 @@ export class UserCreateService implements UserCreateUseCase {
   public readonly create = async (data: UserCreateData): Promise<void> => {
     const {
       userCreateDataSanitizer,
-      userCreateValidator,
-      loggerProvider,
+      userCreateDataValidator,
       userRepository,
+      hashProvider,
+      loggerProvider,
     } = this.props;
 
     const logContext = {
@@ -81,11 +91,18 @@ export class UserCreateService implements UserCreateUseCase {
       });
 
       // Valida os dados sanitizados
-      await userCreateValidator.validate(sanitizedData);
+      await userCreateDataValidator.validate(sanitizedData);
       loggerProvider.debug("Dados validados com sucesso", logContext);
 
+      // Criptografa a senha do usuário
+      const hashedPassword = await hashProvider.hash(sanitizedData.password);
+      loggerProvider.debug("Senha criptografada com sucesso", logContext);
+
       // Persiste o usuário no repositório
-      await userRepository.create(sanitizedData);
+      await userRepository.create({
+        ...sanitizedData,
+        password: hashedPassword,
+      });
 
       loggerProvider.info("Usuário criado com sucesso", {
         ...logContext,

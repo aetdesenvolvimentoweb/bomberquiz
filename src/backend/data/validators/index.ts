@@ -29,4 +29,5 @@
  *
  */
 
+/** Exporta validadores relacionados a usuários */
 export * from "./user";
