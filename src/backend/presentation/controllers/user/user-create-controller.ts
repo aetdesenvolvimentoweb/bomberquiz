@@ -1,0 +1,153 @@
+/**
+ * Controlador para criação de usuários
+ *
+ * Este módulo implementa o controlador responsável por processar requisições HTTP
+ * para criação de novos usuários. Ele recebe os dados do usuário, delega o
+ * processamento para o serviço apropriado e retorna uma resposta padronizada.
+ *
+ * O controlador utiliza logs estruturados para registrar cada etapa do processo,
+ * facilitando o rastreamento e a depuração de problemas.
+ *
+ * @module presentation/controllers/user/user-create-controller
+ *
+ * @example
+ *
+ * // Uso em uma configuração de rotas
+ * const userCreateController = new UserCreateController({
+ *   userCreateService,
+ *   loggerProvider
+ * });
+ *
+ * app.post('/api/users', adaptRoute(userCreateController));
+ */
+
+import { UserCreateService } from "@/backend/data/services";
+import { UserCreateData } from "@/backend/domain/entities";
+import {
+  ApplicationError,
+  MissingParamError,
+  ServerError,
+} from "@/backend/domain/errors";
+import { LoggerProvider } from "@/backend/domain/providers";
+
+import { Controller, HttpRequest, HttpResponse } from "../../protocols";
+
+/**
+ * Interface que define as dependências necessárias para o controlador
+ *
+ * @interface UserCreateControllerProps
+ */
+interface UserCreateControllerProps {
+  /** Serviço responsável pela lógica de criação de usuários */
+  userCreateService: UserCreateService;
+  /** Provedor de logs para registro de eventos e erros */
+  loggerProvider: LoggerProvider;
+}
+
+/**
+ * Implementação do controlador para criação de usuários
+ *
+ * Este controlador segue o padrão de inversão de dependência,
+ * recebendo suas dependências através do construtor, o que facilita
+ * testes e manutenção.
+ *
+ * @class UserCreateController
+ * @implements {Controller<UserCreateData>}
+ */
+export class UserCreateController implements Controller<UserCreateData> {
+  /**
+   * Cria uma nova instância do controlador
+   *
+   * @param {UserCreateControllerProps} props - Dependências do controlador
+   */
+  constructor(private readonly props: UserCreateControllerProps) {}
+
+  /**
+   * Processa uma requisição para criação de usuário
+   *
+   * Este método:
+   * 1. Valida a presença do corpo da requisição
+   * 2. Delega a criação do usuário para o serviço especializado
+   * 3. Retorna uma resposta HTTP padronizada
+   * 4. Trata qualquer erro que ocorra durante o processo
+   *
+   * @param {HttpRequest<UserCreateData>} request - Requisição HTTP com dados do usuário
+   * @returns {Promise<HttpResponse>} Resposta HTTP padronizada
+   */
+  public readonly handle = async (
+    request: HttpRequest<UserCreateData>,
+  ): Promise<HttpResponse> => {
+    const { userCreateService, loggerProvider } = this.props;
+
+    // Criar logger contextual
+    const contextLogger = loggerProvider.withContext({
+      action: "user.create.controller",
+      metadata: {
+        email: request.body?.email,
+      },
+    });
+
+    try {
+      contextLogger.info("Iniciando criação de usuário via controller");
+
+      if (!request.body) {
+        throw new MissingParamError("corpo da requisição não informado");
+      }
+
+      contextLogger.info("Requisição validada com sucesso", {
+        action: "request.body.validated",
+      });
+
+      await userCreateService.create(request.body as UserCreateData);
+
+      contextLogger.info("Usuário criado com sucesso", {
+        action: "user.created.controller",
+      });
+
+      return {
+        body: {
+          success: true,
+          metadata: {
+            timestamp: new Date().toISOString(),
+          },
+        },
+        statusCode: 201,
+      };
+    } catch (error: unknown) {
+      contextLogger.error("Erro ao criar usuário", {
+        action: "user.creation.failed.controller",
+        metadata: { email: request.body?.email },
+        error,
+      });
+
+      // Melhorar a verificação de tipos de erro
+      if (error instanceof ApplicationError) {
+        return {
+          body: {
+            success: false,
+            errorMessage: error.message,
+            metadata: {
+              timestamp: new Date().toISOString(),
+            },
+          },
+          statusCode: error.statusCode,
+        };
+      }
+
+      // Se o erro não for ApplicationError, criar um ServerError
+      const serverError = new ServerError(
+        error instanceof Error ? error : new Error(String(error)),
+      );
+      return {
+        body: {
+          success: false,
+          errorMessage: serverError.message,
+          metadata: {
+            timestamp: new Date().toISOString(),
+          },
+        },
+        statusCode: serverError.statusCode,
+      };
+    }
+  };
+}
