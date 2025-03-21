@@ -10,7 +10,7 @@
  */
 
 import { PasswordValidatorAdapter } from "@/backend/infra/adapters";
-import { MissingParamError, InvalidParamError } from "@/backend/domain/errors";
+import { InvalidParamError, ServerError } from "@/backend/domain/errors";
 
 describe("PasswordValidatorAdapter", () => {
   let validator: PasswordValidatorAdapter;
@@ -32,21 +32,6 @@ describe("PasswordValidatorAdapter", () => {
       // Act & Assert
       validPasswords.forEach((password) => {
         expect(() => validator.validate(password)).not.toThrow();
-      });
-    });
-
-    it("deve lançar MissingParamError quando a senha não é fornecida", () => {
-      // Arrange
-      const emptyPasswords = ["", null, undefined] as string[];
-
-      // Act & Assert
-      emptyPasswords.forEach((password) => {
-        expect(() => validator.validate(password as string)).toThrow(
-          MissingParamError,
-        );
-        expect(() => validator.validate(password as string)).toThrow(
-          new MissingParamError("senha").message,
-        );
       });
     });
 
@@ -148,6 +133,26 @@ describe("PasswordValidatorAdapter", () => {
       blacklistedPasswords.forEach((password) => {
         expect(() => validator.validate(password)).toThrow(InvalidParamError);
       });
+    });
+
+    it("deve converter um erro genérico para ServerError", () => {
+      // Arrange
+      const genericError = new Error("erro genérico");
+
+      // Mock do método schema.validate para lançar um erro genérico
+      jest.spyOn(validator["schema"], "validate").mockImplementationOnce(() => {
+        throw genericError;
+      });
+
+      // Act & Assert
+      expect(() => validator.validate("ValidP@ss123")).toThrow(ServerError);
+      try {
+        validator.validate("ValidP@ss123");
+      } catch (error) {
+        expect(error).toBeInstanceOf(ServerError);
+        // Verifica se a mensagem do ServerError contém a mensagem do erro original
+        expect((error as ServerError).message).toContain("erro genérico");
+      }
     });
   });
 

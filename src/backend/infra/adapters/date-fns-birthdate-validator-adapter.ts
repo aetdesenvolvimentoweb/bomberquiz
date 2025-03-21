@@ -1,5 +1,5 @@
 import { UserBirthdateValidatorUseCase } from "@/backend/domain/validators";
-import { InvalidParamError } from "@/backend/domain/errors";
+import { InvalidParamError, ServerError } from "@/backend/domain/errors";
 import { differenceInYears, isValid, isPast } from "date-fns";
 
 /**
@@ -11,30 +11,18 @@ import { differenceInYears, isValid, isPast } from "date-fns";
  *
  * @implements {UserBirthdateValidatorUseCase}
  */
-export class DateFnsBirthdateValidator
+export class DateFnsBirthdateValidatorAdapter
   implements UserBirthdateValidatorUseCase
 {
   /**
    * Idade mínima permitida em anos
    */
-  private readonly MIN_AGE_YEARS: number;
+  private readonly MIN_AGE_YEARS: number = 18;
 
   /**
    * Idade máxima permitida em anos
    */
-  private readonly MAX_AGE_YEARS: number;
-
-  /**
-   * Cria uma nova instância do validador de data de nascimento
-   *
-   * @param {object} options - Opções de configuração para o validador
-   * @param {number} options.minAgeYears - Idade mínima permitida em anos (padrão: 18)
-   * @param {number} options.maxAgeYears - Idade máxima permitida em anos (padrão: 65)
-   */
-  constructor(options?: { minAgeYears?: number; maxAgeYears?: number }) {
-    this.MIN_AGE_YEARS = options?.minAgeYears ?? 18;
-    this.MAX_AGE_YEARS = options?.maxAgeYears ?? 65;
-  }
+  private readonly MAX_AGE_YEARS: number = 70;
 
   /**
    * Valida uma data de nascimento
@@ -44,38 +32,48 @@ export class DateFnsBirthdateValidator
    * @throws {InvalidParamError} Quando a data de nascimento não atende aos critérios de validação
    */
   validate(birthdate: Date): void {
-    // Verifica se a data é válida
-    if (!birthdate || !isValid(birthdate)) {
-      throw new InvalidParamError("data de nascimento", "data inválida");
-    }
+    try {
+      // Verifica se a data é válida
+      if (!birthdate || !isValid(birthdate)) {
+        throw new InvalidParamError("data de nascimento", "data inválida");
+      }
 
-    const today = new Date();
+      const today = new Date();
 
-    // Verifica se a data está no futuro
-    if (!isPast(birthdate)) {
-      throw new InvalidParamError(
-        "data de nascimento",
-        "não pode ser no futuro",
-      );
-    }
+      // Verifica se a data está no futuro
+      if (!isPast(birthdate)) {
+        throw new InvalidParamError(
+          "data de nascimento",
+          "não pode ser no futuro",
+        );
+      }
 
-    // Calcula a idade usando date-fns
-    const age = differenceInYears(today, birthdate);
+      // Calcula a idade usando date-fns
+      const age = differenceInYears(today, birthdate);
 
-    // Verifica idade mínima
-    if (age < this.MIN_AGE_YEARS) {
-      throw new InvalidParamError(
-        "data de nascimento",
-        `usuário deve ter pelo menos ${this.MIN_AGE_YEARS} anos`,
-      );
-    }
+      // Verifica idade mínima
+      if (age < this.MIN_AGE_YEARS) {
+        throw new InvalidParamError(
+          "data de nascimento",
+          `usuário deve ter pelo menos ${this.MIN_AGE_YEARS} anos`,
+        );
+      }
 
-    // Verifica idade máxima
-    if (age > this.MAX_AGE_YEARS) {
-      throw new InvalidParamError(
-        "data de nascimento",
-        `idade excede o limite máximo de ${this.MAX_AGE_YEARS} anos`,
-      );
+      // Verifica idade máxima
+      if (age > this.MAX_AGE_YEARS) {
+        throw new InvalidParamError(
+          "data de nascimento",
+          `idade excede o limite máximo de ${this.MAX_AGE_YEARS} anos`,
+        );
+      }
+    } catch (error) {
+      // Se o erro já é um ServerError ou um InvalidParamError, propaga
+      if (error instanceof ServerError || error instanceof InvalidParamError) {
+        throw error;
+      }
+
+      // Para outros erros da biblioteca, converte para ServerError
+      throw new ServerError(error as Error);
     }
   }
 }

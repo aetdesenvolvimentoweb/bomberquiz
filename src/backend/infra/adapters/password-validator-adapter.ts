@@ -1,6 +1,6 @@
 import PasswordValidator from "password-validator";
 import { UserPasswordValidatorUseCase } from "@/backend/domain/validators";
-import { MissingParamError, InvalidParamError } from "@/backend/domain/errors";
+import { InvalidParamError, ServerError } from "@/backend/domain/errors";
 
 /**
  * Implementação concreta do validador de senha de usuário
@@ -61,32 +61,37 @@ export class PasswordValidatorAdapter implements UserPasswordValidatorUseCase {
    * @throws {InvalidParamError} Quando a senha não atende aos critérios de validação
    */
   validate(password: string): void {
-    // Verifica se a senha foi fornecida
-    if (!password || password.trim() === "") {
-      throw new MissingParamError("senha");
-    }
+    try {
+      // Valida a senha contra o esquema e obtém as falhas
+      const validationFailures = this.schema.validate(password, {
+        list: true,
+      }) as string[];
 
-    // Valida a senha contra o esquema e obtém as falhas
-    const validationFailures = this.schema.validate(password, {
-      list: true,
-    }) as string[];
+      // Se houver falhas, lança exceção com a primeira falha
+      if (validationFailures.length > 0) {
+        const errorMessageMap: Record<string, string> = {
+          min: "deve ter pelo menos 8 caracteres",
+          uppercase: "deve conter pelo menos uma letra maiúscula",
+          lowercase: "deve conter pelo menos uma letra minúscula",
+          digits: "deve conter pelo menos um número",
+          symbols: "deve conter pelo menos um caractere especial",
+          spaces: "não deve conter espaços",
+          oneOf: "é muito comum ou previsível",
+        };
 
-    // Se houver falhas, lança exceção com a primeira falha
-    if (validationFailures.length > 0) {
-      const errorMessageMap: Record<string, string> = {
-        min: "deve ter pelo menos 8 caracteres",
-        uppercase: "deve conter pelo menos uma letra maiúscula",
-        lowercase: "deve conter pelo menos uma letra minúscula",
-        digits: "deve conter pelo menos um número",
-        symbols: "deve conter pelo menos um caractere especial",
-        spaces: "não deve conter espaços",
-        oneOf: "é muito comum ou previsível",
-      };
+        const failureType = validationFailures[0];
+        const errorMessage = errorMessageMap[failureType];
 
-      const failureType = validationFailures[0];
-      const errorMessage = errorMessageMap[failureType];
+        throw new InvalidParamError("senha", errorMessage);
+      }
+    } catch (error) {
+      // Se o erro já é um ServerError ou um InvalidParamError, propaga
+      if (error instanceof ServerError || error instanceof InvalidParamError) {
+        throw error;
+      }
 
-      throw new InvalidParamError("senha", errorMessage);
+      // Para outros erros da biblioteca, converte para ServerError
+      throw new ServerError(error as Error);
     }
   }
 }

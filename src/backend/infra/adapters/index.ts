@@ -9,4 +9,5 @@
 
 export * from "./password-validator-adapter";
 export * from "./date-fns-birthdate-validator-adapter";
-export * from "./email-validator-adapter";
+export * from "./validator-email-validator-adapter";
+export * from "./libphonenumber-validator-adapter";
