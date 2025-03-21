@@ -20,6 +20,7 @@
     "date-fns": "^4.1.0",
     "dompurify": "^3.2.4",
     "jsdom": "^26.0.0",
+    "libphonenumber-js": "^1.12.6",
     "next": "15.2.3",
     "password-validator": "^5.3.0",
     "react": "^19.0.0",
@@ -59,6 +60,7 @@
   },
   "pnpm": {
     "onlyBuiltDependencies": [
+      "@swc/core",
       "argon2"
     ]
   }
