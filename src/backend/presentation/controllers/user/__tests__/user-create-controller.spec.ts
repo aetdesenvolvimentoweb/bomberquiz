@@ -2,7 +2,7 @@
  * Testes unitários para o UserCreateController
  *
  * Este arquivo contém testes que verificam o comportamento do controlador
- * responsável pela criação de usuários, incluindo o fluxo de sucesso e
+ * responsável pela criação de usuários, incluindo o fluxo feliz e
  * cenários de erro.
  *
  * @group Unit
@@ -17,16 +17,13 @@ import { LoggerProvider } from "@/backend/domain/providers";
 import { DuplicateResourceError } from "@/backend/domain/errors";
 import { UserCreateService } from "@/backend/data/services/user/user-create";
 
-// Mock das dependências com tipagem correta para o controller
-// Usamos jest.fn() para criar um mock que podemos configurar com mockResolvedValue e mockRejectedValue
+// Mock do serviço de criação de usuário
 const mockCreate = jest.fn();
 const mockUserCreateService = {
   create: mockCreate,
 };
 
-// Abordagem simplificada para o mock do logger
-// Criamos um único objeto que implementa todos os métodos necessários
-// e retorna a si mesmo para withContext, permitindo encadeamento
+// Mock do logger que retorna a si mesmo no método withContext
 const mockLogger = {
   log: jest.fn(),
   error: jest.fn(),
@@ -40,8 +37,7 @@ const mockLogger = {
 // Configuramos withContext para retornar o próprio mockLogger
 mockLogger.withContext.mockReturnValue(mockLogger);
 
-// Usamos o mesmo objeto para o provider
-// Usamos uma conversão de tipo mais segura
+// Conversão de tipo para compatibilidade com a interface LoggerProvider
 const mockLoggerProvider = mockLogger as unknown as jest.Mocked<LoggerProvider>;
 
 // Configuramos o withContext do mockLoggerProvider para também retornar mockLogger
@@ -84,6 +80,10 @@ describe("UserCreateController", () => {
   });
 
   describe("handle method", () => {
+    /**
+     * Verifica se o controlador retorna status 201 e resposta de sucesso
+     * quando o usuário é criado com sucesso
+     */
     it("deve retornar 201 e success=true quando o usuário é criado com sucesso", async () => {
       // Act
       const httpResponse = await userCreateController.handle(
@@ -108,6 +108,9 @@ describe("UserCreateController", () => {
       );
     });
 
+    /**
+     * Verifica se o controlador retorna status 400 quando não há corpo na requisição
+     */
     it("deve retornar 400 quando a requisição não contém um corpo", async () => {
       // Arrange
       const requestWithoutBody: HttpRequest = {};
@@ -233,6 +236,9 @@ describe("UserCreateController", () => {
   });
 
   describe("integração com logger", () => {
+    /**
+     * Verifica se informações contextuais adequadas são incluídas nos logs
+     */
     it("deve registrar logs com o email do usuário", async () => {
       // Act
       await userCreateController.handle(httpRequest, mockLogger);
@@ -276,6 +282,9 @@ describe("UserCreateController", () => {
       expect(loggerWithoutTest).toBe(mockLogger); // Porque nosso mock retorna mockLogger
     });
 
+    /**
+     * Verifica se logs são registrados em cada etapa crítica do processo
+     */
     it("deve registrar logs em cada etapa do processo", async () => {
       // Limpar os mocks antes do teste para garantir contagem correta
       jest.clearAllMocks();
