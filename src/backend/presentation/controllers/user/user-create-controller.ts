@@ -74,18 +74,35 @@ export class UserCreateController implements Controller<UserCreateData> {
    * @param {HttpRequest<UserCreateData>} request - Requisição HTTP com dados do usuário
    * @returns {Promise<HttpResponse>} Resposta HTTP padronizada
    */
-  public readonly handle = async (
+  // Método auxiliar para criar o logger contextual
+  // Extraído para facilitar testes
+  private createContextLogger(
     request: HttpRequest<UserCreateData>,
-  ): Promise<HttpResponse> => {
-    const { userCreateService, loggerProvider } = this.props;
+    testContextLogger?: LoggerProvider,
+  ): LoggerProvider {
+    const { loggerProvider } = this.props;
 
-    // Criar logger contextual
-    const contextLogger = loggerProvider.withContext({
+    if (testContextLogger) {
+      return testContextLogger;
+    }
+
+    return loggerProvider.withContext({
       action: "user.create.controller",
       metadata: {
         email: request.body?.email,
       },
     });
+  }
+
+  public readonly handle = async (
+    request: HttpRequest<UserCreateData>,
+    // Parâmetro opcional para facilitar testes
+    testContextLogger?: LoggerProvider,
+  ): Promise<HttpResponse> => {
+    const { userCreateService } = this.props;
+
+    // Criar logger contextual usando o método auxiliar
+    const contextLogger = this.createContextLogger(request, testContextLogger);
 
     try {
       contextLogger.info("Iniciando criação de usuário via controller");
