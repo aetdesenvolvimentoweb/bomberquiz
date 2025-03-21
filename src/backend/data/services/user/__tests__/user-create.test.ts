@@ -16,17 +16,19 @@
  */
 
 import { InMemoryUserRepository } from "@/backend/data/repositories";
-import { UserCreateDataSanitizer } from "@/backend/data/sanitizers/user";
-import { UserCreateService } from "@/backend/data/services/user/user-create";
-import { UserCreateDataValidator } from "@/backend/data/validators/user";
-import { UserUniqueEmailValidator } from "@/backend/data/validators/user";
+import { UserCreateDataSanitizer } from "@/backend/data/sanitizers";
+import { UserCreateService } from "@/backend/data/services";
+import {
+  UserCreateDataValidator,
+  UserUniqueEmailValidator,
+} from "@/backend/data/validators";
 import { UserCreateData } from "@/backend/domain/entities";
 import {
   DuplicateResourceError,
   InvalidParamError,
 } from "@/backend/domain/errors";
 import { HashProvider, LoggerProvider } from "@/backend/domain/providers";
-import { XssSanitizerUseCase } from "@/backend/domain/sanitizers/security";
+import { XssSanitizerUseCase } from "@/backend/domain/sanitizers";
 import {
   UserBirthdateValidatorUseCase,
   UserEmailValidatorUseCase,

@@ -30,7 +30,11 @@ import {
 } from "@/backend/domain/errors";
 import { LoggerProvider } from "@/backend/domain/providers";
 
-import { Controller, HttpRequest, HttpResponse } from "../../protocols";
+import {
+  Controller,
+  HttpRequest,
+  HttpResponse,
+} from "@/backend/presentation/protocols";
 
 /**
  * Interface que define as dependências necessárias para o controlador

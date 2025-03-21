@@ -10,12 +10,12 @@
  * @group User
  */
 
-import { UserCreateController } from "@/backend/presentation/controllers/user/user-create-controller";
+import { UserCreateController } from "@/backend/presentation/controllers";
 import { HttpRequest } from "@/backend/presentation/protocols";
 import { UserCreateData } from "@/backend/domain/entities";
 import { LoggerProvider } from "@/backend/domain/providers";
 import { DuplicateResourceError } from "@/backend/domain/errors";
-import { UserCreateService } from "@/backend/data/services/user/user-create";
+import { UserCreateService } from "@/backend/data/services";
 
 // Mock do serviço de criação de usuário
 const mockCreate = jest.fn();

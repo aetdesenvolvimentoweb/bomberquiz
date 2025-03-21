@@ -9,7 +9,7 @@
  * @group User
  */
 
-import { UserCreateService } from "@/backend/data/services/user/user-create";
+import { UserCreateService } from "@/backend/data/services";
 import { UserCreateData } from "@/backend/domain/entities";
 import { InvalidParamError, MissingParamError } from "@/backend/domain/errors";
 import { HashProvider, LoggerProvider } from "@/backend/domain/providers";
