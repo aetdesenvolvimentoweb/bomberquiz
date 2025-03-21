@@ -23,11 +23,7 @@
 
 import { UserCreateService } from "@/backend/data/services";
 import { UserCreateData } from "@/backend/domain/entities";
-import {
-  ApplicationError,
-  MissingParamError,
-  ServerError,
-} from "@/backend/domain/errors";
+import { MissingParamError } from "@/backend/domain/errors";
 import { LoggerProvider } from "@/backend/domain/providers";
 
 import {
@@ -35,6 +31,7 @@ import {
   HttpRequest,
   HttpResponse,
 } from "@/backend/presentation/protocols";
+import { created, handleError } from "@/backend/presentation/helpers";
 
 /**
  * Interface que define as dependências necessárias para o controlador
@@ -125,15 +122,7 @@ export class UserCreateController implements Controller<UserCreateData> {
         action: "user.created.controller",
       });
 
-      return {
-        body: {
-          success: true,
-          metadata: {
-            timestamp: new Date().toISOString(),
-          },
-        },
-        statusCode: 201,
-      };
+      return created();
     } catch (error: unknown) {
       contextLogger.error("Erro ao criar usuário", {
         action: "user.creation.failed.controller",
@@ -142,33 +131,7 @@ export class UserCreateController implements Controller<UserCreateData> {
       });
 
       // Melhorar a verificação de tipos de erro
-      if (error instanceof ApplicationError) {
-        return {
-          body: {
-            success: false,
-            errorMessage: error.message,
-            metadata: {
-              timestamp: new Date().toISOString(),
-            },
-          },
-          statusCode: error.statusCode,
-        };
-      }
-
-      // Se o erro não for ApplicationError, criar um ServerError
-      const serverError = new ServerError(
-        error instanceof Error ? error : new Error(String(error)),
-      );
-      return {
-        body: {
-          success: false,
-          errorMessage: serverError.message,
-          metadata: {
-            timestamp: new Date().toISOString(),
-          },
-        },
-        statusCode: serverError.statusCode,
-      };
+      return handleError(error);
     }
   };
 }

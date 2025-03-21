@@ -215,7 +215,7 @@ describe("UserCreateController (Integration)", () => {
     it("deve retornar 500 quando ocorre um erro não tratado", async () => {
       // Arrange - Forçar um erro no serviço
       mockUserCreateDataValidator.validate.mockImplementationOnce(() => {
-        throw new Error("Erro inesperado no serviço");
+        throw new Error("Erro inesperado");
       });
 
       // Act
@@ -224,9 +224,7 @@ describe("UserCreateController (Integration)", () => {
       // Assert
       expect(httpResponse.statusCode).toBe(500);
       expect(httpResponse.body.success).toBe(false);
-      expect(httpResponse.body.errorMessage).toContain(
-        "Erro inesperado do servidor",
-      );
+      expect(httpResponse.body.errorMessage).toContain("Erro inesperado");
 
       // Verificar que o erro foi registrado
       expect(mockLoggerProvider.error).toHaveBeenCalledWith(

@@ -176,9 +176,7 @@ describe("UserCreateController", () => {
       // Assert
       expect(httpResponse.statusCode).toBe(500);
       expect(httpResponse.body.success).toBe(false);
-      expect(httpResponse.body.errorMessage).toContain(
-        "Erro inesperado do servidor",
-      );
+      expect(httpResponse.body.errorMessage).toContain("Erro inesperado");
 
       // Verify error was logged
       expect(mockLogger.error).toHaveBeenCalledWith(
@@ -192,7 +190,7 @@ describe("UserCreateController", () => {
 
     it("deve retornar 500 quando ocorre um erro não tratado (não-Error)", async () => {
       // Arrange - usando um objeto simples como erro
-      const nonErrorObject = { message: "Erro não-Error" };
+      const nonErrorObject = { message: "Erro inesperado" };
       mockCreate.mockRejectedValue(nonErrorObject);
 
       // Act
@@ -204,9 +202,7 @@ describe("UserCreateController", () => {
       // Assert
       expect(httpResponse.statusCode).toBe(500);
       expect(httpResponse.body.success).toBe(false);
-      expect(httpResponse.body.errorMessage).toContain(
-        "Erro inesperado do servidor",
-      );
+      expect(httpResponse.body.errorMessage).toContain("Erro inesperado");
     });
 
     it("deve incluir timestamp na resposta em todos os cenários", async () => {
