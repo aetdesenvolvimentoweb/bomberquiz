@@ -1,0 +1,10 @@
+{
+  "./*.(ts|js)": [
+    "pnpm exec prettier --write --ignore-unknown --stdin-filepath \"{}\"\"",
+    "pnpm eslint --fix"
+  ],
+  "./src/**/*.(ts|js)": [
+    "pnpm exec prettier --write --ignore-unknown --stdin-filepath \"{}\"\"",
+    "pnpm eslint --fix"
+  ]
+}

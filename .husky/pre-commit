@@ -1,0 +1,2 @@
+echo "Conferindo o código..."
+pnpm exec lint-staged
