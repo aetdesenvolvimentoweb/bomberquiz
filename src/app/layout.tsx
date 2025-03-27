@@ -3,6 +3,8 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 
+import { ThemeProvider } from "@/components/theme-provider";
+
 const montserrat = Montserrat({
   weight: ["300", "400", "500", "600", "700"],
   subsets: ["latin"],
@@ -20,8 +22,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
-      <body className={`${montserrat.className} antialiased`}>{children}</body>
+    <html lang="pt-BR" suppressHydrationWarning>
+      <body className={`${montserrat.className} antialiased`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }
