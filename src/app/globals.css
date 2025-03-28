@@ -123,14 +123,24 @@
   --ring: hsl(0, 70%, 50%, 0.5);
 }
 
+input:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 30px white inset;
+  -webkit-text-fill-color: var(--card-foreground) !important;
+}
+
 @layer base {
   * {
     @apply m-0 p-0 box-border;
   }
+  body {
+    @apply bg-background text-foreground;
+  }
   button {
     @apply focus:outline-none min-h-10 min-w-10 cursor-pointer transition-colors ease-in-out duration-150;
   }
-  body {
-    @apply bg-background text-foreground;
+  input,
+  select {
+    @apply text-sm placeholder:text-sm placeholder:text-muted-foreground text-card-foreground bg-white transition-colors ease-in-out duration-150;
   }
 }

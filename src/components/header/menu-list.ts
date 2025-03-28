@@ -1,7 +1,7 @@
 export const menuList = (
-  userRole: "Administrador" | "Colaborador" | "Cliente",
+  userRole: "administrador" | "colaborador" | "cliente",
 ) => {
-  if (userRole === "Cliente") {
+  if (userRole === "cliente") {
     return [
       {
         label: "Dashboard",
@@ -14,7 +14,7 @@ export const menuList = (
     ];
   }
 
-  if (userRole === "Colaborador") {
+  if (userRole === "colaborador") {
     return [
       {
         label: "Dashboard",
@@ -31,7 +31,7 @@ export const menuList = (
     ];
   }
 
-  if (userRole === "Administrador") {
+  if (userRole === "administrador") {
     return [
       {
         label: "Dashboard",

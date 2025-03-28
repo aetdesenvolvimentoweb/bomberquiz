@@ -1,14 +1,18 @@
-"use client";
-import { usePathname } from "next/navigation";
+import Link from "next/link";
+
+import { getCurrentUser, getPath } from "@/actions/auth";
 
 import { menuList } from "./menu-list";
 
-export const DesktopMenu = () => {
-  const menu = menuList("Administrador");
-  const path = usePathname();
-  const active = "rounded-md bg-accent px-3 py-2 text-accent-foreground";
-  const menuItem =
-    "rounded-md px-3 py-2 text-primary-foreground hover:bg-accent hover:text-accent-foreground";
+const menuDefault =
+  "rounded-md px-3 py-2 text-primary-foreground hover:bg-accent hover:text-accent-foreground";
+const menuActive = "rounded-md bg-accent px-3 py-2 text-accent-foreground";
+
+export const DesktopMenu = async () => {
+  const path = await getPath();
+  const user = await getCurrentUser();
+
+  const menu = menuList(user?.role || "cliente");
 
   return (
     <div className="hidden md:ml-6 md:flex md:items-center md:justify-center md:w-full">
@@ -16,14 +20,14 @@ export const DesktopMenu = () => {
         {/* <!-- Current: "bg-secondary text-secondary-foreground", Default: "text-primary-foreground hover:bg-muted hover:text-white" --> */}
         {menu &&
           menu.map((item, index) => (
-            <a
+            <Link
               key={index}
               href={item.href}
-              className={path.valueOf().includes(item.href) ? active : menuItem}
+              className={path.includes(item.href) ? menuActive : menuDefault}
               aria-current="page"
             >
               {item.label}
-            </a>
+            </Link>
           ))}
       </div>
     </div>

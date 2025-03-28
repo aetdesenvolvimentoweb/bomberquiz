@@ -1,9 +1,3 @@
-const DashBoardPage = () => {
-  return (
-    <div>
-      <h1>DashBoard</h1>
-    </div>
-  );
-};
-
-export default DashBoardPage;
+export default async function DashboardPage() {
+  return <h1>Dashboar de usuário</h1>;
+}

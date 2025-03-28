@@ -1,7 +1,7 @@
-import { headers } from "next/headers";
 import Link from "next/link";
 import { FiMenu } from "react-icons/fi";
 
+import { getCurrentUser, getPath } from "@/actions/auth";
 import {
   Sheet,
   SheetContent,
@@ -20,9 +20,9 @@ const menuDefault =
 const menuActive = "block rounded-md bg-muted px-3 py-2 text-muted-foreground";
 
 export const MobileMenu = async () => {
-  const menu = menuList("Administrador");
-  const headersList = await headers();
-  const pathname = headersList.get("referer");
+  const user = await getCurrentUser();
+  const menu = menuList(user?.role || "cliente");
+  const path = await getPath();
 
   return (
     <Sheet>
@@ -54,7 +54,7 @@ export const MobileMenu = async () => {
                     key={index}
                     href={item.href}
                     className={
-                      pathname?.includes(item.href) ? menuActive : menuDefault
+                      path.includes(item.href) ? menuActive : menuDefault
                     }
                   >
                     {item.label}
